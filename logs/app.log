@@ -80,3 +80,10 @@
 2025-12-14 14:33:35 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
 2025-12-14 14:33:35 | INFO     | - | src.app:lifespan:83 | Routers loaded
 2025-12-14 14:33:35 | INFO     | - | src.app:lifespan:89 | Application startup complete
+2025-12-14 15:01:15 | INFO     | - | src.app:lifespan:95 | Application shutting down...
+2025-12-14 15:01:15 | INFO     | - | src.core.configs.redis:close:130 | Redis client closed
+2025-12-14 15:01:15 | INFO     | - | src.core.configs.redis:close:134 | Redis connection pool closed
+2025-12-14 15:01:15 | INFO     | - | src.app:lifespan:101 | Redis closed
+2025-12-14 15:01:15 | INFO     | - | src.core.configs.database:close:163 | Write DB connection pool closed
+2025-12-14 15:01:15 | INFO     | - | src.app:lifespan:109 | Database closed
+2025-12-14 15:01:15 | INFO     | - | src.app:lifespan:113 | Application shutdown complete
