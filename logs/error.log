@@ -1,0 +1,14 @@
+2025-12-14 14:07:44 | ERROR    | - | src.core.configs.database:session:194 | Database session error: password authentication failed for user "timima"
+2025-12-14 14:07:44 | ERROR    | - | src.core.configs.database:_verify_connections:153 | Database connection verification failed: password authentication failed for user "timima"
+2025-12-14 14:07:44 | ERROR    | - | src.app:lifespan:54 | Database initialization failed: password authentication failed for user "timima"
+2025-12-14 14:08:21 | ERROR    | - | src.core.configs.database:session:194 | Database session error: password authentication failed for user "timima"
+2025-12-14 14:08:21 | ERROR    | - | src.core.configs.database:_verify_connections:153 | Database connection verification failed: password authentication failed for user "timima"
+2025-12-14 14:08:21 | ERROR    | - | src.app:lifespan:54 | Database initialization failed: password authentication failed for user "timima"
+2025-12-14 14:14:01 | ERROR    | - | src.core.configs.database:session:194 | Database session error: password authentication failed for user "timima"
+2025-12-14 14:14:01 | ERROR    | - | src.core.configs.database:_verify_connections:153 | Database connection verification failed: password authentication failed for user "timima"
+2025-12-14 14:14:01 | ERROR    | - | src.app:lifespan:54 | Database initialization failed: password authentication failed for user "timima"
+2025-12-14 14:16:18 | ERROR    | - | src.core.configs.database:session:194 | Database session error: password authentication failed for user "timima"
+2025-12-14 14:16:18 | ERROR    | - | src.core.configs.database:_verify_connections:153 | Database connection verification failed: password authentication failed for user "timima"
+2025-12-14 14:16:18 | ERROR    | - | src.app:lifespan:54 | Database initialization failed: password authentication failed for user "timima"
+2025-12-14 14:19:45 | ERROR    | - | src.core.configs.redis:init:103 | Failed to connect to Redis: Error 8 connecting to redis:6379. nodename nor servname provided, or not known.
+2025-12-14 14:19:45 | ERROR    | - | src.app:lifespan:62 | Redis initialization failed: Redis connection failed

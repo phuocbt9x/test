@@ -1,0 +1,42 @@
+[project]
+name = "timima"
+version = "0.1.0"
+description = """
+TIMIMA is a modular, production-ready FastAPI backend supporting:
+- Async operations
+- PostgreSQL with pgvector extension
+- JWT authentication
+- Logging
+- Rate limiting
+- Timezone management
+- Best practices for typing, linting, and testing
+"""
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.17.2",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.124.2",
+    "jwt>=1.4.0",
+    "passlib[bcrypt]>=1.7.4",
+    "pgvector>=0.4.2",
+    "pydantic-settings>=2.12.0",
+    "pydantic[email]>=2.12.5",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.20",
+    "pytz>=2025.2",
+    "redis[hiredis]>=7.1.0",
+    "slowapi>=0.1.9",
+    "sqlalchemy[asyncio]>=2.0.45",
+    "uuid>=1.30",
+    "uvicorn[standard]>=0.38.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=1.19.0",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "ruff>=0.14.8",
+]

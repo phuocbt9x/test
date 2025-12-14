@@ -1,0 +1,983 @@
+2025-12-12 09:17:51 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:17:57 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:19:36 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:21:38 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:21:46 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:21:51 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:21:53 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:21:58 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:22:18 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:22:39 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:27:55 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:30:25 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:30:31 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:30:49 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:31:30 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:32:22 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:32:46 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:32:55 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:34:47 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:35:38 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:36:33 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 09:54:29 | INFO     | 3d1b10f0-b042-4656-9248-7406112a76b5 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 09:54:29 | INFO     | 3d1b10f0-b042-4656-9248-7406112a76b5 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 09:54:30 | INFO     | c0492fc8-ba67-415e-8448-e157e1cd5929 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 09:54:30 | INFO     | c0492fc8-ba67-415e-8448-e157e1cd5929 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 09:55:03 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:55:05 | INFO     | a31ef41e-532f-4331-a72a-7ad6ab1eef0b | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 09:55:05 | INFO     | a31ef41e-532f-4331-a72a-7ad6ab1eef0b | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 09:55:05 | INFO     | 948dbdbb-8f20-4758-885f-06ba6ac90622 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 09:55:05 | INFO     | 948dbdbb-8f20-4758-885f-06ba6ac90622 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 09:56:42 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:56:47 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:57:18 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:57:52 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:58:23 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:58:35 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 09:58:48 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:07:56 | INFO     | 84fb5423-6847-4d4d-8f81-c9d6aa0c7a71 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:07:56 | INFO     | 84fb5423-6847-4d4d-8f81-c9d6aa0c7a71 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:07:56 | INFO     | 903f57fa-5a73-4b02-b2ea-98690742647c | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 10:07:56 | INFO     | 903f57fa-5a73-4b02-b2ea-98690742647c | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 10:09:12 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:13:21 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:13:23 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:13:46 | INFO     | bb4d0f63-cee4-447c-9b0e-a902d8e564c7 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:46 | INFO     | bb4d0f63-cee4-447c-9b0e-a902d8e564c7 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:46 | INFO     | 812778bc-8336-4bc7-8d55-4134e4c77758 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 10:13:46 | INFO     | 812778bc-8336-4bc7-8d55-4134e4c77758 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 10:13:48 | INFO     | ff383f8c-a813-4fbd-8a8e-d9dafb7781a0 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:48 | INFO     | ff383f8c-a813-4fbd-8a8e-d9dafb7781a0 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:48 | INFO     | e0e5f5a6-dd28-4a5f-8510-fab5180460f1 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 10:13:48 | INFO     | e0e5f5a6-dd28-4a5f-8510-fab5180460f1 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 10:13:48 | INFO     | 1afae0d5-d232-4d3d-aa02-768442bc9b3a | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:48 | INFO     | 1afae0d5-d232-4d3d-aa02-768442bc9b3a | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:48 | INFO     | b0d22223-35dd-4d56-b5f3-b8a930d97b91 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:48 | INFO     | b0d22223-35dd-4d56-b5f3-b8a930d97b91 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:49 | INFO     | dd3309ac-5452-458e-ab4d-e7ba37c9501e | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:49 | INFO     | dd3309ac-5452-458e-ab4d-e7ba37c9501e | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:49 | INFO     | c9cd98c9-a7b9-4c69-a340-baa58ee1767e | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:49 | INFO     | c9cd98c9-a7b9-4c69-a340-baa58ee1767e | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:49 | INFO     | 072a50b8-c147-486b-a957-cdd38a96bda9 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:49 | INFO     | 072a50b8-c147-486b-a957-cdd38a96bda9 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:49 | INFO     | dc0ed2fe-feb4-4d5b-97d3-be84e94ced0c | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:13:49 | INFO     | dc0ed2fe-feb4-4d5b-97d3-be84e94ced0c | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:13:50 | INFO     | 4e8ee1ee-fc02-4a38-a32a-dabc01d1b33c | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 10:13:50 | INFO     | 4e8ee1ee-fc02-4a38-a32a-dabc01d1b33c | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 10:14:02 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:14:07 | INFO     | cc818e05-e485-4e10-bc1c-116364dc2e6a | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:14:07 | INFO     | cc818e05-e485-4e10-bc1c-116364dc2e6a | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:15:10 | INFO     | 477e3730-bb1a-40c7-98f3-c85d1ca52483 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:15:10 | INFO     | 477e3730-bb1a-40c7-98f3-c85d1ca52483 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:21:04 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:21:22 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:21:59 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:22:01 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:22:10 | INFO     | - | src.app:lifespan:15 | Application shutting down...
+2025-12-12 10:32:48 | INFO     | dc6cd019-2c14-49b5-bbcf-ff727fa67ef7 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:32:48 | INFO     | dc6cd019-2c14-49b5-bbcf-ff727fa67ef7 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:32:48 | INFO     | 39610b62-00cb-4e79-b96b-f4911ab25963 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 10:32:48 | INFO     | 39610b62-00cb-4e79-b96b-f4911ab25963 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 10:33:08 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:33:26 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:33:39 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:33:51 | INFO     | 4d2d102b-7c3e-4b01-8f15-c8890db53848 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 10:33:51 | INFO     | 4d2d102b-7c3e-4b01-8f15-c8890db53848 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 10:33:51 | INFO     | 3d046746-a32b-45b9-b396-11f5e085bb66 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 10:33:51 | INFO     | 3d046746-a32b-45b9-b396-11f5e085bb66 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 10:33:54 | INFO     | d7c9d191-733a-484c-9143-b4aacca2e63b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:33:54 | WARNING  | d7c9d191-733a-484c-9143-b4aacca2e63b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:33:54 | WARNING  | d7c9d191-733a-484c-9143-b4aacca2e63b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:33:56 | INFO     | d978821a-7a65-411a-bf33-d31e7451d588 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:33:56 | WARNING  | d978821a-7a65-411a-bf33-d31e7451d588 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:33:56 | WARNING  | d978821a-7a65-411a-bf33-d31e7451d588 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:33:56 | INFO     | 1e6b0c3c-5941-4d27-9ed9-c751eb0a77ba | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:33:56 | WARNING  | 1e6b0c3c-5941-4d27-9ed9-c751eb0a77ba | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:33:56 | WARNING  | 1e6b0c3c-5941-4d27-9ed9-c751eb0a77ba | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:34:28 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:34:30 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:34:33 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:35:17 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:36:28 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:36:41 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:36:43 | INFO     | 46d1f068-60d9-4605-8334-ee2f37a8e446 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:43 | WARNING  | 46d1f068-60d9-4605-8334-ee2f37a8e446 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:43 | WARNING  | 46d1f068-60d9-4605-8334-ee2f37a8e446 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:44 | INFO     | 1670df93-ea6a-40e9-b8b4-1cf75685d027 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:44 | WARNING  | 1670df93-ea6a-40e9-b8b4-1cf75685d027 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:44 | WARNING  | 1670df93-ea6a-40e9-b8b4-1cf75685d027 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:44 | INFO     | 4a28f929-eec5-4e0d-9343-6b0da5af59a2 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:44 | WARNING  | 4a28f929-eec5-4e0d-9343-6b0da5af59a2 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:44 | WARNING  | 4a28f929-eec5-4e0d-9343-6b0da5af59a2 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:45 | INFO     | a87e2e64-b10e-43f2-910f-8be0784e70dc | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:45 | WARNING  | a87e2e64-b10e-43f2-910f-8be0784e70dc | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:45 | WARNING  | a87e2e64-b10e-43f2-910f-8be0784e70dc | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:45 | INFO     | 4b8344dd-e3e0-43ed-99aa-8089b4d5b4db | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:45 | WARNING  | 4b8344dd-e3e0-43ed-99aa-8089b4d5b4db | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:45 | WARNING  | 4b8344dd-e3e0-43ed-99aa-8089b4d5b4db | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:45 | INFO     | 2eeb9c69-b4f7-444f-9f59-2aab81faf155 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:45 | WARNING  | 2eeb9c69-b4f7-444f-9f59-2aab81faf155 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:45 | WARNING  | 2eeb9c69-b4f7-444f-9f59-2aab81faf155 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:45 | INFO     | 6903a56e-2f00-4512-b634-503b490adbc4 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:45 | WARNING  | 6903a56e-2f00-4512-b634-503b490adbc4 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:45 | WARNING  | 6903a56e-2f00-4512-b634-503b490adbc4 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:45 | INFO     | f4ef92af-95b5-49f6-8d38-286174c549f0 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:45 | WARNING  | f4ef92af-95b5-49f6-8d38-286174c549f0 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:45 | WARNING  | f4ef92af-95b5-49f6-8d38-286174c549f0 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:45 | INFO     | 9deaa472-6f41-478c-9c2e-4ad939b71547 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:36:45 | WARNING  | 9deaa472-6f41-478c-9c2e-4ad939b71547 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:36:45 | WARNING  | 9deaa472-6f41-478c-9c2e-4ad939b71547 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:36:59 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:37:00 | INFO     | 22fa09f7-57f1-4fbd-91dd-8d38ef3ae9f9 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:00 | WARNING  | 22fa09f7-57f1-4fbd-91dd-8d38ef3ae9f9 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:00 | WARNING  | 22fa09f7-57f1-4fbd-91dd-8d38ef3ae9f9 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:01 | INFO     | 136ff4af-f73f-4be3-ae27-0dedaff829dc | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:01 | WARNING  | 136ff4af-f73f-4be3-ae27-0dedaff829dc | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:01 | WARNING  | 136ff4af-f73f-4be3-ae27-0dedaff829dc | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:01 | INFO     | 4b572ac5-e7d6-4e50-af16-077a50fe8c02 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:01 | WARNING  | 4b572ac5-e7d6-4e50-af16-077a50fe8c02 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:01 | WARNING  | 4b572ac5-e7d6-4e50-af16-077a50fe8c02 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:01 | INFO     | 5d747fd0-794b-4db2-958a-00ad3afa6bdd | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:01 | WARNING  | 5d747fd0-794b-4db2-958a-00ad3afa6bdd | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:01 | WARNING  | 5d747fd0-794b-4db2-958a-00ad3afa6bdd | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:01 | INFO     | 1422b763-c43c-4bd4-9ac7-f2bc2f1ee903 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:01 | WARNING  | 1422b763-c43c-4bd4-9ac7-f2bc2f1ee903 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:01 | WARNING  | 1422b763-c43c-4bd4-9ac7-f2bc2f1ee903 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:02 | INFO     | ae09316f-3e9b-4139-87c3-cb496bd17990 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:02 | WARNING  | ae09316f-3e9b-4139-87c3-cb496bd17990 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:02 | WARNING  | ae09316f-3e9b-4139-87c3-cb496bd17990 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:02 | INFO     | 9f13b6c6-67c4-4891-9f6c-dca96d592b78 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:02 | WARNING  | 9f13b6c6-67c4-4891-9f6c-dca96d592b78 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:02 | WARNING  | 9f13b6c6-67c4-4891-9f6c-dca96d592b78 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:19 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:37:22 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:37:24 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:37:26 | INFO     | 22bdaca2-bbee-4de1-b9e7-c2c7b9a52727 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:26 | WARNING  | 22bdaca2-bbee-4de1-b9e7-c2c7b9a52727 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:26 | WARNING  | 22bdaca2-bbee-4de1-b9e7-c2c7b9a52727 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:27 | INFO     | cd4c3b6c-dfb4-409e-8464-782196eb5948 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:27 | WARNING  | cd4c3b6c-dfb4-409e-8464-782196eb5948 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:27 | WARNING  | cd4c3b6c-dfb4-409e-8464-782196eb5948 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:27 | INFO     | 94b5a0b2-70e7-4e93-bccf-30d875c78995 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:27 | WARNING  | 94b5a0b2-70e7-4e93-bccf-30d875c78995 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:27 | WARNING  | 94b5a0b2-70e7-4e93-bccf-30d875c78995 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:27 | INFO     | dc1dfa00-5482-4877-a48d-0cee4560c422 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:27 | WARNING  | dc1dfa00-5482-4877-a48d-0cee4560c422 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:27 | WARNING  | dc1dfa00-5482-4877-a48d-0cee4560c422 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:27 | INFO     | cfb8074c-d7c8-4923-8422-264f690d2713 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:27 | WARNING  | cfb8074c-d7c8-4923-8422-264f690d2713 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:27 | WARNING  | cfb8074c-d7c8-4923-8422-264f690d2713 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:28 | INFO     | 41fd26f2-8558-460e-be35-15ab42daca3b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:28 | WARNING  | 41fd26f2-8558-460e-be35-15ab42daca3b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:28 | WARNING  | 41fd26f2-8558-460e-be35-15ab42daca3b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:28 | INFO     | 464e1356-35ba-4394-9358-1508f9355a87 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:28 | WARNING  | 464e1356-35ba-4394-9358-1508f9355a87 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:28 | WARNING  | 464e1356-35ba-4394-9358-1508f9355a87 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:28 | INFO     | 617b0783-0b10-46f2-8142-176c61e24aa8 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:28 | WARNING  | 617b0783-0b10-46f2-8142-176c61e24aa8 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:28 | WARNING  | 617b0783-0b10-46f2-8142-176c61e24aa8 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:28 | INFO     | 5ee5ae44-da1c-47f7-976d-55801ec87cab | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:28 | WARNING  | 5ee5ae44-da1c-47f7-976d-55801ec87cab | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:28 | WARNING  | 5ee5ae44-da1c-47f7-976d-55801ec87cab | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:37:28 | INFO     | 1fb204eb-6761-4048-93a3-f9d232a10dcc | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:37:28 | WARNING  | 1fb204eb-6761-4048-93a3-f9d232a10dcc | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:37:28 | WARNING  | 1fb204eb-6761-4048-93a3-f9d232a10dcc | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:38:12 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:38:26 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:38:27 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:38:29 | INFO     | 0e738246-dad0-4117-9d25-470bb9126b7b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:38:29 | WARNING  | 0e738246-dad0-4117-9d25-470bb9126b7b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:38:29 | WARNING  | 0e738246-dad0-4117-9d25-470bb9126b7b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:38:30 | INFO     | 8249c3cd-dd5a-4570-a6c9-97848a8e3f65 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:38:30 | WARNING  | 8249c3cd-dd5a-4570-a6c9-97848a8e3f65 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:38:30 | WARNING  | 8249c3cd-dd5a-4570-a6c9-97848a8e3f65 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:38:30 | INFO     | 5b8827a8-6b76-4bce-94d1-55be8efb711b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:38:30 | WARNING  | 5b8827a8-6b76-4bce-94d1-55be8efb711b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:38:30 | WARNING  | 5b8827a8-6b76-4bce-94d1-55be8efb711b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:38:30 | INFO     | be30d042-3645-4f56-a47a-54df82127fb3 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:38:30 | WARNING  | be30d042-3645-4f56-a47a-54df82127fb3 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:38:30 | WARNING  | be30d042-3645-4f56-a47a-54df82127fb3 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:38:31 | INFO     | 53ce4d17-5a81-4e22-b7fe-8a6495948267 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:38:31 | WARNING  | 53ce4d17-5a81-4e22-b7fe-8a6495948267 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:38:31 | WARNING  | 53ce4d17-5a81-4e22-b7fe-8a6495948267 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:38:31 | INFO     | b96327db-a258-4e1f-9c22-ed0570ab07f7 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:38:31 | WARNING  | b96327db-a258-4e1f-9c22-ed0570ab07f7 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:38:31 | WARNING  | b96327db-a258-4e1f-9c22-ed0570ab07f7 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:39:03 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:39:46 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:39:54 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:40:01 | INFO     | - | src.app:lifespan:18 | Application shutting down...
+2025-12-12 10:40:03 | INFO     | caad1775-0be7-41da-a50e-97d306fd9214 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:40:03 | WARNING  | caad1775-0be7-41da-a50e-97d306fd9214 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:40:03 | WARNING  | caad1775-0be7-41da-a50e-97d306fd9214 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:40:17 | INFO     | 4e8727e9-73a5-4566-a904-fb4be837b741 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:40:17 | WARNING  | 4e8727e9-73a5-4566-a904-fb4be837b741 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:40:17 | WARNING  | 4e8727e9-73a5-4566-a904-fb4be837b741 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:40:19 | INFO     | - | src.app:lifespan:18 | Application shutting down...
+2025-12-12 10:42:27 | INFO     | - | src.app:lifespan:18 | Application shutting down...
+2025-12-12 10:42:32 | INFO     | - | src.app:lifespan:18 | Application shutting down...
+2025-12-12 10:42:43 | INFO     | - | src.app:lifespan:18 | Application shutting down...
+2025-12-12 10:42:44 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:42:53 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:42:55 | INFO     | c09783d9-9623-4519-a0d8-e954a60c968b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:55 | WARNING  | c09783d9-9623-4519-a0d8-e954a60c968b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:55 | WARNING  | c09783d9-9623-4519-a0d8-e954a60c968b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:55 | INFO     | 7bc96388-2f80-4915-9ff7-4a3b83c38753 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:55 | WARNING  | 7bc96388-2f80-4915-9ff7-4a3b83c38753 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:55 | WARNING  | 7bc96388-2f80-4915-9ff7-4a3b83c38753 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:56 | INFO     | cb7af4fa-ae56-43a0-a5d8-897fa179c270 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:56 | WARNING  | cb7af4fa-ae56-43a0-a5d8-897fa179c270 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:56 | WARNING  | cb7af4fa-ae56-43a0-a5d8-897fa179c270 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:56 | INFO     | 2e870a8a-90eb-4794-aa7f-62807ab9fe71 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:56 | WARNING  | 2e870a8a-90eb-4794-aa7f-62807ab9fe71 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:56 | WARNING  | 2e870a8a-90eb-4794-aa7f-62807ab9fe71 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:56 | INFO     | b795a15c-da56-4e8c-8b8d-41c8f6307d4e | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:56 | WARNING  | b795a15c-da56-4e8c-8b8d-41c8f6307d4e | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:56 | WARNING  | b795a15c-da56-4e8c-8b8d-41c8f6307d4e | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:56 | INFO     | fb4079cc-1a37-4d79-8310-040c2e6199bf | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:56 | WARNING  | fb4079cc-1a37-4d79-8310-040c2e6199bf | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:56 | WARNING  | fb4079cc-1a37-4d79-8310-040c2e6199bf | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | b564f2b3-8925-4a31-ae64-ac10d178e744 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | b564f2b3-8925-4a31-ae64-ac10d178e744 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | b564f2b3-8925-4a31-ae64-ac10d178e744 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | 692c7c7e-f80e-479c-998f-e1074dc92c61 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | 692c7c7e-f80e-479c-998f-e1074dc92c61 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | 692c7c7e-f80e-479c-998f-e1074dc92c61 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | b88e9c1a-0d03-40a5-919f-bd243e2b022b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | b88e9c1a-0d03-40a5-919f-bd243e2b022b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | b88e9c1a-0d03-40a5-919f-bd243e2b022b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | 0196a548-247f-4bc3-a6bf-ba87fc4de609 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | 0196a548-247f-4bc3-a6bf-ba87fc4de609 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | 0196a548-247f-4bc3-a6bf-ba87fc4de609 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | 067df4b9-dea2-4c6b-a127-17062c4d7dc1 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | 067df4b9-dea2-4c6b-a127-17062c4d7dc1 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | 067df4b9-dea2-4c6b-a127-17062c4d7dc1 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | fe1c9993-d312-4b92-8bfa-e97dfc8119ce | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | fe1c9993-d312-4b92-8bfa-e97dfc8119ce | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | fe1c9993-d312-4b92-8bfa-e97dfc8119ce | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:57 | INFO     | 6373760f-5fa4-48a9-9b96-e9180ef40188 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:57 | WARNING  | 6373760f-5fa4-48a9-9b96-e9180ef40188 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:57 | WARNING  | 6373760f-5fa4-48a9-9b96-e9180ef40188 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:58 | INFO     | fbbcb2dc-2e4d-440f-a7b9-dce439a825ef | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:58 | WARNING  | fbbcb2dc-2e4d-440f-a7b9-dce439a825ef | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:58 | WARNING  | fbbcb2dc-2e4d-440f-a7b9-dce439a825ef | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:58 | INFO     | 7ba30c12-ed16-4a42-a49f-82e45c3ec030 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:58 | WARNING  | 7ba30c12-ed16-4a42-a49f-82e45c3ec030 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:58 | WARNING  | 7ba30c12-ed16-4a42-a49f-82e45c3ec030 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:58 | INFO     | d5bee2a2-8c83-4fd6-8b6e-49761650f544 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:58 | WARNING  | d5bee2a2-8c83-4fd6-8b6e-49761650f544 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:58 | WARNING  | d5bee2a2-8c83-4fd6-8b6e-49761650f544 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:58 | INFO     | 9f545eca-a8ff-44bf-b92c-1b2eac9b1782 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:58 | WARNING  | 9f545eca-a8ff-44bf-b92c-1b2eac9b1782 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:58 | WARNING  | 9f545eca-a8ff-44bf-b92c-1b2eac9b1782 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:58 | INFO     | 307939a0-930a-4ab7-8ca6-f9babb2475f9 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:58 | WARNING  | 307939a0-930a-4ab7-8ca6-f9babb2475f9 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:58 | WARNING  | 307939a0-930a-4ab7-8ca6-f9babb2475f9 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:42:58 | INFO     | 2422216a-abdc-4dbe-8478-3b03a258ef61 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:42:58 | WARNING  | 2422216a-abdc-4dbe-8478-3b03a258ef61 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:42:58 | WARNING  | 2422216a-abdc-4dbe-8478-3b03a258ef61 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:43:21 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:43:31 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:43:33 | INFO     | - | src.app:lifespan:17 | Application shutting down...
+2025-12-12 10:43:40 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:44:45 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:45:00 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:45:05 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:45:13 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:45:26 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:45:34 | INFO     | 66687104-6155-4c13-89a2-0a522ea6994c | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:34 | WARNING  | 66687104-6155-4c13-89a2-0a522ea6994c | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:34 | WARNING  | 66687104-6155-4c13-89a2-0a522ea6994c | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:35 | INFO     | c752bb64-ff31-4d94-92a4-4f9ba65f9f15 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:35 | WARNING  | c752bb64-ff31-4d94-92a4-4f9ba65f9f15 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:35 | WARNING  | c752bb64-ff31-4d94-92a4-4f9ba65f9f15 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:41 | INFO     | 6edc9732-d20c-4137-b63d-9ca9aa71e9af | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:41 | WARNING  | 6edc9732-d20c-4137-b63d-9ca9aa71e9af | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:41 | WARNING  | 6edc9732-d20c-4137-b63d-9ca9aa71e9af | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:41 | INFO     | 5accf8b5-61d7-4f24-b014-085fac30872d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:41 | WARNING  | 5accf8b5-61d7-4f24-b014-085fac30872d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:41 | WARNING  | 5accf8b5-61d7-4f24-b014-085fac30872d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:41 | INFO     | 445d87e1-ab90-4478-aed0-cacea294caac | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:41 | WARNING  | 445d87e1-ab90-4478-aed0-cacea294caac | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:41 | WARNING  | 445d87e1-ab90-4478-aed0-cacea294caac | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:41 | INFO     | 412d961b-dc26-4db0-a7bb-37ac5ce63a46 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:41 | WARNING  | 412d961b-dc26-4db0-a7bb-37ac5ce63a46 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:41 | WARNING  | 412d961b-dc26-4db0-a7bb-37ac5ce63a46 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | 1e0c713c-3f22-4b90-b22e-11291fa49965 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | 1e0c713c-3f22-4b90-b22e-11291fa49965 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | 1e0c713c-3f22-4b90-b22e-11291fa49965 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | 6c6655f9-b198-4a94-8f00-88ac17db2def | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | 6c6655f9-b198-4a94-8f00-88ac17db2def | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | 6c6655f9-b198-4a94-8f00-88ac17db2def | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | 69db8620-6cf7-4446-89dd-9f2a319c79a0 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | 69db8620-6cf7-4446-89dd-9f2a319c79a0 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | 69db8620-6cf7-4446-89dd-9f2a319c79a0 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | 8a3005ef-7556-4132-8e1c-91901f7296f9 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | 8a3005ef-7556-4132-8e1c-91901f7296f9 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | 8a3005ef-7556-4132-8e1c-91901f7296f9 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | 839a8977-e286-4c42-9980-7ec9dcc1147c | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | 839a8977-e286-4c42-9980-7ec9dcc1147c | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | 839a8977-e286-4c42-9980-7ec9dcc1147c | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | cdde7bca-dd6d-4a69-9bdf-52497c66621b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | cdde7bca-dd6d-4a69-9bdf-52497c66621b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | cdde7bca-dd6d-4a69-9bdf-52497c66621b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | f8e14e7d-f28f-4a15-9775-8c406b850a64 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | f8e14e7d-f28f-4a15-9775-8c406b850a64 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | f8e14e7d-f28f-4a15-9775-8c406b850a64 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:42 | INFO     | b445c435-8d07-40d1-8fec-3240a876087d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:42 | WARNING  | b445c435-8d07-40d1-8fec-3240a876087d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:42 | WARNING  | b445c435-8d07-40d1-8fec-3240a876087d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:43 | INFO     | 58857e3b-11e2-4438-af8d-69b841c9a15d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:43 | WARNING  | 58857e3b-11e2-4438-af8d-69b841c9a15d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:43 | WARNING  | 58857e3b-11e2-4438-af8d-69b841c9a15d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:43 | INFO     | ebc386ba-43a8-4ba5-8199-f28d9eda0a60 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:43 | WARNING  | ebc386ba-43a8-4ba5-8199-f28d9eda0a60 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:43 | WARNING  | ebc386ba-43a8-4ba5-8199-f28d9eda0a60 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:48 | INFO     | 7dd02d20-6d0d-4f7f-b9e6-2c07f2118343 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:48 | WARNING  | 7dd02d20-6d0d-4f7f-b9e6-2c07f2118343 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:48 | WARNING  | 7dd02d20-6d0d-4f7f-b9e6-2c07f2118343 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:48 | INFO     | 1aa47cdf-5057-409b-8c14-6f45065b056d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:48 | WARNING  | 1aa47cdf-5057-409b-8c14-6f45065b056d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:48 | WARNING  | 1aa47cdf-5057-409b-8c14-6f45065b056d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:48 | INFO     | 2521e57c-a7ec-42ec-8aff-95f7bd51bdab | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:48 | WARNING  | 2521e57c-a7ec-42ec-8aff-95f7bd51bdab | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:48 | WARNING  | 2521e57c-a7ec-42ec-8aff-95f7bd51bdab | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:48 | INFO     | 53bf2d02-c6b5-4c5d-89f9-a02f8d9016d8 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:48 | WARNING  | 53bf2d02-c6b5-4c5d-89f9-a02f8d9016d8 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:48 | WARNING  | 53bf2d02-c6b5-4c5d-89f9-a02f8d9016d8 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:48 | INFO     | 54279a3c-ffdb-4025-a52d-48e7d9a4b11e | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:48 | WARNING  | 54279a3c-ffdb-4025-a52d-48e7d9a4b11e | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:48 | WARNING  | 54279a3c-ffdb-4025-a52d-48e7d9a4b11e | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:45:48 | INFO     | b340765b-8ac0-43b3-a81e-c84d19364fbe | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:45:48 | WARNING  | b340765b-8ac0-43b3-a81e-c84d19364fbe | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:45:48 | WARNING  | b340765b-8ac0-43b3-a81e-c84d19364fbe | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:28 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:47:34 | INFO     | d4fd2b91-c7a9-433c-8135-eca6d389366e | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:34 | INFO     | d4fd2b91-c7a9-433c-8135-eca6d389366e | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:35 | INFO     | 892e3885-4aef-46ac-8ccd-aef99a9c57f2 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:35 | INFO     | 892e3885-4aef-46ac-8ccd-aef99a9c57f2 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:35 | INFO     | b1a04574-7b84-4588-8b51-ffa1da308ade | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:35 | INFO     | b1a04574-7b84-4588-8b51-ffa1da308ade | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:35 | INFO     | 68a73c78-b00c-4937-a81b-60a12346febd | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:35 | INFO     | 68a73c78-b00c-4937-a81b-60a12346febd | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:35 | INFO     | 49ba6a38-919f-4e7f-903b-145655e228a8 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:35 | INFO     | 49ba6a38-919f-4e7f-903b-145655e228a8 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:36 | INFO     | 37141b46-1dcb-41e5-80b0-2c75f0217a8f | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:36 | INFO     | 37141b46-1dcb-41e5-80b0-2c75f0217a8f | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:36 | INFO     | 4e5fe427-452b-4470-b08f-1e90461f59da | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:36 | INFO     | 4e5fe427-452b-4470-b08f-1e90461f59da | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:36 | INFO     | 188257ed-0d84-423f-a63c-f28ef8c84913 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:36 | INFO     | 188257ed-0d84-423f-a63c-f28ef8c84913 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:46 | INFO     | db01e53c-cd68-44b4-b3fb-4f74df0da08b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:46 | INFO     | db01e53c-cd68-44b4-b3fb-4f74df0da08b | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:47 | INFO     | 7d33c50c-c14a-4cd5-bf5c-537ee8e071c8 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:47 | INFO     | 7d33c50c-c14a-4cd5-bf5c-537ee8e071c8 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:47 | INFO     | f0ad5564-203a-4088-a2df-a03fd9e76a13 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:47 | INFO     | f0ad5564-203a-4088-a2df-a03fd9e76a13 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:47 | INFO     | 222ab915-898a-45ab-b95f-917db8b0debc | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:47 | INFO     | 222ab915-898a-45ab-b95f-917db8b0debc | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:47 | INFO     | 55209d19-7cb6-47cf-8033-61cbcf4471ac | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:47 | INFO     | 55209d19-7cb6-47cf-8033-61cbcf4471ac | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:47 | INFO     | 7ab40a74-57d9-40f8-8d49-0c878ce5dcc6 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:47 | INFO     | 7ab40a74-57d9-40f8-8d49-0c878ce5dcc6 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:47 | INFO     | 5185c04e-8bab-422d-8862-00289fb515ad | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:47 | INFO     | 5185c04e-8bab-422d-8862-00289fb515ad | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:47:48 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:47:51 | INFO     | adb3d9bb-4eb4-4850-b791-319b6bec168a | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:51 | WARNING  | adb3d9bb-4eb4-4850-b791-319b6bec168a | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:51 | WARNING  | adb3d9bb-4eb4-4850-b791-319b6bec168a | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:52 | INFO     | 69c3a748-27e1-4b4e-a960-343304f3de7b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:52 | WARNING  | 69c3a748-27e1-4b4e-a960-343304f3de7b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:52 | WARNING  | 69c3a748-27e1-4b4e-a960-343304f3de7b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:52 | INFO     | dcb4059b-0516-42b1-8285-fc0bbee507f6 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:52 | WARNING  | dcb4059b-0516-42b1-8285-fc0bbee507f6 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:52 | WARNING  | dcb4059b-0516-42b1-8285-fc0bbee507f6 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:53 | INFO     | d652c1cf-1e14-4afe-a0c8-f29b558bc14c | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:53 | WARNING  | d652c1cf-1e14-4afe-a0c8-f29b558bc14c | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:53 | WARNING  | d652c1cf-1e14-4afe-a0c8-f29b558bc14c | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:53 | INFO     | 4b08e3aa-643c-47a9-b2ce-62767d13fbc0 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:53 | WARNING  | 4b08e3aa-643c-47a9-b2ce-62767d13fbc0 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:53 | WARNING  | 4b08e3aa-643c-47a9-b2ce-62767d13fbc0 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:53 | INFO     | c8e486f3-6d8e-4202-9bc4-72ac7f4ec996 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:53 | WARNING  | c8e486f3-6d8e-4202-9bc4-72ac7f4ec996 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:53 | WARNING  | c8e486f3-6d8e-4202-9bc4-72ac7f4ec996 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:53 | INFO     | c7f678f3-6fa2-462c-886d-6bac50931b9b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:53 | WARNING  | c7f678f3-6fa2-462c-886d-6bac50931b9b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:53 | WARNING  | c7f678f3-6fa2-462c-886d-6bac50931b9b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:53 | INFO     | 14a765ae-6f39-48c1-a9cb-497107d6f851 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:53 | WARNING  | 14a765ae-6f39-48c1-a9cb-497107d6f851 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:53 | WARNING  | 14a765ae-6f39-48c1-a9cb-497107d6f851 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:57 | INFO     | 3c538c64-3e81-4430-bd49-99db34a2cb3e | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:57 | WARNING  | 3c538c64-3e81-4430-bd49-99db34a2cb3e | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:57 | WARNING  | 3c538c64-3e81-4430-bd49-99db34a2cb3e | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:58 | INFO     | 950807a6-28f2-4f79-a55c-48b1c870f7fd | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:58 | WARNING  | 950807a6-28f2-4f79-a55c-48b1c870f7fd | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:58 | WARNING  | 950807a6-28f2-4f79-a55c-48b1c870f7fd | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:58 | INFO     | 785d3f2f-f7bc-41ce-87d6-430882a5060d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:58 | WARNING  | 785d3f2f-f7bc-41ce-87d6-430882a5060d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:58 | WARNING  | 785d3f2f-f7bc-41ce-87d6-430882a5060d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:58 | INFO     | 05e69534-1988-459e-9791-c303190d2e15 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:58 | WARNING  | 05e69534-1988-459e-9791-c303190d2e15 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:58 | WARNING  | 05e69534-1988-459e-9791-c303190d2e15 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:58 | INFO     | 5c50e3ae-4963-49fb-beb8-fac0620aa0f1 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:58 | WARNING  | 5c50e3ae-4963-49fb-beb8-fac0620aa0f1 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:58 | WARNING  | 5c50e3ae-4963-49fb-beb8-fac0620aa0f1 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:58 | INFO     | 7b0cd7d1-4c68-4b16-84ef-a68a2d09a73c | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:58 | WARNING  | 7b0cd7d1-4c68-4b16-84ef-a68a2d09a73c | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:58 | WARNING  | 7b0cd7d1-4c68-4b16-84ef-a68a2d09a73c | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:59 | INFO     | d492c4da-58cf-41a8-9d05-9c49d308f6e1 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:59 | WARNING  | d492c4da-58cf-41a8-9d05-9c49d308f6e1 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:59 | WARNING  | d492c4da-58cf-41a8-9d05-9c49d308f6e1 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:59 | INFO     | 26dccb63-0ecc-43ce-b730-3e647e56c8db | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:59 | WARNING  | 26dccb63-0ecc-43ce-b730-3e647e56c8db | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:59 | WARNING  | 26dccb63-0ecc-43ce-b730-3e647e56c8db | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:47:59 | INFO     | f96345b1-fe34-4203-9dc0-7f196b98506b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:47:59 | WARNING  | f96345b1-fe34-4203-9dc0-7f196b98506b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:47:59 | WARNING  | f96345b1-fe34-4203-9dc0-7f196b98506b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:01 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:48:05 | INFO     | 603e7756-cc7f-4402-a7ea-ac69e7b9a7be | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:05 | WARNING  | 603e7756-cc7f-4402-a7ea-ac69e7b9a7be | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:05 | WARNING  | 603e7756-cc7f-4402-a7ea-ac69e7b9a7be | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:05 | INFO     | 8ebb8f6a-5e1e-4567-9bcd-e85258da000e | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:05 | WARNING  | 8ebb8f6a-5e1e-4567-9bcd-e85258da000e | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:05 | WARNING  | 8ebb8f6a-5e1e-4567-9bcd-e85258da000e | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:06 | INFO     | 4e7d0559-05f5-4214-bcc8-982a64d1057d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:06 | WARNING  | 4e7d0559-05f5-4214-bcc8-982a64d1057d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:06 | WARNING  | 4e7d0559-05f5-4214-bcc8-982a64d1057d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:06 | INFO     | d8a3a3fe-2a9f-4e87-9ae4-217737a88e61 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:06 | WARNING  | d8a3a3fe-2a9f-4e87-9ae4-217737a88e61 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:06 | WARNING  | d8a3a3fe-2a9f-4e87-9ae4-217737a88e61 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:08 | INFO     | a04ee88c-f0f6-4590-974d-c693ae4ab50c | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:08 | WARNING  | a04ee88c-f0f6-4590-974d-c693ae4ab50c | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:08 | WARNING  | a04ee88c-f0f6-4590-974d-c693ae4ab50c | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:09 | INFO     | 1239ed6f-b57a-4cf4-8e4d-3e4b8c16028b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:09 | WARNING  | 1239ed6f-b57a-4cf4-8e4d-3e4b8c16028b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:09 | WARNING  | 1239ed6f-b57a-4cf4-8e4d-3e4b8c16028b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:09 | INFO     | 2af1ed34-ad83-4698-ac22-413ff304aa5b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:09 | WARNING  | 2af1ed34-ad83-4698-ac22-413ff304aa5b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:09 | WARNING  | 2af1ed34-ad83-4698-ac22-413ff304aa5b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:09 | INFO     | 206009b1-a93c-4225-8beb-1e8653f1dedb | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:09 | WARNING  | 206009b1-a93c-4225-8beb-1e8653f1dedb | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:09 | WARNING  | 206009b1-a93c-4225-8beb-1e8653f1dedb | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:09 | INFO     | d4d3ee44-5aa9-4489-b03a-1f341a591bac | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:09 | WARNING  | d4d3ee44-5aa9-4489-b03a-1f341a591bac | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:09 | WARNING  | d4d3ee44-5aa9-4489-b03a-1f341a591bac | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:09 | INFO     | 9624c0e1-74d2-485b-9442-c0eb2080dc2a | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:09 | WARNING  | 9624c0e1-74d2-485b-9442-c0eb2080dc2a | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:09 | WARNING  | 9624c0e1-74d2-485b-9442-c0eb2080dc2a | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | 707b2ec3-a06c-4fe7-94f8-ed4fed63d11c | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | 707b2ec3-a06c-4fe7-94f8-ed4fed63d11c | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | 707b2ec3-a06c-4fe7-94f8-ed4fed63d11c | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | e3b2cba6-83cd-4e93-830c-0896b9a0f454 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | e3b2cba6-83cd-4e93-830c-0896b9a0f454 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | e3b2cba6-83cd-4e93-830c-0896b9a0f454 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | 6e4b1457-2f8a-4c7c-903f-9ee1c856c19f | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | 6e4b1457-2f8a-4c7c-903f-9ee1c856c19f | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | 6e4b1457-2f8a-4c7c-903f-9ee1c856c19f | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | 24d508b9-fa65-4d2f-94cd-a6c929ff56de | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | 24d508b9-fa65-4d2f-94cd-a6c929ff56de | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | 24d508b9-fa65-4d2f-94cd-a6c929ff56de | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | f2133bc2-e6b7-40f2-a5ae-bcbd963991ed | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | f2133bc2-e6b7-40f2-a5ae-bcbd963991ed | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | f2133bc2-e6b7-40f2-a5ae-bcbd963991ed | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | 2b379821-1a94-4896-beb3-4ac251878563 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | 2b379821-1a94-4896-beb3-4ac251878563 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | 2b379821-1a94-4896-beb3-4ac251878563 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:10 | INFO     | 51c4b2be-895f-4c7a-9435-cd365aa9f515 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:10 | WARNING  | 51c4b2be-895f-4c7a-9435-cd365aa9f515 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:10 | WARNING  | 51c4b2be-895f-4c7a-9435-cd365aa9f515 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:18 | INFO     | db58d85a-39da-475f-b73c-a34ae4c84c57 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:18 | WARNING  | db58d85a-39da-475f-b73c-a34ae4c84c57 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:18 | WARNING  | db58d85a-39da-475f-b73c-a34ae4c84c57 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:19 | INFO     | 3c29f21a-b2c2-4100-aba1-b9c25c4fab4d | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:19 | WARNING  | 3c29f21a-b2c2-4100-aba1-b9c25c4fab4d | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:19 | WARNING  | 3c29f21a-b2c2-4100-aba1-b9c25c4fab4d | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:19 | INFO     | af2c92fd-ee4b-417c-9190-0bcb83368ed0 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:48:19 | WARNING  | af2c92fd-ee4b-417c-9190-0bcb83368ed0 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 10:48:19 | WARNING  | af2c92fd-ee4b-417c-9190-0bcb83368ed0 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 10:48:34 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:56:11 | INFO     | 09e4dce2-fb3f-4f93-9b89-ea47c37307ac | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:11 | INFO     | 09e4dce2-fb3f-4f93-9b89-ea47c37307ac | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:56:14 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:56:17 | INFO     | df4a98c7-9978-4cb3-9fc5-2dc2c229ecee | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:17 | INFO     | df4a98c7-9978-4cb3-9fc5-2dc2c229ecee | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:56:17 | INFO     | 6e97e7b7-201f-4495-ad9d-fac1e02f13ce | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:17 | INFO     | 6e97e7b7-201f-4495-ad9d-fac1e02f13ce | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:56:18 | INFO     | 67023b44-c9ce-4e3b-a744-2a6c40777051 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:18 | INFO     | 67023b44-c9ce-4e3b-a744-2a6c40777051 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:56:18 | INFO     | 7eaa70c6-9ceb-421f-9689-dcbb1c856dd6 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:18 | INFO     | 7eaa70c6-9ceb-421f-9689-dcbb1c856dd6 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:56:18 | INFO     | 8062d428-9747-4b2c-9e91-11f89a4463bb | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:18 | INFO     | 8062d428-9747-4b2c-9e91-11f89a4463bb | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:56:18 | INFO     | 5d7ef5ed-7a9f-4fda-89e4-6909950060a9 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 10:56:18 | INFO     | 5d7ef5ed-7a9f-4fda-89e4-6909950060a9 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 10:58:26 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:58:56 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:59:08 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:59:16 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 10:59:25 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:00:30 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:01:30 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:01:59 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:08:23 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:08:46 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:10:11 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:10:45 | INFO     | - | src.app:lifespan:16 | Application shutting down...
+2025-12-12 11:10:46 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:10:47 | INFO     | - | src.app:lifespan:23 | Application shutting down...
+2025-12-12 11:10:48 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:10:52 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:11:04 | INFO     | - | src.app:lifespan:22 | Application shutting down...
+2025-12-12 11:11:25 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:12:01 | INFO     | - | src.app:lifespan:23 | Application shutting down...
+2025-12-12 11:12:02 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:12:03 | INFO     | - | src.app:lifespan:27 | Application shutting down...
+2025-12-12 11:12:05 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:12:53 | INFO     | - | src.app:lifespan:26 | Application shutting down...
+2025-12-12 11:16:37 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:17:06 | INFO     | 98b9cbb5-b9ee-450f-b3ca-59980bd2202b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:06 | INFO     | 98b9cbb5-b9ee-450f-b3ca-59980bd2202b | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 11:17:24 | INFO     | - | src.app:lifespan:26 | Application shutting down...
+2025-12-12 11:17:26 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:17:26 | INFO     | 9ae83b65-c3fa-4abd-8f76-c0d68f5b72a0 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:26 | WARNING  | 9ae83b65-c3fa-4abd-8f76-c0d68f5b72a0 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:26 | WARNING  | 9ae83b65-c3fa-4abd-8f76-c0d68f5b72a0 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:27 | INFO     | 12f926a8-2d56-41b3-bf61-8b534d88fd1e | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:27 | WARNING  | 12f926a8-2d56-41b3-bf61-8b534d88fd1e | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:27 | WARNING  | 12f926a8-2d56-41b3-bf61-8b534d88fd1e | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:27 | INFO     | 452211eb-ec09-408e-b9a6-828d641bb84b | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:27 | WARNING  | 452211eb-ec09-408e-b9a6-828d641bb84b | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:27 | WARNING  | 452211eb-ec09-408e-b9a6-828d641bb84b | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:27 | INFO     | c7c4f52a-b7a7-451c-9636-08b5dc7b3662 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:27 | WARNING  | c7c4f52a-b7a7-451c-9636-08b5dc7b3662 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:27 | WARNING  | c7c4f52a-b7a7-451c-9636-08b5dc7b3662 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:27 | INFO     | 43eb5b3c-dea7-4ab9-89f4-e4abaefdf872 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:28 | WARNING  | 43eb5b3c-dea7-4ab9-89f4-e4abaefdf872 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:28 | WARNING  | 43eb5b3c-dea7-4ab9-89f4-e4abaefdf872 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:28 | INFO     | 7531c561-445b-4d5c-b5d9-f55aece08398 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:28 | WARNING  | 7531c561-445b-4d5c-b5d9-f55aece08398 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:28 | WARNING  | 7531c561-445b-4d5c-b5d9-f55aece08398 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:35 | INFO     | - | src.app:lifespan:26 | Application shutting down...
+2025-12-12 11:17:37 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:17:37 | INFO     | 7ee64dc6-b59a-4d7f-a1f1-1f32efa118de | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:37 | WARNING  | 7ee64dc6-b59a-4d7f-a1f1-1f32efa118de | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:37 | WARNING  | 7ee64dc6-b59a-4d7f-a1f1-1f32efa118de | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:48 | INFO     | a08894bc-4dba-474d-95d6-b2f1ff33fa20 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:48 | WARNING  | a08894bc-4dba-474d-95d6-b2f1ff33fa20 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:48 | WARNING  | a08894bc-4dba-474d-95d6-b2f1ff33fa20 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:49 | INFO     | 99508750-eb89-4bb6-8f8a-4cba523546e6 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 11:17:49 | WARNING  | 99508750-eb89-4bb6-8f8a-4cba523546e6 | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 11:17:49 | WARNING  | 99508750-eb89-4bb6-8f8a-4cba523546e6 | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 11:17:55 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:17:56 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:17:57 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:17:59 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:18:39 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:18:41 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:20:08 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:23:06 | WARNING  | - | src.core.router_loader:load_all:157 | No controller files found in 'src/modules'
+2025-12-12 11:24:51 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:24:53 | WARNING  | - | src.core.router_loader:load_all:107 | No controller files found in 'src/modules'
+2025-12-12 11:25:02 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:25:03 | WARNING  | - | src.core.router_loader:load_all:107 | No controller files found in 'src/modules'
+2025-12-12 11:26:03 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:26:04 | WARNING  | - | src.core.router_loader:load_all:107 | No controller files found in 'src/modules'
+2025-12-12 11:26:05 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:26:06 | WARNING  | - | src.core.router_loader:load_all:107 | No controller files found in 'src/modules'
+2025-12-12 11:27:22 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:27:23 | WARNING  | - | src.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:27:46 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:27:48 | WARNING  | - | src.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:27:56 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:29:57 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:30:01 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:30:02 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:30:09 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:30:10 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:30:18 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:30:19 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:30:19 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:30:20 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:30:27 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:31:10 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:31:16 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:31:17 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:34:02 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:34:04 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:34:19 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:34:22 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:34:35 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:34:37 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:34:53 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:34:54 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:35:03 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:35:04 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:40:06 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:40:08 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:40:16 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:40:17 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:41:08 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:41:09 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:41:30 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:41:31 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:41:38 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:41:39 | WARNING  | - | src.core.routers.loader:load_all:83 | No controller files found in 'src/modules'
+2025-12-12 11:41:53 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:44:24 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:44:39 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:44:41 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:45:11 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:45:12 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:45:45 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:45:46 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:45:55 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:45:56 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:46:12 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:46:13 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:47:03 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:47:04 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:47:20 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:47:21 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:49:04 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:49:05 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:49:13 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:49:14 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:51:42 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:51:43 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:51:51 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:51:53 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:52:07 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:52:09 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:52:41 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:52:42 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:53:33 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:53:35 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:53:46 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:53:48 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:54:23 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:54:24 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:55:52 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:55:54 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:56:27 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:56:27 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:58:44 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:58:46 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:59:05 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:59:06 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 11:59:18 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 11:59:21 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 12:01:07 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 12:01:08 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 12:01:12 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 12:01:13 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 12:01:36 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 12:01:37 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 12:01:51 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 12:01:52 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 12:02:20 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 12:02:21 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 12:02:40 | INFO     | 0ed0447a-b322-421f-a166-6bbd9cf800fb | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 12:02:40 | WARNING  | 0ed0447a-b322-421f-a166-6bbd9cf800fb | slowapi:__evaluate_limits:510 | ratelimit 1 per 1 minute (127.0.0.1) exceeded at endpoint: /
+2025-12-12 12:02:40 | WARNING  | 0ed0447a-b322-421f-a166-6bbd9cf800fb | src.core.middlewares.logging:dispatch:126 | Request completed: CLIENT_ERROR - GET /
+2025-12-12 13:10:20 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:10:21 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:10:22 | INFO     | 57a331c8-3bdd-4bbe-979b-f33b0a261399 | src.core.middlewares.logging:dispatch:72 | Request started: GET /
+2025-12-12 13:10:22 | INFO     | 57a331c8-3bdd-4bbe-979b-f33b0a261399 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /
+2025-12-12 13:10:23 | INFO     | 53457a79-dc47-4171-986e-e502ca9f4da8 | src.core.middlewares.logging:dispatch:72 | Request started: GET /docs
+2025-12-12 13:10:23 | INFO     | 53457a79-dc47-4171-986e-e502ca9f4da8 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /docs
+2025-12-12 13:10:24 | INFO     | 35795426-fa8d-4731-89a0-918cd7ea2281 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 13:10:24 | INFO     | 35795426-fa8d-4731-89a0-918cd7ea2281 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 13:10:26 | INFO     | 892640bb-6991-4022-aaed-c576cef42d97 | src.core.middlewares.logging:dispatch:72 | Request started: GET /redoc
+2025-12-12 13:10:26 | INFO     | 892640bb-6991-4022-aaed-c576cef42d97 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /redoc
+2025-12-12 13:10:26 | INFO     | 6ee9100a-5be0-4837-9267-2d41c57210b9 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 13:10:26 | INFO     | 6ee9100a-5be0-4837-9267-2d41c57210b9 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 13:10:31 | INFO     | 8a657703-9ddc-4d38-af37-99d9d2f0a352 | src.core.middlewares.logging:dispatch:72 | Request started: GET /redoc
+2025-12-12 13:10:31 | INFO     | 8a657703-9ddc-4d38-af37-99d9d2f0a352 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /redoc
+2025-12-12 13:10:31 | INFO     | 803c6b06-ef9c-44f5-a1c8-175e80b27a44 | src.core.middlewares.logging:dispatch:72 | Request started: GET /api/v1/openapi.json
+2025-12-12 13:10:31 | INFO     | 803c6b06-ef9c-44f5-a1c8-175e80b27a44 | src.core.middlewares.logging:dispatch:126 | Request completed: SUCCESS - GET /api/v1/openapi.json
+2025-12-12 13:27:05 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:27:07 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:31:57 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:31:58 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:32:15 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:32:17 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:36:31 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:36:34 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:36:43 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:37:10 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:37:16 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:37:17 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:37:22 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:37:23 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:37:24 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:37:25 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:37:48 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:37:56 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:38:21 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:38:22 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:38:48 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:38:50 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:39:01 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:39:02 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:39:18 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:39:19 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:39:35 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:39:36 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:39:40 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:39:41 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:39:48 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:39:50 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:41:43 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:41:45 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:41:54 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:41:55 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:42:37 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:42:38 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:43:03 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:43:03 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:43:11 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:43:12 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:45:20 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:52:50 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:53:24 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:53:25 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:54:50 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:54:52 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:54:59 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:55:00 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:55:19 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:55:20 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:55:30 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:55:31 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:56:09 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:56:10 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:56:16 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:56:17 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:56:20 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:56:21 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:56:33 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:56:34 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:58:23 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:58:24 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:58:29 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:58:30 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:58:52 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:58:53 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:58:54 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:58:55 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:59:10 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:59:11 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:59:52 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:59:53 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 13:59:58 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 13:59:58 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:00:04 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:00:05 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:00:21 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:00:22 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:07:02 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:07:03 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:10:30 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:10:31 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:10:52 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:10:53 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:11:03 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:11:04 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:11:35 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:11:37 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:12:30 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:12:31 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:12:54 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:12:55 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:13:41 | INFO     | - | src.app:lifespan:25 | Application shutting down...
+2025-12-12 14:22:45 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:22:45 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:23:03 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:23:03 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:23:09 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:23:09 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:27:39 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:27:39 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:28:27 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:28:27 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:28:55 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:28:55 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:29:35 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:29:35 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:30:23 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:30:23 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:30:30 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:30:30 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:30:54 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:30:54 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:31:26 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:31:26 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:31:39 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:31:39 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:31:51 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:31:51 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:52:12 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:52:12 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:52:42 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:52:42 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:52:56 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:52:56 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:08 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:53:08 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:15 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:53:15 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:16 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:53:16 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:21 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:53:21 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:44 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:53:44 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:44 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:53:44 | INFO     | - | src.app:lifespan:34 | Application startup complete
+2025-12-12 14:53:50 | INFO     | - | src.app:lifespan:37 | Application shutting down...
+2025-12-12 14:53:50 | INFO     | - | src.core.configs.database:close:163 | Write DB connection pool closed
+2025-12-12 14:53:50 | INFO     | - | src.app:lifespan:41 | Database connections closed
+2025-12-12 14:53:50 | INFO     | - | src.app:lifespan:45 | Application shutdown complete
+2025-12-12 14:53:51 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:53:51 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:53:51 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:53:51 | INFO     | - | src.app:lifespan:34 | Application startup complete
+2025-12-12 14:54:16 | INFO     | - | src.app:lifespan:37 | Application shutting down...
+2025-12-12 14:54:16 | INFO     | - | src.core.configs.database:close:163 | Write DB connection pool closed
+2025-12-12 14:54:16 | INFO     | - | src.app:lifespan:41 | Database connections closed
+2025-12-12 14:54:16 | INFO     | - | src.app:lifespan:45 | Application shutdown complete
+2025-12-12 14:54:26 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:54:26 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 14:54:26 | WARNING  | - | src.core.routers.loader:load_all:84 | No controller files found in 'src/modules'
+2025-12-12 14:54:26 | INFO     | - | src.app:lifespan:34 | Application startup complete
+2025-12-12 14:55:11 | INFO     | - | src.app:lifespan:37 | Application shutting down...
+2025-12-12 14:55:11 | INFO     | - | src.core.configs.database:close:163 | Write DB connection pool closed
+2025-12-12 14:55:11 | INFO     | - | src.app:lifespan:41 | Database connections closed
+2025-12-12 14:55:11 | INFO     | - | src.app:lifespan:45 | Application shutdown complete
+2025-12-12 14:55:12 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 14:55:12 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:03:30 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:03:30 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:03:46 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:03:46 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:08:45 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:08:45 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:08:50 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:08:50 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:08:55 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:08:55 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:09:42 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:09:42 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:11:37 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:11:37 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:17:04 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:17:04 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:17:36 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:17:36 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:17:53 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:17:53 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:18:41 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:18:41 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:18:52 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:18:52 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:18:57 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:18:57 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:19:07 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:19:07 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:19:37 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:19:37 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:20:23 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:20:23 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:21:10 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:21:10 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:21:13 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:21:13 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:21:25 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:21:25 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:21:53 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:21:53 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:22:12 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:22:12 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:22:30 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:22:30 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:25:25 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:25:25 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:25:31 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:25:31 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:25:48 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:25:48 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:27:03 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:27:03 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:27:13 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:27:13 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:28:46 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:28:46 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:29:08 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:29:08 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:29:24 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:29:24 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:29:37 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:29:37 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:29:52 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:29:52 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:30:04 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:30:04 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:30:19 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:30:19 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:31:24 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:31:24 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:31:27 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:31:27 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:31:43 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:31:43 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:32:18 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:32:18 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:37:12 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:37:12 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:38:07 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:38:07 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:50:16 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:50:16 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:50:16 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:50:28 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:50:28 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:50:28 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:53:02 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:53:02 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:53:02 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:53:27 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:53:27 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:53:27 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:56:03 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:56:03 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:56:03 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:56:18 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:56:19 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:56:19 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 15:56:42 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 15:56:42 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 15:56:42 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 16:03:42 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 16:03:42 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 16:03:42 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 16:04:27 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 16:04:27 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 16:04:27 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 16:29:09 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 16:29:09 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 16:29:09 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 16:30:30 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 16:30:30 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: timima_postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 16:30:30 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 16:37:09 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 16:37:09 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: postgres:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 16:37:09 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 16:37:59 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 16:37:59 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: 127.0.0.1:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 16:37:59 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 17:45:13 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 17:45:14 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: 127.0.0.1:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 17:45:14 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
+2025-12-12 17:45:47 | INFO     | - | src.app:lifespan:47 | Logging configured
+2025-12-12 17:45:47 | INFO     | - | src.core.configs.database:init:70 | ✅ Write DB initialized: 127.0.0.1:5432/timima (pool_size=10, max_overflow=20)
+2025-12-12 17:45:47 | INFO     | - | src.core.configs.database:init:105 | Read DB using write DB configuration (no replica)
