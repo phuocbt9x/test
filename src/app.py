@@ -10,6 +10,7 @@ from src.core import (
     logging_settings,
     print_routes_table,
     settings,
+    Environment,
     setup_exception_handlers,
     setup_logging,
     setup_middlewares,
@@ -73,17 +74,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.warning("Health check warning: %s", e)
     
-    # 5. Auto-load routers
-    auto_load_routers(
-        app=app,
-        modules_dir="src/modules",
-        prefix=settings.APP_ROUTER_PREFIX,
-        parallel=True,
-    )
-    logger.info("Routers loaded")
-    
     # 6. Print routes in development
-    if settings.APP_ENV == "development":
+    if settings.APP_ENV == Environment.DEVELOPMENT:
         print_routes_table(app)
     
     logger.info("Application startup complete")
@@ -114,20 +106,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 def create_app() -> FastAPI:
     """Create FastAPI application."""
+
     app = FastAPI(
         title=settings.APP_NAME,
-        docs_url="/docs" if settings.APP_ENV == "development" else None,
-        redoc_url="/redoc" if settings.APP_ENV == "development" else None,
+        docs_url="/docs" if settings.APP_ENV == Environment.DEVELOPMENT else None,
+        redoc_url="/redoc" if settings.APP_ENV == Environment.DEVELOPMENT else None,
         openapi_url=(
             f"{settings.APP_ROUTER_PREFIX}/openapi.json"
-            if settings.APP_ENV == "development"
+            if settings.APP_ENV == Environment.DEVELOPMENT
             else None
         ),
         lifespan=lifespan,
+        # Swagger UI will use CDN by default
     )
 
     setup_middlewares(app)
     setup_exception_handlers(app)
+    auto_load_routers(
+        app=app,
+        modules_dir="src/modules",
+        prefix=settings.APP_ROUTER_PREFIX,
+        parallel=True,
+    )
+    logger.info("Routers loaded")
 
     @app.get("/", tags=["Root"])
     @limiter.exempt
@@ -137,7 +138,7 @@ def create_app() -> FastAPI:
             "message": "Welcome to FastAPI Clean Architecture",
             "app": settings.APP_NAME,
             "version": "0.1.0",
-            "docs": "/docs" if settings.APP_ENV == "development" else None,
+            "docs": "/docs" if settings.APP_ENV == Environment.DEVELOPMENT else None,
             "health": "/health",
         }
 
@@ -196,7 +197,7 @@ def create_app() -> FastAPI:
         return await redis_manager.health_check()
     
     # Debug endpoints for development
-    if settings.APP_ENV == "development":
+    if settings.APP_ENV == Environment.DEVELOPMENT:
         
         @app.get("/debug/cache/keys", tags=["Debug"])
         async def list_cache_keys(pattern: str = "*") -> dict[str, Any]:
@@ -218,3 +219,6 @@ def create_app() -> FastAPI:
             }
 
     return app
+
+# Create app instance for uvicorn
+app = create_app()

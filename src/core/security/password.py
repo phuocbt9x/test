@@ -1,7 +1,8 @@
 """
 Password Hashing & Verification
 
-Uses bcrypt for secure password hashing with configurable cost factor.
+Uses argon2 (preferred) and bcrypt for secure password hashing.
+Argon2 is more resistant to GPU/ASIC attacks and is the recommended algorithm.
 """
 import re
 from typing import Optional
@@ -10,10 +11,14 @@ from src.core.configs import settings
 from src.core.exceptions import ValidationException
 
 
-# Initialize password context with bcrypt
+# Initialize password context with argon2 (preferred) and bcrypt (fallback)
+# argon2 is more secure and resistant to GPU attacks
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
+    schemes=["argon2", "bcrypt"],  # argon2 first for new hashes
     deprecated="auto",
+    argon2__rounds=4,  # Time cost (iterations)
+    argon2__memory_cost=65536,  # Memory cost in KiB (64 MB)
+    argon2__parallelism=4,  # Number of parallel threads
     bcrypt__rounds=settings.BCRYPT_ROUNDS,  # Cost factor (10-15)
 )
 

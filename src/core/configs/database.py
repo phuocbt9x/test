@@ -11,9 +11,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.pool import NullPool, QueuePool
 
-from src.core.configs import settings
+from src.core.configs import settings, Environment
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ class DatabaseManager(metaclass=SingletonMeta):
         )
         
         logger.info(
-            f"✅ Write DB initialized: {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME} "
+            f"Write DB initialized: {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME} "
             f"(pool_size={settings.DB_POOL_SIZE}, max_overflow={settings.DB_MAX_OVERFLOW})"
         )
         
@@ -119,25 +118,66 @@ class DatabaseManager(metaclass=SingletonMeta):
         max_overflow: int,
         is_write: bool = True,
     ) -> AsyncEngine:
+        """
+        Create a SQLAlchemy async engine with optimized connection pooling.
+
+        Connection Pool Configuration:
+            - Production: Uses QueuePool with configured size and overflow
+            - Development: Uses NullPool (creates new connections as needed)
+
+        Pool Settings (Production):
+            - pool_size: Base number of connections to maintain
+            - max_overflow: Additional connections allowed under load
+            - pool_recycle: Recycle connections after N seconds (prevents stale connections)
+            - pool_timeout: Max seconds to wait for available connection
+            - pool_pre_ping: Test connections before using (detect disconnects)
+
+        Args:
+            host: Database host address
+            port: Database port number
+            user: Database username
+            password: Database password
+            database: Database name
+            pool_size: Number of connections to maintain in pool
+            max_overflow: Additional connections allowed when pool is full
+            is_write: Whether this is a write (True) or read (False) database
+
+        Returns:
+            AsyncEngine: Configured SQLAlchemy async engine
+        """
         database_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
-        is_production = getattr(settings, "APP_ENV", "development") == "production"
-        poolclass = QueuePool if is_production else NullPool
+        is_production = settings.APP_ENV == Environment.PRODUCTION
+
+        # Use QueuePool for all environments (better performance)
+        # Development: smaller pool for resource efficiency
+        # Production: full pool for high concurrency
         engine_args: dict[str, object] = {
             "echo": settings.DB_ECHO,
-            "pool_pre_ping": True,
-            "poolclass": poolclass,
+            "pool_pre_ping": True,  # Verify connections before use
+            # DO NOT set poolclass for async engine
             "connect_args": {
                 "server_settings": {
                     "application_name": f"{settings.APP_NAME}_{'write' if is_write else 'read'}",
-                    "jit": "off",
+                    "jit": "off",  # Disable JIT compilation for predictable performance
                 },
-                "command_timeout": 60,
-                "timeout": 10,
+                "command_timeout": 60,  # Query timeout in seconds
+                "timeout": 10,  # Connection timeout in seconds
             },
         }
+
+        # Configure pool size based on environment
         if is_production:
             engine_args["pool_size"] = pool_size
             engine_args["max_overflow"] = max_overflow
+            engine_args["pool_recycle"] = settings.DB_POOL_RECYCLE
+            engine_args["pool_timeout"] = settings.DB_POOL_TIMEOUT
+        else:
+            # Smaller pool for development to save resources
+            engine_args["pool_size"] = 5
+            engine_args["max_overflow"] = 10
+            engine_args["pool_recycle"] = 3600  # 1 hour
+            engine_args["pool_timeout"] = 30
+
         return create_async_engine(database_url, **engine_args)
     
     async def _verify_connections(self) -> None:
@@ -269,3 +309,4 @@ async def get_read_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 get_db = get_write_db
+get_db_session = get_write_db  # Alias for consistency

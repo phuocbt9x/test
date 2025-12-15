@@ -14,7 +14,7 @@ from redis.asyncio import ConnectionPool, Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import RedisError
 
-from src.core.configs import settings
+from src.core.configs import settings, Environment
 
 logger = logging.getLogger(__name__)
 
@@ -492,7 +492,9 @@ class RedisManager(metaclass=SingletonMeta):
         client = self._ensure_client()
         try:
             key = self._prefixed_key(key)
-            return await cast(Awaitable[int], client.zadd(key, mapping))
+            # Ensure mapping values are float (or str/int/bytes if needed)
+            safe_mapping: dict[str, float] = {k: float(v) for k, v in mapping.items()}
+            return await cast(Awaitable[int], client.zadd(key, safe_mapping))
         except RedisError as e:
             logger.error("Redis ZADD error: %s", e)
             return 0
@@ -547,7 +549,7 @@ class RedisManager(metaclass=SingletonMeta):
     
     async def flushdb(self) -> bool:
         """Delete all keys. Only for development."""
-        if settings.APP_ENV == "production":
+        if settings.APP_ENV == Environment.PRODUCTION:
             logger.error("FLUSHDB is disabled in production!")
             return False
         

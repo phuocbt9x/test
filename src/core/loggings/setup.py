@@ -4,8 +4,8 @@ import sys
 import json
 
 from typing import Any, Dict
-from datetime import datetime
 from pathlib import Path
+from src.core.utils.timezone import utcnow
 from .context import LoggingContext
 from logging.handlers import TimedRotatingFileHandler
 from src.core.configs import logging_settings
@@ -16,7 +16,7 @@ import re
 class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         log_data: Dict[str, Any] = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": utcnow().isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),

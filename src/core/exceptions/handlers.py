@@ -1,5 +1,5 @@
-from datetime import datetime
 from typing import Any, Dict
+from src.core.utils.timezone import utcnow
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -25,7 +25,7 @@ def create_error_response(
             "message": message,
             "details": details,
         },
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": utcnow().isoformat(),
         "path": str(request.url.path),
         "request_id": request_id,
     }

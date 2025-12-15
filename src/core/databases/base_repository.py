@@ -3,7 +3,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
 from sqlalchemy import Select, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
 from .base_model import BaseModel
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
@@ -123,17 +123,25 @@ class BaseRepository(Generic[ModelType]):
 
     
     def _apply_relationships(self, query: Select) -> Select:
-        """Apply eager loading for relationships."""
+        """
+        Apply eager loading for relationships.
+
+        Uses selectinload for better performance with 1-to-many relationships.
+        selectinload issues a separate SELECT for related objects, avoiding
+        cartesian products that can occur with joinedload.
+        """
         for rel in self._relationships:
             if '.' in rel:
                 # Nested relationship: user.posts.comments
                 parts = rel.split('.')
-                option = joinedload(getattr(self.model, parts[0]))
+                # Use selectinload consistently for all levels
+                option = selectinload(getattr(self.model, parts[0]))
                 for part in parts[1:]:
-                    option = option.joinedload(getattr(self.model, part))
+                    # Chain selectinload for nested relationships
+                    option = option.selectinload(getattr(self.model, part))
                 query = query.options(option)
             else:
-                # Simple relationship
+                # Simple relationship - selectinload is optimal for collections
                 query = query.options(selectinload(getattr(self.model, rel)))
         return query
     

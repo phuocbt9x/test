@@ -83,8 +83,8 @@ async def get_token_payload(
     
     try:
         # Verify token
-        payload = JWTManager.verify_token(token, token_type="access")
-        
+        payload = await JWTManager.verify_token(token, token_type="access")
+
         # Check if user's tokens have been revoked
         is_revoked = await JWTManager.is_user_revoked(
             payload.sub,
@@ -281,6 +281,30 @@ def require_all_roles(*roles: str):
     return check_all_roles
 
 
+async def get_token_from_header(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+) -> str:
+    """
+    Extract token string from header.
+
+    Args:
+        credentials: HTTP Bearer credentials
+
+    Returns:
+        Token string
+
+    Raises:
+        AuthenticationException: If token is missing
+    """
+    if not credentials:
+        raise AuthenticationException(
+            message="Missing authentication token",
+            error_code="MISSING_TOKEN"
+        )
+    return credentials.credentials
+
+
 # Convenience aliases
 require_auth = get_current_user
 require_active_user = get_current_active_user
+require_superuser = require_roles("admin")

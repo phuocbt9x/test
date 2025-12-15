@@ -118,8 +118,8 @@ class ExternalServiceException(BaseAppException):
 
 class RateLimitException(BaseAppException):
     def __init__(
-        self, 
-        message: str = "Rate limit exceeded", 
+        self,
+        message: str = "Rate limit exceeded",
         retry_after: Optional[int] = None
     ):
         headers = {"Retry-After": str(retry_after)} if retry_after else None
@@ -128,4 +128,35 @@ class RateLimitException(BaseAppException):
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             error_code=ErrorCode.RATE_LIMIT_EXCEEDED,
             headers=headers,
+        )
+
+
+class BadRequestException(BaseAppException):
+    """Bad request exception (400)"""
+    def __init__(
+        self,
+        message: str = "Bad request",
+        error_code: ErrorCode = ErrorCode.BAD_REQUEST,
+        details: Optional[Dict[str, Any]] = None
+    ):
+        super().__init__(
+            message=message,
+            status_code=status.HTTP_400_BAD_REQUEST,
+            error_code=error_code,
+            details=details,
+        )
+
+
+class UnauthorizedException(BaseAppException):
+    """Unauthorized exception (401) - alias for AuthenticationException"""
+    def __init__(
+        self,
+        message: str = "Unauthorized",
+        error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED
+    ):
+        super().__init__(
+            message=message,
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            error_code=error_code,
+            headers={"WWW-Authenticate": "Bearer"},
         )

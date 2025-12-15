@@ -1,4 +1,14 @@
-from .base import BaseAppException, ValidationException, AuthenticationException, AuthorizationException, NotFoundException, ConflictException, RateLimitException
+from .base import (
+    BaseAppException,
+    ValidationException,
+    AuthenticationException,
+    AuthorizationException,
+    NotFoundException,
+    ConflictException,
+    RateLimitException,
+    BadRequestException,
+    UnauthorizedException,
+)
 from .handlers import setup_exception_handlers
 
 __all__ = [
@@ -9,5 +19,7 @@ __all__ = [
     "NotFoundException",
     "ConflictException",
     "RateLimitException",
+    "BadRequestException",
+    "UnauthorizedException",
     "setup_exception_handlers",
 ]

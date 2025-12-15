@@ -21,3 +21,34 @@ wheels/
 .idea/
 *.iml
 /docker
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml
+docker-compose.*.yml
+docker/
+
+# Logs
+logs/
+*.log
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+
+# Test outputs
+.pytest_cache/
+nosetests.xml
+test-results/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/

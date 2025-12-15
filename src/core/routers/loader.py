@@ -22,7 +22,7 @@ class RouterMetadata(BaseModel):
 
 class LoaderConfig(BaseModel):
     modules_dir: str = "modules"
-    controller_pattern: str = "controllers.py"
+    controller_pattern: str = "controller.py"  # Changed from controllers.py to controller.py
     router_attribute: str = "router"
     prefix: str = ""
     exclude_patterns: List[str] = Field(default_factory=lambda: ["__pycache__", "tests", ".pytest_cache"])
@@ -39,15 +39,18 @@ class RouterValidator:
         errors = []
         if not router.routes:
             errors.append("Router has no routes")
-        paths = set()
-        for route in router.routes:
-            if hasattr(route, "path"):
-                if route.path in paths:
-                    errors.append(f"Duplicate path: {route.path}")
-                paths.add(route.path)
+        # Check for duplicate path + method combinations
+        route_signatures = set()
         for route in router.routes:
             if not isinstance(route, APIRoute):
                 continue
+            # Check each method for this route
+            for method in route.methods:
+                signature = (route.path, method)
+                if signature in route_signatures:
+                    errors.append(f"Duplicate route: {method} {route.path}")
+                route_signatures.add(signature)
+            # Validate endpoint is callable
             if not callable(route.endpoint):
                 errors.append(f"Route '{route.name}' endpoint is not callable")
         return errors
@@ -141,9 +144,9 @@ class RouterLoader:
             self._handle_error(file_path, e)
             return None
     def _build_module_path(self, file_path: Path) -> str:
-        modules_path = Path(self.config.modules_dir)
-        relative_path = file_path.relative_to(modules_path.parent)
-        return str(relative_path.with_suffix("")).replace("/", ".").replace("\\", ".")
+        # file_path from rglob is already relative to cwd, so use it directly
+        # Convert path to module notation (e.g., "src/modules/user/controller.py" -> "src.modules.user.controller")
+        return str(file_path.with_suffix("")).replace("/", ".").replace("\\", ".")
     def _import_module(self, module_path: str) -> Any:
         if self.config.cache_modules and self._cache.has(module_path):
             return self._cache.get(module_path)
