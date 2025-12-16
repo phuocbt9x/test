@@ -8,10 +8,9 @@ Tests cover:
 - User-level token revocation
 - Error handling for expired/invalid tokens
 """
+
 import pytest
-import pytest_asyncio
 from datetime import timedelta
-from unittest.mock import AsyncMock, patch, MagicMock
 from jose import jwt
 
 from src.core.security.jwt import JWTManager, TokenPayload, TokenResponse
@@ -41,7 +40,7 @@ class TestJWTManager:
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_signature": False, "verify_aud": False}
+            options={"verify_signature": False, "verify_aud": False},
         )
 
         assert payload["sub"] == user_id
@@ -65,7 +64,7 @@ class TestJWTManager:
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_signature": False, "verify_aud": False}
+            options={"verify_signature": False, "verify_aud": False},
         )
 
         assert payload["sub"] == user_id
@@ -85,7 +84,7 @@ class TestJWTManager:
             email=email,
             username=username,
             roles=roles,
-            permissions=permissions
+            permissions=permissions,
         )
 
         assert isinstance(token_pair, TokenResponse)
@@ -99,7 +98,7 @@ class TestJWTManager:
             token_pair.access_token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_signature": False, "verify_aud": False}
+            options={"verify_signature": False, "verify_aud": False},
         )
 
         assert access_payload["email"] == email
@@ -113,16 +112,14 @@ class TestJWTManager:
         expires_delta = timedelta(hours=2)
 
         token = JWTManager.create_token(
-            subject=user_id,
-            token_type="access",
-            expires_delta=expires_delta
+            subject=user_id, token_type="access", expires_delta=expires_delta
         )
 
         payload = jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_signature": False, "verify_aud": False}
+            options={"verify_signature": False, "verify_aud": False},
         )
 
         exp_time = payload["exp"]
@@ -138,8 +135,16 @@ class TestJWTManager:
         token1 = JWTManager.create_access_token(user_id)
         token2 = JWTManager.create_access_token(user_id)
 
-        payload1 = jwt.decode(token1, settings.JWT_SECRET_KEY, options={"verify_signature": False, "verify_aud": False})
-        payload2 = jwt.decode(token2, settings.JWT_SECRET_KEY, options={"verify_signature": False, "verify_aud": False})
+        payload1 = jwt.decode(
+            token1,
+            settings.JWT_SECRET_KEY,
+            options={"verify_signature": False, "verify_aud": False},
+        )
+        payload2 = jwt.decode(
+            token2,
+            settings.JWT_SECRET_KEY,
+            options={"verify_signature": False, "verify_aud": False},
+        )
 
         assert payload1["jti"] != payload2["jti"]
 
@@ -184,9 +189,7 @@ class TestJWTManager:
 
         # Create token with negative expiry (already expired)
         token = JWTManager.create_token(
-            subject=user_id,
-            token_type="access",
-            expires_delta=timedelta(seconds=-10)
+            subject=user_id, token_type="access", expires_delta=timedelta(seconds=-10)
         )
 
         with pytest.raises(AuthenticationException) as exc_info:
@@ -248,8 +251,7 @@ class TestJWTManager:
         token = JWTManager.create_access_token(user_id)
 
         # Decode to get JTI
-        payload = JWTManager.decode_token(token, verify=False)
-        jti = payload["jti"]
+        JWTManager.decode_token(token, verify=False)
 
         # Mock Redis to return blacklisted
         redis_client.get.return_value = "1"
@@ -268,7 +270,9 @@ class TestJWTManager:
             # Missing 'type', 'jti', etc.
         }
 
-        token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        token = jwt.encode(
+            payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        )
 
         with pytest.raises(AuthenticationException) as exc_info:
             await JWTManager.verify_token(token)
@@ -358,7 +362,9 @@ class TestJWTManager:
             "iat": int(utcnow().timestamp()),
             "type": "access",
         }
-        token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        token = jwt.encode(
+            payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        )
 
         result = await JWTManager.revoke_token(token)
 
@@ -445,8 +451,7 @@ class TestJWTManager:
         assert token_pair.refresh_token is not None
 
         payload = jwt.decode(
-            token_pair.access_token,
-            options={"verify_signature": False}
+            token_pair.access_token, options={"verify_signature": False}
         )
 
         assert payload["sub"] == user_id
@@ -461,7 +466,7 @@ class TestJWTManager:
             "email": "full@example.com",
             "username": "fulluser",
             "roles": ["admin", "user", "moderator"],
-            "permissions": ["read:all", "write:all", "delete:all"]
+            "permissions": ["read:all", "write:all", "delete:all"],
         }
 
         token = JWTManager.create_access_token(user_id, claims)
@@ -477,7 +482,11 @@ class TestJWTManager:
         user_id = "iss-aud-user"
         token = JWTManager.create_access_token(user_id)
 
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, options={"verify_signature": False, "verify_aud": False})
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            options={"verify_signature": False, "verify_aud": False},
+        )
 
         assert payload["iss"] == settings.JWT_ISSUER
         assert payload["aud"] == settings.JWT_AUDIENCE

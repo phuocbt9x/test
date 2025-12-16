@@ -8,6 +8,7 @@ This module provides:
 - Authentication fixtures
 - Mock factories
 """
+
 import asyncio
 import pytest
 import pytest_asyncio
@@ -20,16 +21,15 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from redis.asyncio import Redis
 
-from src.core.configs import settings
-from src.core.configs.database import db, Base
+from src.core.configs.database import Base
 from src.core.configs.redis import redis_manager
 from src.modules.user.models import User
-from src.modules.auth.models import RefreshToken, TokenBlacklist
 from src.core.security.jwt import JWTManager
 from src.core.security.password import PasswordHasher
 
 
 # ==================== Event Loop Configuration ====================
+
 
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
@@ -40,6 +40,7 @@ def event_loop() -> Generator:
 
 
 # ==================== Database Fixtures ====================
+
 
 @pytest_asyncio.fixture(scope="function")
 async def test_db_engine():
@@ -93,6 +94,7 @@ async def db_session(test_db_engine) -> AsyncGenerator[AsyncSession, None]:
 
 
 # ==================== Redis Fixtures ====================
+
 
 @pytest_asyncio.fixture(scope="function")
 async def mock_redis() -> AsyncGenerator[AsyncMock, None]:
@@ -157,12 +159,14 @@ async def redis_client(mock_redis) -> AsyncGenerator[AsyncMock, None]:
 
 # ==================== FastAPI Test Client ====================
 
+
 @pytest_asyncio.fixture(scope="function")
 async def test_app() -> FastAPI:
     """
     Create a FastAPI test application.
     """
     from src.app import app
+
     return app
 
 
@@ -177,6 +181,7 @@ async def client(test_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
 
 
 # ==================== User Fixtures ====================
+
 
 @pytest_asyncio.fixture
 async def test_user(db_session: AsyncSession) -> User:
@@ -241,6 +246,7 @@ async def inactive_user(db_session: AsyncSession) -> User:
 
 # ==================== Authentication Fixtures ====================
 
+
 @pytest.fixture
 def test_tokens(test_user: User) -> dict:
     """
@@ -251,7 +257,7 @@ def test_tokens(test_user: User) -> dict:
         email=test_user.email,
         username=test_user.username,
         roles=["user"],
-        permissions=[]
+        permissions=[],
     )
     return {
         "access_token": token_pair.access_token,
@@ -270,7 +276,7 @@ def admin_tokens(admin_user: User) -> dict:
         email=admin_user.email,
         username=admin_user.username,
         roles=["admin", "user"],
-        permissions=["users:read", "users:write", "users:delete"]
+        permissions=["users:read", "users:write", "users:delete"],
     )
     return {
         "access_token": token_pair.access_token,
@@ -296,6 +302,7 @@ def admin_auth_headers(admin_tokens: dict) -> dict:
 
 
 # ==================== Mock Factories ====================
+
 
 @pytest.fixture
 def mock_password_manager():

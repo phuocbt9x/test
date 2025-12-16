@@ -5,26 +5,22 @@ from .loader import RouterLoader, LoaderConfig
 from fastapi.routing import APIRoute
 
 
-
 def auto_load_routers(
     app: FastAPI,
     modules_dir: str = "modules",
     prefix: Optional[str] = None,
     parallel: bool = False,
-    **kwargs
+    **kwargs,
 ) -> RouterLoader:
     prefix = prefix or settings.APP_ROUTER_PREFIX
-    
+
     config = LoaderConfig(
-        modules_dir=modules_dir,
-        prefix=prefix,
-        parallel_loading=parallel,
-        **kwargs
+        modules_dir=modules_dir, prefix=prefix, parallel_loading=parallel, **kwargs
     )
-    
+
     loader = RouterLoader(app=app, config=config)
     loader.load_all()
-    
+
     return loader
 
 

@@ -3,13 +3,18 @@ User Router
 
 REST API endpoints for user management.
 """
+
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
 from src.core.controllers import BaseController, SuccessResponse, PaginatedResponse
-from src.core.security.dependencies import CurrentUser, get_current_active_user, require_superuser
+from src.core.security.dependencies import (
+    CurrentUser,
+    get_current_active_user,
+    require_superuser,
+)
 
 from .dependencies import get_user_service
 from .schemas import (
@@ -61,7 +66,9 @@ async def get_current_user_profile(
     """Get current user's own profile"""
     user = await service.get_user_by_id(UUID(current_user.user_id))
     user_data = UserDetailResponse.model_validate(user)
-    return controller.success(data=user_data, message="User profile retrieved successfully")
+    return controller.success(
+        data=user_data, message="User profile retrieved successfully"
+    )
 
 
 @router.patch(
@@ -116,7 +123,7 @@ async def list_users(
         page=page,
         per_page=per_page,
         total=result["total"],
-        message="Users retrieved successfully"
+        message="Users retrieved successfully",
     )
 
 

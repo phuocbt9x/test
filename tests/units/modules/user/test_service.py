@@ -10,16 +10,25 @@ Tests cover:
 - Password changes
 - Account lockout logic
 """
+
 import pytest
-import pytest_asyncio
 from uuid import uuid4
 from datetime import timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.user.service import UserService
 from src.modules.user.models import User
-from src.modules.user.schemas import UserCreateRequest, UserUpdateRequest, UserPasswordChangeRequest
-from src.core.exceptions import ConflictException, NotFoundException, UnauthorizedException, BadRequestException
+from src.modules.user.schemas import (
+    UserCreateRequest,
+    UserUpdateRequest,
+    UserPasswordChangeRequest,
+)
+from src.core.exceptions import (
+    ConflictException,
+    NotFoundException,
+    UnauthorizedException,
+    BadRequestException,
+)
 from src.core.security.password import PasswordHasher
 from src.core.utils.timezone import utcnow
 
@@ -38,7 +47,7 @@ class TestUserServiceCreate:
             username="newuser",
             password="NewUser@123",
             full_name="New User",
-            phone="+1234567890"
+            phone="+1234567890",
         )
 
         user = await service.create_user(data)
@@ -55,7 +64,9 @@ class TestUserServiceCreate:
         assert PasswordHasher.verify(data.password, user.password_hash)
 
     @pytest.mark.asyncio
-    async def test_create_user_duplicate_email(self, db_session: AsyncSession, test_user: User):
+    async def test_create_user_duplicate_email(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test creating user with duplicate email."""
         service = UserService(db_session)
 
@@ -72,7 +83,9 @@ class TestUserServiceCreate:
         assert "already" in exc_info.value.message.lower()
 
     @pytest.mark.asyncio
-    async def test_create_user_duplicate_username(self, db_session: AsyncSession, test_user: User):
+    async def test_create_user_duplicate_username(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test creating user with duplicate username."""
         service = UserService(db_session)
 
@@ -124,7 +137,9 @@ class TestUserServiceRetrieval:
     """Test user retrieval operations."""
 
     @pytest.mark.asyncio
-    async def test_get_user_by_id_success(self, db_session: AsyncSession, test_user: User):
+    async def test_get_user_by_id_success(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test getting user by ID."""
         service = UserService(db_session)
 
@@ -145,7 +160,9 @@ class TestUserServiceRetrieval:
         assert "not found" in exc_info.value.message.lower()
 
     @pytest.mark.asyncio
-    async def test_get_user_by_email_success(self, db_session: AsyncSession, test_user: User):
+    async def test_get_user_by_email_success(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test getting user by email."""
         service = UserService(db_session)
 
@@ -163,7 +180,9 @@ class TestUserServiceRetrieval:
             await service.get_user_by_email("nonexistent@example.com")
 
     @pytest.mark.asyncio
-    async def test_get_user_by_username_success(self, db_session: AsyncSession, test_user: User):
+    async def test_get_user_by_username_success(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test getting user by username."""
         service = UserService(db_session)
 
@@ -173,7 +192,9 @@ class TestUserServiceRetrieval:
         assert user.username == test_user.username
 
     @pytest.mark.asyncio
-    async def test_get_user_by_email_or_username_email(self, db_session: AsyncSession, test_user: User):
+    async def test_get_user_by_email_or_username_email(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test getting user by email or username (using email)."""
         service = UserService(db_session)
 
@@ -183,7 +204,9 @@ class TestUserServiceRetrieval:
         assert user.id == test_user.id
 
     @pytest.mark.asyncio
-    async def test_get_user_by_email_or_username_username(self, db_session: AsyncSession, test_user: User):
+    async def test_get_user_by_email_or_username_username(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test getting user by email or username (using username)."""
         service = UserService(db_session)
 
@@ -202,10 +225,7 @@ class TestUserServiceUpdate:
         """Test updating user."""
         service = UserService(db_session)
 
-        data = UserUpdateRequest(
-            full_name="Updated Name",
-            phone="+9876543210"
-        )
+        data = UserUpdateRequest(full_name="Updated Name", phone="+9876543210")
 
         user = await service.update_user(test_user.id, data)
 
@@ -243,13 +263,15 @@ class TestUserServicePasswordChange:
     """Test password change operations."""
 
     @pytest.mark.asyncio
-    async def test_change_password_success(self, db_session: AsyncSession, test_user: User):
+    async def test_change_password_success(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test successful password change."""
         service = UserService(db_session)
 
         data = UserPasswordChangeRequest(
             old_password="Test@1234",  # From conftest
-            new_password="NewPassword@123"
+            new_password="NewPassword@123",
         )
 
         user = await service.change_password(test_user.id, data)
@@ -261,28 +283,34 @@ class TestUserServicePasswordChange:
         assert not PasswordHasher.verify(data.old_password, user.password_hash)
 
     @pytest.mark.asyncio
-    async def test_change_password_wrong_old_password(self, db_session: AsyncSession, test_user: User):
+    async def test_change_password_wrong_old_password(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test password change with wrong old password."""
         service = UserService(db_session)
 
         data = UserPasswordChangeRequest(
-            old_password="WrongPassword@123",
-            new_password="NewPassword@123"
+            old_password="WrongPassword@123", new_password="NewPassword@123"
         )
 
         with pytest.raises(UnauthorizedException) as exc_info:
             await service.change_password(test_user.id, data)
 
-        assert "incorrect" in exc_info.value.message.lower() or "invalid" in exc_info.value.message.lower()
+        assert (
+            "incorrect" in exc_info.value.message.lower()
+            or "invalid" in exc_info.value.message.lower()
+        )
 
     @pytest.mark.asyncio
-    async def test_change_password_same_as_old(self, db_session: AsyncSession, test_user: User):
+    async def test_change_password_same_as_old(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test changing password to same password."""
         service = UserService(db_session)
 
         data = UserPasswordChangeRequest(
             old_password="Test@1234",
-            new_password="Test@1234"  # Same as old
+            new_password="Test@1234",  # Same as old
         )
 
         with pytest.raises(BadRequestException) as exc_info:
@@ -296,7 +324,9 @@ class TestUserServiceAccountLockout:
     """Test account lockout logic."""
 
     @pytest.mark.asyncio
-    async def test_increment_failed_login_attempts(self, db_session: AsyncSession, test_user: User):
+    async def test_increment_failed_login_attempts(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test incrementing failed login attempts."""
         service = UserService(db_session)
 
@@ -310,7 +340,9 @@ class TestUserServiceAccountLockout:
         assert updated_user.failed_login_attempts == original_attempts + 1
 
     @pytest.mark.asyncio
-    async def test_reset_failed_login_attempts(self, db_session: AsyncSession, test_user: User):
+    async def test_reset_failed_login_attempts(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test resetting failed login attempts."""
         service = UserService(db_session)
 
@@ -341,7 +373,9 @@ class TestUserServiceAccountLockout:
         assert updated_user.locked_until > utcnow()
 
     @pytest.mark.asyncio
-    async def test_is_account_locked_true(self, db_session: AsyncSession, test_user: User):
+    async def test_is_account_locked_true(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test checking if account is locked (when it is)."""
         service = UserService(db_session)
 
@@ -353,7 +387,9 @@ class TestUserServiceAccountLockout:
         assert is_locked is True
 
     @pytest.mark.asyncio
-    async def test_is_account_locked_false(self, db_session: AsyncSession, test_user: User):
+    async def test_is_account_locked_false(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test checking if account is locked (when it's not)."""
         service = UserService(db_session)
 
@@ -362,7 +398,9 @@ class TestUserServiceAccountLockout:
         assert is_locked is False
 
     @pytest.mark.asyncio
-    async def test_is_account_locked_expired(self, db_session: AsyncSession, test_user: User):
+    async def test_is_account_locked_expired(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test account lock expiration."""
         service = UserService(db_session)
 
@@ -381,16 +419,18 @@ class TestUserServicePagination:
     """Test user listing with pagination."""
 
     @pytest.mark.asyncio
-    async def test_get_active_users(self, db_session: AsyncSession, test_user: User, admin_user: User):
+    async def test_get_active_users(
+        self, db_session: AsyncSession, test_user: User, admin_user: User
+    ):
         """Test getting active users."""
         service = UserService(db_session)
 
         result = await service.get_active_users(page=1, per_page=10)
 
-        assert 'data' in result
-        assert 'total' in result
-        assert len(result['data']) >= 2
-        assert all(u.is_active for u in result['data'])
+        assert "data" in result
+        assert "total" in result
+        assert len(result["data"]) >= 2
+        assert all(u.is_active for u in result["data"])
 
     @pytest.mark.asyncio
     async def test_get_active_users_pagination(self, db_session: AsyncSession):
@@ -399,20 +439,22 @@ class TestUserServicePagination:
 
         # Create multiple active users
         for i in range(5):
-            await service.repository.create({
-                "id": uuid4(),
-                "email": f"active{i}@example.com",
-                "username": f"active{i}",
-                "password_hash": "hash",
-                "is_active": True,
-            })
+            await service.repository.create(
+                {
+                    "id": uuid4(),
+                    "email": f"active{i}@example.com",
+                    "username": f"active{i}",
+                    "password_hash": "hash",
+                    "is_active": True,
+                }
+            )
         await db_session.commit()
 
         result = await service.get_active_users(page=1, per_page=3)
 
-        assert len(result['data']) <= 3
-        assert result['page'] == 1
-        assert result['per_page'] == 3
+        assert len(result["data"]) <= 3
+        assert result["page"] == 1
+        assert result["per_page"] == 3
 
 
 @pytest.mark.units

@@ -3,6 +3,7 @@ Auth Dependencies
 
 FastAPI dependencies for auth module.
 """
+
 from typing import Annotated, Optional
 
 from fastapi import Depends, Header, Request
@@ -15,7 +16,7 @@ from .service import AuthService
 
 
 async def get_user_service_for_auth(
-    session: Annotated[AsyncSession, Depends(get_db_session)]
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> UserService:
     """Helper dependency to get UserService for AuthService"""
     return UserService(session)
@@ -27,7 +28,7 @@ async def get_auth_service(
 ) -> AuthService:
     """
     Dependency to get AuthService instance.
-    
+
     Injects UserService following Dependency Inversion Principle (DIP).
     """
     return AuthService(session, user_service=user_service)

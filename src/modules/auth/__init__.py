@@ -7,6 +7,7 @@ This module handles authentication and authorization:
 - Token blacklisting (DB-based)
 - User registration
 """
+
 from .models import RefreshToken, TokenBlacklist
 
 __all__ = ["TokenBlacklist", "RefreshToken"]

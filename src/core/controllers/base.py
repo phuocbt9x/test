@@ -8,10 +8,13 @@ T = TypeVar("T")
 
 class SuccessResponse(BaseModel, Generic[T]):
     """Standard success response wrapper"""
+
     success: bool = Field(default=True, description="Response status")
     message: str = Field(default="Success", description="Response message")
     data: Optional[T] = Field(default=None, description="Response data")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_schema_extra = {
@@ -19,18 +22,21 @@ class SuccessResponse(BaseModel, Generic[T]):
                 "success": True,
                 "message": "Operation completed successfully",
                 "data": {"id": "123", "name": "Example"},
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             }
         }
 
 
 class ErrorResponse(BaseModel):
     """Standard error response wrapper"""
+
     success: bool = Field(default=False, description="Response status")
     message: str = Field(description="Error message")
     error_code: Optional[str] = Field(default=None, description="Error code")
     details: Optional[Dict[str, Any]] = Field(default=None, description="Error details")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_schema_extra = {
@@ -39,13 +45,14 @@ class ErrorResponse(BaseModel):
                 "message": "Validation error",
                 "error_code": "VALIDATION_ERROR",
                 "details": {"field": "email", "issue": "Invalid format"},
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             }
         }
 
 
 class PaginationMeta(BaseModel):
     """Pagination metadata"""
+
     page: int = Field(description="Current page number")
     per_page: int = Field(description="Items per page")
     total: int = Field(description="Total items count")
@@ -61,18 +68,21 @@ class PaginationMeta(BaseModel):
                 "total": 100,
                 "total_pages": 5,
                 "has_next": True,
-                "has_prev": False
+                "has_prev": False,
             }
         }
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
     """Standard paginated response wrapper"""
+
     success: bool = Field(default=True, description="Response status")
     message: str = Field(default="Success", description="Response message")
     data: List[T] = Field(default_factory=list, description="Response data items")
     meta: PaginationMeta = Field(description="Pagination metadata")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Response timestamp"
+    )
 
     class Config:
         json_schema_extra = {
@@ -86,9 +96,9 @@ class PaginatedResponse(BaseModel, Generic[T]):
                     "total": 100,
                     "total_pages": 5,
                     "has_next": True,
-                    "has_prev": False
+                    "has_prev": False,
                 },
-                "timestamp": "2024-01-15T10:30:00Z"
+                "timestamp": "2024-01-15T10:30:00Z",
             }
         }
 
@@ -105,7 +115,7 @@ class BaseController:
     def success(
         data: Any = None,
         message: str = "Success",
-        status_code: int = status.HTTP_200_OK
+        status_code: int = status.HTTP_200_OK,
     ) -> SuccessResponse:
         """
         Create a standard success response.
@@ -119,16 +129,12 @@ class BaseController:
             SuccessResponse instance
         """
         return SuccessResponse(
-            success=True,
-            message=message,
-            data=data,
-            timestamp=datetime.utcnow()
+            success=True, message=message, data=data, timestamp=datetime.utcnow()
         )
 
     @staticmethod
     def created(
-        data: Any = None,
-        message: str = "Resource created successfully"
+        data: Any = None, message: str = "Resource created successfully"
     ) -> SuccessResponse:
         """
         Create a standard 201 Created response.
@@ -141,16 +147,12 @@ class BaseController:
             SuccessResponse instance
         """
         return SuccessResponse(
-            success=True,
-            message=message,
-            data=data,
-            timestamp=datetime.utcnow()
+            success=True, message=message, data=data, timestamp=datetime.utcnow()
         )
 
     @staticmethod
     def updated(
-        data: Any = None,
-        message: str = "Resource updated successfully"
+        data: Any = None, message: str = "Resource updated successfully"
     ) -> SuccessResponse:
         """
         Create a standard update response.
@@ -163,10 +165,7 @@ class BaseController:
             SuccessResponse instance
         """
         return SuccessResponse(
-            success=True,
-            message=message,
-            data=data,
-            timestamp=datetime.utcnow()
+            success=True, message=message, data=data, timestamp=datetime.utcnow()
         )
 
     @staticmethod
@@ -181,10 +180,7 @@ class BaseController:
             SuccessResponse instance
         """
         return SuccessResponse(
-            success=True,
-            message=message,
-            data=None,
-            timestamp=datetime.utcnow()
+            success=True, message=message, data=None, timestamp=datetime.utcnow()
         )
 
     @staticmethod
@@ -193,7 +189,7 @@ class BaseController:
         page: int,
         per_page: int,
         total: int,
-        message: str = "Data retrieved successfully"
+        message: str = "Data retrieved successfully",
     ) -> PaginatedResponse:
         """
         Create a standard paginated response.
@@ -216,7 +212,7 @@ class BaseController:
             total=total,
             total_pages=total_pages,
             has_next=page < total_pages,
-            has_prev=page > 1
+            has_prev=page > 1,
         )
 
         return PaginatedResponse(
@@ -224,7 +220,7 @@ class BaseController:
             message=message,
             data=data,
             meta=meta,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
     @staticmethod
@@ -232,7 +228,7 @@ class BaseController:
         message: str,
         error_code: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
-        status_code: int = status.HTTP_400_BAD_REQUEST
+        status_code: int = status.HTTP_400_BAD_REQUEST,
     ) -> ErrorResponse:
         """
         Create a standard error response.
@@ -251,5 +247,5 @@ class BaseController:
             message=message,
             error_code=error_code,
             details=details,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )

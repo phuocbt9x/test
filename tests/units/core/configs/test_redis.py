@@ -10,9 +10,9 @@ Tests cover:
 - TTL and expiration
 - Error handling
 """
+
 import pytest
-import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 import json
 
 from src.core.configs.redis import RedisManager, redis_manager
@@ -27,11 +27,11 @@ class TestRedisManagerInitialization:
         """Test successful Redis initialization."""
         manager = RedisManager()
 
-        with patch('src.core.configs.redis.ConnectionPool') as mock_pool_class:
+        with patch("src.core.configs.redis.ConnectionPool") as mock_pool_class:
             mock_pool = AsyncMock()
             mock_pool_class.from_url.return_value = mock_pool
 
-            with patch('src.core.configs.redis.Redis') as mock_redis_class:
+            with patch("src.core.configs.redis.Redis") as mock_redis_class:
                 mock_redis_class.return_value = mock_redis
 
                 await manager.init()
@@ -52,8 +52,10 @@ class TestRedisManagerInitialization:
         """Test initialization with connection error."""
         manager = RedisManager()
 
-        with patch('src.core.configs.redis.ConnectionPool') as mock_pool_class:
-            mock_pool_class.from_url.side_effect = RedisConnectionError("Connection failed")
+        with patch("src.core.configs.redis.ConnectionPool") as mock_pool_class:
+            mock_pool_class.from_url.side_effect = RedisConnectionError(
+                "Connection failed"
+            )
 
             with pytest.raises(RuntimeError, match="Redis connection failed"):
                 await manager.init()

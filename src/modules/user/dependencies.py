@@ -3,6 +3,7 @@ User Dependencies
 
 FastAPI dependencies for user module.
 """
+
 from typing import Annotated
 from uuid import UUID
 
@@ -16,7 +17,7 @@ from .service import UserService
 
 
 async def get_user_service(
-    session: Annotated[AsyncSession, Depends(get_db_session)]
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> UserService:
     """Dependency to get UserService instance"""
     return UserService(session)
@@ -44,10 +45,12 @@ async def get_current_user_or_admin(
     """
     from fastapi import HTTPException, status
 
-    if UUID(current_user.user_id) != target_user_id and not current_user.has_role("admin"):
+    if UUID(current_user.user_id) != target_user_id and not current_user.has_role(
+        "admin"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to access this resource"
+            detail="Not authorized to access this resource",
         )
 
     return current_user

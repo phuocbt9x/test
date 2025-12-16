@@ -41,7 +41,7 @@ class DatabaseManager(metaclass=SingletonMeta):
         self._write_session_factory: Optional[async_sessionmaker] = None
         self._read_session_factory: Optional[async_sessionmaker] = None
         self._initialized: bool = False
-    
+
     async def init(self) -> None:
         if self._initialized:
             logger.warning("Database already initialized - skipping")
@@ -57,7 +57,7 @@ class DatabaseManager(metaclass=SingletonMeta):
             max_overflow=settings.DB_MAX_OVERFLOW,
             is_write=True,
         )
-        
+
         self._write_session_factory = async_sessionmaker(
             bind=self._write_engine,
             class_=AsyncSession,
@@ -65,12 +65,12 @@ class DatabaseManager(metaclass=SingletonMeta):
             autocommit=False,
             autoflush=False,
         )
-        
+
         logger.info(
             f"Write DB initialized: {settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME} "
             f"(pool_size={settings.DB_POOL_SIZE}, max_overflow={settings.DB_MAX_OVERFLOW})"
         )
-        
+
         if settings.has_read_db:
             read_host = settings.DB_READ_HOST or settings.DB_HOST
             read_port = settings.DB_READ_PORT or settings.DB_PORT
@@ -102,11 +102,11 @@ class DatabaseManager(metaclass=SingletonMeta):
             self._read_engine = self._write_engine
             self._read_session_factory = self._write_session_factory
             logger.info("Read DB using write DB configuration (no replica)")
-        
+
         self._initialized = True
-    
+
         await self._verify_connections()
-    
+
     def _create_engine(
         self,
         host: str,
@@ -145,7 +145,9 @@ class DatabaseManager(metaclass=SingletonMeta):
         Returns:
             AsyncEngine: Configured SQLAlchemy async engine
         """
-        database_url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        database_url = (
+            f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
+        )
         is_production = settings.APP_ENV == Environment.PRODUCTION
 
         # Use QueuePool for all environments (better performance)
@@ -179,7 +181,7 @@ class DatabaseManager(metaclass=SingletonMeta):
             engine_args["pool_timeout"] = 30
 
         return create_async_engine(database_url, **engine_args)
-    
+
     async def _verify_connections(self) -> None:
         try:
             async with self.session(read_only=False) as session:
@@ -192,22 +194,22 @@ class DatabaseManager(metaclass=SingletonMeta):
         except Exception as e:
             logger.error(f"Database connection verification failed: {e}")
             raise
-    
+
     async def close(self) -> None:
         if not self._initialized:
             logger.warning("Database not initialized - nothing to close")
             return
-        
+
         if self._write_engine:
             await self._write_engine.dispose()
             logger.info("Write DB connection pool closed")
-        
+
         if self._read_engine and self._read_engine != self._write_engine:
             await self._read_engine.dispose()
             logger.info("Read DB connection pool closed")
-        
+
         self._initialized = False
-    
+
     @asynccontextmanager
     async def session(
         self, read_only: bool = False
@@ -216,9 +218,11 @@ class DatabaseManager(metaclass=SingletonMeta):
             raise RuntimeError(
                 "Database not initialized. Call await db.init() first in app lifespan."
             )
-        
-        factory = self._read_session_factory if read_only else self._write_session_factory
-        
+
+        factory = (
+            self._read_session_factory if read_only else self._write_session_factory
+        )
+
         if factory is None:
             raise RuntimeError("Session factory not available")
 
@@ -227,7 +231,7 @@ class DatabaseManager(metaclass=SingletonMeta):
                 yield session
                 if not read_only:
                     await session.commit()
-                    
+
             except Exception as e:
                 if not read_only:
                     await session.rollback()
@@ -235,28 +239,28 @@ class DatabaseManager(metaclass=SingletonMeta):
                 raise
             finally:
                 pass
-    
+
     @property
     def write_engine(self) -> AsyncEngine:
         if self._write_engine is None:
             raise RuntimeError("Database not initialized")
         return self._write_engine
-    
+
     @property
     def read_engine(self) -> AsyncEngine:
         if self._read_engine is None:
             raise RuntimeError("Database not initialized")
         return self._read_engine
-    
+
     @property
     def is_initialized(self) -> bool:
         return self._initialized
-    
+
     async def create_pgvector_extension(self) -> None:
         async with self.session(read_only=False) as session:
             await session.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
             logger.info("pgvector extension ensured")
-    
+
     async def health_check(self) -> dict:
         status: dict[str, object] = {
             "write_db": "unknown",
@@ -283,14 +287,18 @@ class DatabaseManager(metaclass=SingletonMeta):
             if self._write_engine:
                 pool = self._write_engine.pool
                 pool_status["write"] = {
-                    "size": pool.size() if hasattr(pool, 'size') else 'N/A',
-                    "checked_out": pool.checkedout() if hasattr(pool, 'checkedout') else 'N/A',
+                    "size": pool.size() if hasattr(pool, "size") else "N/A",
+                    "checked_out": pool.checkedout()
+                    if hasattr(pool, "checkedout")
+                    else "N/A",
                 }
             if self._read_engine and self._read_engine != self._write_engine:
                 pool = self._read_engine.pool
                 pool_status["read"] = {
-                    "size": pool.size() if hasattr(pool, 'size') else 'N/A',
-                    "checked_out": pool.checkedout() if hasattr(pool, 'checkedout') else 'N/A',
+                    "size": pool.size() if hasattr(pool, "size") else "N/A",
+                    "checked_out": pool.checkedout()
+                    if hasattr(pool, "checkedout")
+                    else "N/A",
                 }
         return status
 

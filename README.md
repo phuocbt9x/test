@@ -190,56 +190,6 @@ The API will be available at `http://localhost:8000`
    mypy src/
    ```
 
-## Configuration
-
-### Environment Variables
-
-Key configuration options (see [.env.example](.env.example) for full list):
-
-```env
-# Application
-APP_NAME=TIMIMA
-APP_VERSION=1.0.0
-ENVIRONMENT=development
-DEBUG=true
-
-# Database
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_NAME=timima
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_DB=0
-
-# JWT
-JWT_SECRET_KEY=your-secret-key-here
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=15
-JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
-
-# Security
-PASSWORD_MIN_LENGTH=8
-PASSWORD_BCRYPT_ROUNDS=12
-RATE_LIMIT_PER_MINUTE=60
-```
-
-### Database Configuration
-
-- **Connection Pooling**: 20 connections (configurable)
-- **Pool Overflow**: 40 additional connections
-- **Pool Recycle**: 1800 seconds
-- **Health Checks**: Pre-ping enabled
-
-### Redis Configuration
-
-- **Timeout**: 5 seconds
-- **Max Connections**: 50
-- **Eviction Policy**: allkeys-lru (in Docker)
-
 ## API Documentation
 
 ### Endpoints
@@ -293,29 +243,6 @@ Once the application is running, access the interactive API documentation:
 - `GET /health` - Comprehensive health check
 - `GET /health/database` - Database status
 - `GET /health/redis` - Redis status
-
-## Security Features
-
-### Authentication & Authorization
-
-- **JWT Tokens**: Access tokens (15-60 min) and refresh tokens (7-30 days)
-- **Token Security**: JWT ID (jti), blacklisting, token family tracking
-- **Password Security**: Bcrypt hashing (12 rounds), minimum 8 characters
-- **Account Protection**: Lockout after 5 failed attempts (15 minutes)
-
-### Security Middleware
-
-- **Rate Limiting**: 60 requests/minute per IP (configurable)
-- **CORS**: Strict origin validation
-- **Security Headers**: HSTS, CSP, X-Frame-Options, X-Content-Type-Options
-- **Request Tracking**: Unique request ID per request
-
-### Data Protection
-
-- **Sensitive Data Masking**: Automatic masking in logs
-- **Timezone-Aware**: All timestamps stored in UTC
-- **Input Validation**: Comprehensive Pydantic schemas
-- **SQL Injection Prevention**: SQLAlchemy ORM with parameterized queries
 
 ## Database Migrations
 
@@ -443,15 +370,7 @@ gunicorn main:app \
 - [ ] Set strong JWT secret key
 - [ ] Configure production database with connection pooling
 - [ ] Set up Redis with persistence (RDB + AOF)
-- [ ] Enable HTTPS with valid SSL certificate
 - [ ] Configure CORS with specific allowed origins
-- [ ] Set up log aggregation and monitoring
-- [ ] Configure Sentry for error tracking
-- [ ] Set up Prometheus metrics collection
-- [ ] Enable rate limiting appropriate for your use case
-- [ ] Regular database backups
-- [ ] Health check monitoring
-- [ ] Resource limits (memory, CPU) for containers
 
 ### Monitoring & Logging
 
@@ -462,21 +381,6 @@ Logs are written to:
 - File: `logs/timima.log` (daily rotation, 30-day retention)
 - Error log: `logs/timima_error.log`
 
-#### Metrics
-
-Prometheus metrics available at `/metrics`:
-- Request count and duration
-- Database query performance
-- Redis cache hit/miss rates
-- Active session count
-
-#### Error Tracking
-
-Sentry integration for:
-- Unhandled exceptions
-- Request context capture
-- User context tracking
-- Performance monitoring
 
 ## Contributing
 
@@ -494,9 +398,9 @@ Sentry integration for:
 
 3. Run code quality checks
    ```bash
-   ruff check .
-   ruff format .
-   mypy src/
+   uv run ruff check .
+   uv run ruff format .
+   uv run mypy src/
    ```
 
 4. Commit your changes (pre-commit hooks will run)
@@ -599,17 +503,3 @@ uv sync --reinstall
 # Clear Python cache
 find . -type d -name __pycache__ -exec rm -rf {} +
 ```
-
-## License
-
-[Add your license here]
-
-## Support
-
-For issues and questions:
-- Create an issue in the repository
-- Contact the development team
-
-## Acknowledgments
-
-Built with FastAPI and the Python async ecosystem.

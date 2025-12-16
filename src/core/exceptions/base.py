@@ -22,9 +22,9 @@ class BaseAppException(Exception):
 
 class ValidationException(BaseAppException):
     def __init__(
-        self, 
-        message: str = "Validation error", 
-        details: Optional[List[ErrorDetail]] = None
+        self,
+        message: str = "Validation error",
+        details: Optional[List[ErrorDetail]] = None,
     ):
         super().__init__(
             message=message,
@@ -36,9 +36,9 @@ class ValidationException(BaseAppException):
 
 class AuthenticationException(BaseAppException):
     def __init__(
-        self, 
-        message: str = "Authentication failed", 
-        error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED
+        self,
+        message: str = "Authentication failed",
+        error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED,
     ):
         super().__init__(
             message=message,
@@ -50,9 +50,9 @@ class AuthenticationException(BaseAppException):
 
 class AuthorizationException(BaseAppException):
     def __init__(
-        self, 
-        message: str = "Access denied", 
-        error_code: ErrorCode = ErrorCode.FORBIDDEN
+        self,
+        message: str = "Access denied",
+        error_code: ErrorCode = ErrorCode.FORBIDDEN,
     ):
         super().__init__(
             message=message,
@@ -62,15 +62,11 @@ class AuthorizationException(BaseAppException):
 
 
 class NotFoundException(BaseAppException):
-    def __init__(
-        self, 
-        resource: str = "Resource", 
-        resource_id: Optional[str] = None
-    ):
+    def __init__(self, resource: str = "Resource", resource_id: Optional[str] = None):
         message = f"{resource} not found"
         if resource_id:
             message = f"{resource} with ID '{resource_id}' not found"
-        
+
         super().__init__(
             message=message,
             status_code=status.HTTP_404_NOT_FOUND,
@@ -80,11 +76,11 @@ class NotFoundException(BaseAppException):
 
 class ConflictException(BaseAppException):
     """Resource conflict exception."""
-    
+
     def __init__(
-        self, 
-        message: str = "Resource already exists", 
-        error_code: ErrorCode = ErrorCode.CONFLICT
+        self,
+        message: str = "Resource already exists",
+        error_code: ErrorCode = ErrorCode.CONFLICT,
     ):
         super().__init__(
             message=message,
@@ -94,11 +90,7 @@ class ConflictException(BaseAppException):
 
 
 class BusinessRuleException(BaseAppException):
-    def __init__(
-        self, 
-        message: str, 
-        details: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         super().__init__(
             message=message,
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -118,9 +110,7 @@ class ExternalServiceException(BaseAppException):
 
 class RateLimitException(BaseAppException):
     def __init__(
-        self,
-        message: str = "Rate limit exceeded",
-        retry_after: Optional[int] = None
+        self, message: str = "Rate limit exceeded", retry_after: Optional[int] = None
     ):
         headers = {"Retry-After": str(retry_after)} if retry_after else None
         super().__init__(
@@ -133,11 +123,12 @@ class RateLimitException(BaseAppException):
 
 class BadRequestException(BaseAppException):
     """Bad request exception (400)"""
+
     def __init__(
         self,
         message: str = "Bad request",
         error_code: ErrorCode = ErrorCode.BAD_REQUEST,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(
             message=message,
@@ -149,10 +140,11 @@ class BadRequestException(BaseAppException):
 
 class UnauthorizedException(BaseAppException):
     """Unauthorized exception (401) - alias for AuthenticationException"""
+
     def __init__(
         self,
         message: str = "Unauthorized",
-        error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED
+        error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED,
     ):
         super().__init__(
             message=message,

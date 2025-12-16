@@ -8,6 +8,7 @@ Tests cover:
 - Rate limit exception handling
 - Generic exception fallback
 """
+
 import pytest
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -40,7 +41,7 @@ class TestCreateErrorResponse:
             request=request,
             error_code="TEST_ERROR",
             message="Test error message",
-            status_code=400
+            status_code=400,
         )
 
         assert response["success"] is False
@@ -63,7 +64,7 @@ class TestCreateErrorResponse:
             error_code="VALIDATION_ERROR",
             message="Validation failed",
             details=details,
-            status_code=422
+            status_code=422,
         )
 
         assert response["error"]["details"] == details
@@ -75,10 +76,7 @@ class TestCreateErrorResponse:
         # No request_id in state
 
         response = create_error_response(
-            request=request,
-            error_code="TEST_ERROR",
-            message="Test",
-            status_code=500
+            request=request, error_code="TEST_ERROR", message="Test", status_code=500
         )
 
         assert response["request_id"] is None
@@ -105,8 +103,7 @@ class TestExceptionHandlers:
     async def test_base_app_exception_handler(self, app):
         """Test handling of BaseAppException."""
         exc = AuthenticationException(
-            message="Invalid credentials",
-            error_code=ErrorCode.INVALID_CREDENTIALS
+            message="Invalid credentials", error_code=ErrorCode.INVALID_CREDENTIALS
         )
 
         request = MagicMock(spec=Request)
@@ -130,7 +127,7 @@ class TestExceptionHandlers:
         from pydantic import BaseModel, Field, ValidationError
 
         class TestModel(BaseModel):
-            email: str = Field(..., pattern=r'^[\w\.-]+@[\w\.-]+\.\w+$')
+            email: str = Field(..., pattern=r"^[\w\.-]+@[\w\.-]+\.\w+$")
             age: int = Field(..., ge=0, le=150)
 
         try:
@@ -157,7 +154,7 @@ class TestExceptionHandlers:
         exc = IntegrityError(
             "INSERT INTO users (email) VALUES (?)",
             {},
-            Exception("UNIQUE constraint failed: users.email")
+            Exception("UNIQUE constraint failed: users.email"),
         )
 
         request = MagicMock(spec=Request)
@@ -177,7 +174,7 @@ class TestExceptionHandlers:
         exc = IntegrityError(
             "INSERT INTO posts (user_id) VALUES (?)",
             {},
-            Exception("FOREIGN KEY constraint failed")
+            Exception("FOREIGN KEY constraint failed"),
         )
 
         request = MagicMock(spec=Request)
@@ -189,7 +186,9 @@ class TestExceptionHandlers:
 
         assert response.status_code == 409
         content_str = response.body.decode()
-        assert "Referenced resource" in content_str or "not exist" in content_str.lower()
+        assert (
+            "Referenced resource" in content_str or "not exist" in content_str.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_integrity_error_not_null(self, app):
@@ -197,7 +196,7 @@ class TestExceptionHandlers:
         exc = IntegrityError(
             "INSERT INTO users (name) VALUES (NULL)",
             {},
-            Exception("NOT NULL constraint failed: users.name")
+            Exception("NOT NULL constraint failed: users.name"),
         )
 
         request = MagicMock(spec=Request)
@@ -215,9 +214,7 @@ class TestExceptionHandlers:
     async def test_operational_error_connection(self, app):
         """Test OperationalError for database connection issues."""
         exc = OperationalError(
-            "SELECT * FROM users",
-            {},
-            Exception("could not connect to server")
+            "SELECT * FROM users", {}, Exception("could not connect to server")
         )
 
         request = MagicMock(spec=Request)
@@ -234,11 +231,7 @@ class TestExceptionHandlers:
     @pytest.mark.asyncio
     async def test_operational_error_timeout(self, app):
         """Test OperationalError for timeout."""
-        exc = OperationalError(
-            "SELECT * FROM users",
-            {},
-            Exception("timeout expired")
-        )
+        exc = OperationalError("SELECT * FROM users", {}, Exception("timeout expired"))
 
         request = MagicMock(spec=Request)
         request.url.path = "/api/users"
@@ -315,7 +308,10 @@ class TestExceptionHandlers:
 
         content_str = response.body.decode()
         # In debug mode, should include error details
-        assert "Detailed database error message" in content_str or "details" in content_str.lower()
+        assert (
+            "Detailed database error message" in content_str
+            or "details" in content_str.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_production_mode_hides_details(self, app):
@@ -341,8 +337,7 @@ class TestCustomExceptions:
     def test_authentication_exception(self):
         """Test AuthenticationException."""
         exc = AuthenticationException(
-            message="Token expired",
-            error_code=ErrorCode.TOKEN_EXPIRED
+            message="Token expired", error_code=ErrorCode.TOKEN_EXPIRED
         )
 
         assert exc.status_code == 401
@@ -353,8 +348,7 @@ class TestCustomExceptions:
     def test_authorization_exception(self):
         """Test AuthorizationException."""
         exc = AuthorizationException(
-            message="Access denied",
-            error_code=ErrorCode.FORBIDDEN
+            message="Access denied", error_code=ErrorCode.FORBIDDEN
         )
 
         assert exc.status_code == 403
@@ -371,8 +365,7 @@ class TestCustomExceptions:
     def test_conflict_exception(self):
         """Test ConflictException."""
         exc = ConflictException(
-            message="Email already exists",
-            error_code=ErrorCode.DUPLICATE_ENTRY
+            message="Email already exists", error_code=ErrorCode.DUPLICATE_ENTRY
         )
 
         assert exc.status_code == 409

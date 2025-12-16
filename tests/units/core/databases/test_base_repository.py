@@ -9,12 +9,11 @@ Tests cover:
 - Relationship loading
 - Count and exists operations
 """
+
 import pytest
-import pytest_asyncio
 from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.databases.base_repository import BaseRepository
 from src.modules.user.models import User
 from src.modules.user.repository import UserRepository
 
@@ -44,26 +43,27 @@ class TestBaseRepositoryQueryBuilding:
         assert users[0].email == test_user.email
 
     @pytest.mark.asyncio
-    async def test_where_multiple_filters(self, db_session: AsyncSession, test_user: User):
+    async def test_where_multiple_filters(
+        self, db_session: AsyncSession, test_user: User
+    ):
         """Test where with multiple filters."""
         repo = UserRepository(db_session)
 
-        users = await repo.query().where(
-            email=test_user.email,
-            is_active=True
-        ).all()
+        users = await repo.query().where(email=test_user.email, is_active=True).all()
 
         assert len(users) == 1
         assert users[0].email == test_user.email
         assert users[0].is_active is True
 
     @pytest.mark.asyncio
-    async def test_where_in(self, db_session: AsyncSession, test_user: User, admin_user: User):
+    async def test_where_in(
+        self, db_session: AsyncSession, test_user: User, admin_user: User
+    ):
         """Test where IN clause."""
         repo = UserRepository(db_session)
 
         user_ids = [test_user.id, admin_user.id]
-        users = await repo.query().where_in('id', user_ids).all()
+        users = await repo.query().where_in("id", user_ids).all()
 
         assert len(users) == 2
         user_ids_result = {u.id for u in users}
@@ -75,16 +75,18 @@ class TestBaseRepositoryQueryBuilding:
         repo = UserRepository(db_session)
 
         # Create user without phone
-        user = await repo.create({
-            "id": uuid4(),
-            "email": "nophone@example.com",
-            "username": "nophone",
-            "password_hash": "hash123",
-            "phone": None,
-        })
+        user = await repo.create(
+            {
+                "id": uuid4(),
+                "email": "nophone@example.com",
+                "username": "nophone",
+                "password_hash": "hash123",
+                "phone": None,
+            }
+        )
         await db_session.commit()
 
-        users = await repo.query().where_null('phone').all()
+        users = await repo.query().where_null("phone").all()
 
         assert len(users) >= 1
         assert any(u.id == user.id for u in users)
@@ -94,17 +96,19 @@ class TestBaseRepositoryQueryBuilding:
         """Test where NOT NULL condition."""
         repo = UserRepository(db_session)
 
-        users = await repo.query().where_not_null('email').all()
+        users = await repo.query().where_not_null("email").all()
 
         assert len(users) >= 1
         assert all(u.email is not None for u in users)
 
     @pytest.mark.asyncio
-    async def test_order_by_asc(self, db_session: AsyncSession, test_user: User, admin_user: User):
+    async def test_order_by_asc(
+        self, db_session: AsyncSession, test_user: User, admin_user: User
+    ):
         """Test ORDER BY ascending."""
         repo = UserRepository(db_session)
 
-        users = await repo.query().order_by('email', desc=False).all()
+        users = await repo.query().order_by("email", desc=False).all()
 
         assert len(users) >= 2
         # Check emails are in ascending order
@@ -112,11 +116,13 @@ class TestBaseRepositoryQueryBuilding:
             assert users[i].email <= users[i + 1].email
 
     @pytest.mark.asyncio
-    async def test_order_by_desc(self, db_session: AsyncSession, test_user: User, admin_user: User):
+    async def test_order_by_desc(
+        self, db_session: AsyncSession, test_user: User, admin_user: User
+    ):
         """Test ORDER BY descending."""
         repo = UserRepository(db_session)
 
-        users = await repo.query().order_by('email', desc=True).all()
+        users = await repo.query().order_by("email", desc=True).all()
 
         assert len(users) >= 2
         # Check emails are in descending order
@@ -124,7 +130,9 @@ class TestBaseRepositoryQueryBuilding:
             assert users[i].email >= users[i + 1].email
 
     @pytest.mark.asyncio
-    async def test_limit(self, db_session: AsyncSession, test_user: User, admin_user: User):
+    async def test_limit(
+        self, db_session: AsyncSession, test_user: User, admin_user: User
+    ):
         """Test LIMIT clause."""
         repo = UserRepository(db_session)
 
@@ -139,19 +147,21 @@ class TestBaseRepositoryQueryBuilding:
 
         # Create multiple users
         for i in range(3):
-            await repo.create({
-                "id": uuid4(),
-                "email": f"user{i}@example.com",
-                "username": f"user{i}",
-                "password_hash": "hash",
-            })
+            await repo.create(
+                {
+                    "id": uuid4(),
+                    "email": f"user{i}@example.com",
+                    "username": f"user{i}",
+                    "password_hash": "hash",
+                }
+            )
         await db_session.commit()
 
         # Get all users ordered by email
-        all_users = await repo.query().order_by('email').all()
+        all_users = await repo.query().order_by("email").all()
 
         # Get users with offset
-        offset_users = await repo.query().order_by('email').offset(1).all()
+        offset_users = await repo.query().order_by("email").offset(1).all()
 
         assert len(offset_users) == len(all_users) - 1
         if len(all_users) > 1:
@@ -290,12 +300,14 @@ class TestBaseRepositoryCRUD:
         repo = UserRepository(db_session)
 
         # Create user to delete
-        user = await repo.create({
-            "id": uuid4(),
-            "email": "todelete@example.com",
-            "username": "todelete",
-            "password_hash": "hash",
-        })
+        user = await repo.create(
+            {
+                "id": uuid4(),
+                "email": "todelete@example.com",
+                "username": "todelete",
+                "password_hash": "hash",
+            }
+        )
         await db_session.commit()
 
         # Delete user
@@ -350,20 +362,19 @@ class TestBaseRepositoryBulkOperations:
 
         # Create users
         for i in range(2):
-            await repo.create({
-                "id": uuid4(),
-                "email": f"bulkupdate{i}@example.com",
-                "username": f"bulkupdate{i}",
-                "password_hash": "hash",
-                "is_active": True,
-            })
+            await repo.create(
+                {
+                    "id": uuid4(),
+                    "email": f"bulkupdate{i}@example.com",
+                    "username": f"bulkupdate{i}",
+                    "password_hash": "hash",
+                    "is_active": True,
+                }
+            )
         await db_session.commit()
 
         # Bulk update
-        count = await repo.bulk_update(
-            {"is_active": True},
-            {"is_verified": True}
-        )
+        count = await repo.bulk_update({"is_active": True}, {"is_verified": True})
         await db_session.commit()
 
         assert count >= 2
@@ -375,12 +386,14 @@ class TestBaseRepositoryBulkOperations:
 
         # Create users with specific pattern
         for i in range(2):
-            await repo.create({
-                "id": uuid4(),
-                "email": f"bulkdelete{i}@example.com",
-                "username": f"bulkdelete{i}",
-                "password_hash": "hash",
-            })
+            await repo.create(
+                {
+                    "id": uuid4(),
+                    "email": f"bulkdelete{i}@example.com",
+                    "username": f"bulkdelete{i}",
+                    "password_hash": "hash",
+                }
+            )
         await db_session.commit()
 
         # Count before delete
@@ -405,24 +418,26 @@ class TestBaseRepositoryPagination:
 
         # Create multiple users
         for i in range(10):
-            await repo.create({
-                "id": uuid4(),
-                "email": f"page{i}@example.com",
-                "username": f"page{i}",
-                "password_hash": "hash",
-            })
+            await repo.create(
+                {
+                    "id": uuid4(),
+                    "email": f"page{i}@example.com",
+                    "username": f"page{i}",
+                    "password_hash": "hash",
+                }
+            )
         await db_session.commit()
 
-        result = await repo.query().order_by('email').paginate(page=1, per_page=5)
+        result = await repo.query().order_by("email").paginate(page=1, per_page=5)
 
-        assert 'data' in result
-        assert 'total' in result
-        assert 'page' in result
-        assert 'per_page' in result
-        assert 'total_pages' in result
-        assert len(result['data']) <= 5
-        assert result['page'] == 1
-        assert result['per_page'] == 5
+        assert "data" in result
+        assert "total" in result
+        assert "page" in result
+        assert "per_page" in result
+        assert "total_pages" in result
+        assert len(result["data"]) <= 5
+        assert result["page"] == 1
+        assert result["per_page"] == 5
 
     @pytest.mark.asyncio
     async def test_paginate_has_next_prev(self, db_session: AsyncSession):
@@ -431,23 +446,25 @@ class TestBaseRepositoryPagination:
 
         # Create users
         for i in range(10):
-            await repo.create({
-                "id": uuid4(),
-                "email": f"nav{i}@example.com",
-                "username": f"nav{i}",
-                "password_hash": "hash",
-            })
+            await repo.create(
+                {
+                    "id": uuid4(),
+                    "email": f"nav{i}@example.com",
+                    "username": f"nav{i}",
+                    "password_hash": "hash",
+                }
+            )
         await db_session.commit()
 
         # First page
         page1 = await repo.query().paginate(page=1, per_page=3)
-        assert page1['has_prev'] is False
-        assert page1['has_next'] is True
+        assert page1["has_prev"] is False
+        assert page1["has_next"] is True
 
         # Middle page
         page2 = await repo.query().paginate(page=2, per_page=3)
-        assert page2['has_prev'] is True
-        assert page2['has_next'] is True
+        assert page2["has_prev"] is True
+        assert page2["has_next"] is True
 
 
 @pytest.mark.units
@@ -461,21 +478,21 @@ class TestBaseRepositoryChaining:
 
         # Create test data
         for i in range(5):
-            await repo.create({
-                "id": uuid4(),
-                "email": f"chain{i}@example.com",
-                "username": f"chain{i}",
-                "password_hash": "hash",
-                "is_active": True,
-            })
+            await repo.create(
+                {
+                    "id": uuid4(),
+                    "email": f"chain{i}@example.com",
+                    "username": f"chain{i}",
+                    "password_hash": "hash",
+                    "is_active": True,
+                }
+            )
         await db_session.commit()
 
         # Complex query chain
-        users = await repo.query()\
-            .where(is_active=True)\
-            .order_by('email')\
-            .limit(3)\
-            .all()
+        users = (
+            await repo.query().where(is_active=True).order_by("email").limit(3).all()
+        )
 
         assert len(users) <= 3
         assert all(u.is_active for u in users)

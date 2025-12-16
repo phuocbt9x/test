@@ -10,7 +10,7 @@ class LoggingSettings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
-    
+
     LOGGING_LEVEL: str = Field(default="INFO")
     LOGGING_BACKUP_DAYS: int = Field(default=30)
     LOGGING_JSON_FORMAT: bool = Field(default=True)
@@ -29,7 +29,7 @@ class LoggingSettings(BaseSettings):
         "x-csrf-token",
         "x-xsrf-token",
     }
-    
+
     LOGGING_SENSITIVE_BODY_FIELDS: Set[str] = {
         "password",
         "token",
@@ -47,6 +47,6 @@ class LoggingSettings(BaseSettings):
         "new_password",
         "confirm_password",
     }
-    
+
 
 logging_settings = LoggingSettings()

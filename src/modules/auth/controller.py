@@ -3,12 +3,17 @@ Auth Router
 
 REST API endpoints for authentication.
 """
+
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, status
 
 from src.core.controllers import BaseController, SuccessResponse
-from src.core.security.dependencies import CurrentUser, get_current_active_user, get_token_from_header
+from src.core.security.dependencies import (
+    CurrentUser,
+    get_current_active_user,
+    get_token_from_header,
+)
 from src.modules.user.schemas import UserResponse
 
 from .dependencies import get_auth_service, get_client_ip, get_device_info
@@ -62,7 +67,7 @@ async def register(
             "username": user.username,
             "full_name": user.full_name,
             "is_verified": user.is_verified,
-        }
+        },
     )
 
     return controller.created(data=login_data, message="User registered successfully")
@@ -102,8 +107,10 @@ async def login(
             "username": user.username,
             "full_name": user.full_name,
             "is_verified": user.is_verified,
-            "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
-        }
+            "last_login_at": user.last_login_at.isoformat()
+            if user.last_login_at
+            else None,
+        },
     )
 
     return controller.success(data=login_data, message="Login successful")
@@ -174,17 +181,18 @@ async def get_current_user(
 ) -> SuccessResponse[UserResponse]:
     """
     Get current authenticated user.
-    
+
     Fetches full user data from database for complete profile information.
     """
-    
+
     # Fetch full user data from database using service's repository
     user = await service.user_repo.get(UUID(current_user.user_id))
-    
+
     if not user:
         from src.core.exceptions import NotFoundException
+
         raise NotFoundException(resource="User", resource_id=current_user.user_id)
-    
+
     user_data = UserResponse.model_validate(user)
     return controller.success(data=user_data, message="User retrieved successfully")
 
@@ -204,7 +212,7 @@ async def get_active_sessions(
 
     Shows all devices/browsers where user is logged in.
     """
-    
+
     sessions = await service.get_active_sessions(UUID(current_user.user_id))
 
     sessions_data = [
@@ -218,7 +226,9 @@ async def get_active_sessions(
         for session in sessions
     ]
 
-    return controller.success(data=sessions_data, message="Active sessions retrieved successfully")
+    return controller.success(
+        data=sessions_data, message="Active sessions retrieved successfully"
+    )
 
 
 @router.delete(
@@ -259,8 +269,7 @@ async def revoke_all_sessions(
 
     Useful when user suspects unauthorized access.
     """
-    
+
     await service.revoke_all_user_tokens(
-        user_id=UUID(current_user.user_id),
-        reason="user_revoke_all"
+        user_id=UUID(current_user.user_id), reason="user_revoke_all"
     )

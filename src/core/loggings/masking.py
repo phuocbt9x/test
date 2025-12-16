@@ -4,7 +4,7 @@ from typing import Any, Dict, Set
 
 class DataMasker:
     MASK_VALUE = "***MASKED***"
-    
+
     def __init__(
         self,
         sensitive_headers: Set[str],
@@ -12,7 +12,7 @@ class DataMasker:
     ):
         self.sensitive_headers = {h.lower() for h in sensitive_headers}
         self.sensitive_fields = {f.lower() for f in sensitive_fields}
-    
+
     def mask_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         masked = {}
         for key, value in headers.items():
@@ -21,7 +21,7 @@ class DataMasker:
             else:
                 masked[key] = value
         return masked
-    
+
     def mask_dict(
         self,
         data: Dict[str, Any],
@@ -38,13 +38,15 @@ class DataMasker:
                 masked[key] = self.mask_dict(value, max_depth - 1)
             elif isinstance(value, list):
                 masked[key] = [
-                    self.mask_dict(item, max_depth - 1) if isinstance(item, dict) else item
+                    self.mask_dict(item, max_depth - 1)
+                    if isinstance(item, dict)
+                    else item
                     for item in value
                 ]
             else:
                 masked[key] = value
         return masked
-    
+
     def mask_string(self, text: str) -> str:
         text = re.sub(
             r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
@@ -62,5 +64,5 @@ class DataMasker:
             "***JWT***",
             text,
         )
-        
+
         return text

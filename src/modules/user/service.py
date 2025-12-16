@@ -4,6 +4,7 @@ User Service
 Business logic layer for user operations following Service Pattern.
 Implements SOLID principles and handles all user-related business rules.
 """
+
 from typing import Optional
 from uuid import UUID
 
@@ -122,11 +123,7 @@ class UserService:
         """Get user by username (returns None if not found)"""
         return await self.repository.find_by_username(username)
 
-    async def update_user(
-        self,
-        user_id: UUID,
-        data: UserUpdateRequest
-    ) -> User:
+    async def update_user(self, user_id: UUID, data: UserUpdateRequest) -> User:
         """
         Update user profile.
 
@@ -148,7 +145,7 @@ class UserService:
         user = await self.get_user_by_id(user_id)
 
         update_data = data.model_dump(exclude_unset=True)
-        
+
         # Validate update data if needed
         # For example, phone number format validation
         if "phone" in update_data and update_data["phone"]:
@@ -168,9 +165,7 @@ class UserService:
         return user
 
     async def change_password(
-        self,
-        user_id: UUID,
-        data: UserPasswordChangeRequest
+        self, user_id: UUID, data: UserPasswordChangeRequest
     ) -> User:
         """
         Change user password.
@@ -205,15 +200,19 @@ class UserService:
             )
 
         # Validate new password strength
-        is_valid, error = self.password_hasher.validate_password_strength(data.new_password)
+        is_valid, error = self.password_hasher.validate_password_strength(
+            data.new_password
+        )
         if not is_valid:
             from src.core.exceptions import ValidationException
+
             raise ValidationException(
                 message=error or "New password does not meet security requirements"
             )
 
         # Hash new password
         from src.core.security.password import validate_and_hash_password
+
         new_password_hash = validate_and_hash_password(data.new_password)
 
         # Update password
@@ -224,7 +223,7 @@ class UserService:
                 "password_changed_at": utcnow(),
                 "failed_login_attempts": 0,  # Reset failed attempts
                 "locked_until": None,  # Unlock account on password change
-            }
+            },
         )
         await self.session.commit()
 
@@ -232,14 +231,19 @@ class UserService:
         # Note: This requires AuthService - consider event-based architecture for better decoupling
         try:
             from src.modules.auth.repository import RefreshTokenRepository
+
             refresh_token_repo = RefreshTokenRepository(self.session)
             await refresh_token_repo.revoke_all_user_tokens(user_id)
             await self.session.commit()
         except Exception:
             # Log but don't fail password change if token revocation fails
             import logging
+
             logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to revoke tokens for user {user_id} after password change", exc_info=True)
+            logger.warning(
+                f"Failed to revoke tokens for user {user_id} after password change",
+                exc_info=True,
+            )
 
         return user
 
@@ -259,7 +263,7 @@ class UserService:
                 "is_active": True,
                 "failed_login_attempts": 0,
                 "locked_until": None,
-            }
+            },
         )
         await self.session.commit()
         return user

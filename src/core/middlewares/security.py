@@ -3,6 +3,7 @@ Security Headers Middleware
 
 Implements OWASP recommended security headers.
 """
+
 from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -11,11 +12,11 @@ from src.core.configs import settings, Environment
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Add security headers to all responses"""
-    
+
     def __init__(self, app, enable_hsts: bool = True):
         super().__init__(app)
         self.enable_hsts = enable_hsts
-    
+
     async def dispatch(
         self,
         request: Request,
@@ -31,7 +32,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/redoc",
             "/openapi.json",
-            f"{settings.APP_ROUTER_PREFIX}/openapi.json"
+            f"{settings.APP_ROUTER_PREFIX}/openapi.json",
         ]
         if any(request.url.path.startswith(path) for path in skip_paths):
             return response
@@ -79,10 +80,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "form-action 'self'",
             ]
         response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
-        
+
         # Referrer-Policy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        
+
         # Permissions-Policy
         permissions = [
             "geolocation=()",
@@ -95,11 +96,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "accelerometer=()",
         ]
         response.headers["Permissions-Policy"] = ", ".join(permissions)
-        
+
         # Remove Server header
         if "server" in response.headers:
             del response.headers["server"]
-        
+
         return response
 
 

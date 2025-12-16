@@ -3,6 +3,7 @@ Auth Repository
 
 Data access layer for auth operations.
 """
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -23,7 +24,7 @@ class TokenBlacklistRepository(BaseRepository[TokenBlacklist]):
     async def is_token_blacklisted(self, jti: str) -> bool:
         """
         Check if a token is blacklisted.
-        
+
         Performance: Uses BaseRepository exists() method for optimal performance.
         Indexed on jti column for fast lookups.
 
@@ -36,8 +37,7 @@ class TokenBlacklistRepository(BaseRepository[TokenBlacklist]):
         # Note: BaseRepository.where() only supports ==, so we need custom query for > comparison
         # But we can still use BaseRepository pattern for consistency
         query = select(TokenBlacklist).where(
-            TokenBlacklist.jti == jti,
-            TokenBlacklist.expires_at > utcnow()
+            TokenBlacklist.jti == jti, TokenBlacklist.expires_at > utcnow()
         )
         result = await self.session.execute(query)
         return result.scalars().first() is not None
@@ -76,9 +76,7 @@ class TokenBlacklistRepository(BaseRepository[TokenBlacklist]):
         return await self.create(data)
 
     async def blacklist_all_user_tokens(
-        self,
-        user_id: UUID,
-        reason: str = "user_action"
+        self, user_id: UUID, reason: str = "user_action"
     ) -> int:
         """
         Revoke all active tokens for a user.
@@ -117,12 +115,10 @@ class TokenBlacklistRepository(BaseRepository[TokenBlacklist]):
         Returns:
             Number of tokens removed
         """
-        stmt = delete(TokenBlacklist).where(
-            TokenBlacklist.expires_at < utcnow()
-        )
+        stmt = delete(TokenBlacklist).where(TokenBlacklist.expires_at < utcnow())
         result = await self.session.execute(stmt)
         # SQLAlchemy 2.x async result may not have rowcount; fallback to 0 if missing
-        rowcount = getattr(result, 'rowcount', None)
+        rowcount = getattr(result, "rowcount", None)
         return rowcount if rowcount is not None else 0
 
 
@@ -134,7 +130,7 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
     async def find_by_jti(self, jti: str) -> Optional[RefreshToken]:
         """
         Find refresh token by JTI.
-        
+
         Uses BaseRepository query builder for consistency.
         """
         return await self.query().where(jti=jti).first()
@@ -211,7 +207,7 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
         query = select(RefreshToken).where(
             RefreshToken.user_id == user_id,
             ~RefreshToken.is_revoked,
-            RefreshToken.expires_at > utcnow()
+            RefreshToken.expires_at > utcnow(),
         )
         result = await self.session.execute(query)
         tokens = result.scalars().all()
@@ -232,17 +228,15 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
         Returns:
             Number of tokens removed
         """
-        stmt = delete(RefreshToken).where(
-            RefreshToken.expires_at < utcnow()
-        )
+        stmt = delete(RefreshToken).where(RefreshToken.expires_at < utcnow())
         result = await self.session.execute(stmt)
-        rowcount = getattr(result, 'rowcount', None)
+        rowcount = getattr(result, "rowcount", None)
         return rowcount if rowcount is not None else 0
 
     async def get_user_active_sessions(self, user_id: UUID) -> list[RefreshToken]:
         """
         Get all active sessions (refresh tokens) for a user.
-        
+
         Uses BaseRepository query builder where possible. Note that BaseRepository
         doesn't support complex conditions (like ~ and >), so we keep custom query
         for this specific use case.
@@ -255,11 +249,15 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
         """
         # BaseRepository.where() doesn't support complex conditions (~, >),
         # so we use direct query for this specific case
-        query = select(RefreshToken).where(
-            RefreshToken.user_id == user_id,
-            ~RefreshToken.is_revoked,
-            RefreshToken.expires_at > utcnow()
-        ).order_by(RefreshToken.created_at.desc())
+        query = (
+            select(RefreshToken)
+            .where(
+                RefreshToken.user_id == user_id,
+                ~RefreshToken.is_revoked,
+                RefreshToken.expires_at > utcnow(),
+            )
+            .order_by(RefreshToken.created_at.desc())
+        )
 
         result = await self.session.execute(query)
         return list(result.scalars().all())

@@ -21,31 +21,31 @@ class JSONFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
         }
-        
+
         if request_id := LoggingContext.get_request_id():
             log_data["request_id"] = request_id
-        
+
         if correlation_id := LoggingContext.get_correlation_id():
             log_data["correlation_id"] = correlation_id
-        
+
         if user_id := LoggingContext.get_user_id():
             log_data["user_id"] = user_id
-        
+
         if hasattr(record, "duration"):
             log_data["duration"] = record.duration
-        
+
         if hasattr(record, "status_code"):
             log_data["status_code"] = record.status_code
-        
+
         if hasattr(record, "method"):
             log_data["method"] = record.method
-        
+
         if hasattr(record, "path"):
             log_data["path"] = record.path
-        
+
         if hasattr(record, "client"):
             log_data["client"] = record.client
-        
+
         for key, value in record.__dict__.items():
             if key not in [
                 "name",
@@ -72,33 +72,33 @@ class JSONFormatter(logging.Formatter):
             ] and not key.startswith("_"):
                 if key not in log_data:
                     log_data[key] = value
-        
+
         if record.exc_info:
             log_data["exception"] = {
                 "type": record.exc_info[0].__name__ if record.exc_info[0] else None,
                 "message": str(record.exc_info[1]) if record.exc_info[1] else None,
                 "traceback": self.formatException(record.exc_info),
             }
-        
+
         return json.dumps(log_data, default=str)
 
 
 class ColoredFormatter(logging.Formatter):
     COLORS = {
-        "DEBUG": "\033[36m",      # Cyan
-        "INFO": "\033[32m",       # Green
-        "WARNING": "\033[33m",    # Yellow
-        "ERROR": "\033[31m",      # Red
-        "CRITICAL": "\033[35m",   # Magenta
+        "DEBUG": "\033[36m",  # Cyan
+        "INFO": "\033[32m",  # Green
+        "WARNING": "\033[33m",  # Yellow
+        "ERROR": "\033[31m",  # Red
+        "CRITICAL": "\033[35m",  # Magenta
     }
     RESET = "\033[0m"
-    
+
     def format(self, record: logging.LogRecord) -> str:
         def is_colored(text):
             return any(code in text for code in self.COLORS.values())
 
         raw_level = record.levelname.strip()
-        color = self.COLORS.get(raw_level.replace(self.RESET, ''), self.RESET)
+        color = self.COLORS.get(raw_level.replace(self.RESET, ""), self.RESET)
         if not is_colored(raw_level):
             colored_level = f"{color}{raw_level}{self.RESET}"
         else:
@@ -106,7 +106,7 @@ class ColoredFormatter(logging.Formatter):
 
         pad_len = 8 - len(raw_level)
         if pad_len > 0:
-            colored_level = colored_level + ' ' * pad_len
+            colored_level = colored_level + " " * pad_len
         record.levelname = colored_level
 
         context_parts = []
@@ -120,6 +120,7 @@ class ColoredFormatter(logging.Formatter):
         record.msg = f"{original_msg}{context_str}"
         record.args = ()
         return super().format(record)
+
 
 def setup_logging(json_format: bool = False, level: str = "INFO") -> None:
     log_level = getattr(logging, level.upper(), logging.INFO)
@@ -167,17 +168,20 @@ def setup_logging(json_format: bool = False, level: str = "INFO") -> None:
         def __init__(self, max_level):
             super().__init__()
             self.max_level = max_level
+
         def filter(self, record) -> bool:
             return record.levelno < self.max_level
 
-
     class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
         def rotation_filename(self, default_name: str) -> str:
-            match = re.match(r"(.+)/(app|error)\.log\.(\d{4}_\d{2}_\d{2})", default_name)
+            match = re.match(
+                r"(.+)/(app|error)\.log\.(\d{4}_\d{2}_\d{2})", default_name
+            )
             if match:
                 folder, base, date = match.groups()
                 return f"{folder}/{base}-{date}.log"
             return default_name
+
         def doRollover(self):
             if self.stream:
                 self.stream.close()
@@ -188,9 +192,12 @@ def setup_logging(json_format: bool = False, level: str = "INFO") -> None:
                         os.remove(s)
                     except Exception:
                         pass
-            if os.path.exists(self.baseFilename) and os.path.getsize(self.baseFilename) == 0:
+            if (
+                os.path.exists(self.baseFilename)
+                and os.path.getsize(self.baseFilename) == 0
+            ):
                 os.remove(self.baseFilename)
-                self.mode = 'a'
+                self.mode = "a"
                 self.stream = self._open()
                 return
             super().doRollover()
@@ -231,6 +238,7 @@ def setup_logging(json_format: bool = False, level: str = "INFO") -> None:
     logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 
 def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)

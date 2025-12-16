@@ -28,7 +28,9 @@ def setup_middlewares(app: FastAPI) -> None:
     # Add middlewares in reverse order (LIFO)
     setup_rate_limit(app)  # 5th to execute (check limits early)
     if getattr(settings, "ENABLE_SECURITY_HEADERS", True):
-        setup_security_headers(app, enable_hsts=(settings.APP_ENV == Environment.PRODUCTION))  # 4th
+        setup_security_headers(
+            app, enable_hsts=(settings.APP_ENV == Environment.PRODUCTION)
+        )  # 4th
     setup_cors(app)  # 3rd to execute
     app.add_middleware(RequestIDMiddleware)  # 2nd to execute
     app.add_middleware(LoggingMiddleware)  # 1st to execute (logs everything)

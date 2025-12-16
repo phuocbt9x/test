@@ -3,6 +3,7 @@ Auth Models
 
 Token management models for JWT blacklist and refresh token storage.
 """
+
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
@@ -32,6 +33,7 @@ class TokenBlacklist(BaseModel):
     - Index on jti for fast lookup during authentication
     - Index on user_id for bulk revocation
     """
+
     __tablename__ = "token_blacklist"
 
     # Primary Key
@@ -39,7 +41,7 @@ class TokenBlacklist(BaseModel):
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid4,
-        comment="Blacklist entry unique identifier"
+        comment="Blacklist entry unique identifier",
     )
 
     # Token Information
@@ -48,13 +50,11 @@ class TokenBlacklist(BaseModel):
         unique=True,
         nullable=False,
         index=True,
-        comment="JWT ID (unique token identifier)"
+        comment="JWT ID (unique token identifier)",
     )
 
     token_type: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False,
-        comment="Token type: access or refresh"
+        String(20), nullable=False, comment="Token type: access or refresh"
     )
 
     # User Reference (for bulk revocation)
@@ -62,7 +62,7 @@ class TokenBlacklist(BaseModel):
         UUID(as_uuid=True),
         nullable=False,
         index=True,
-        comment="User who owned this token"
+        comment="User who owned this token",
     )
 
     # Expiration
@@ -70,7 +70,7 @@ class TokenBlacklist(BaseModel):
         DateTime(timezone=True),
         nullable=False,
         index=True,
-        comment="Token expiration timestamp (for cleanup)"
+        comment="Token expiration timestamp (for cleanup)",
     )
 
     # Revocation Metadata
@@ -78,29 +78,29 @@ class TokenBlacklist(BaseModel):
         DateTime(timezone=True),
         nullable=False,
         server_default="NOW()",
-        comment="When the token was revoked"
+        comment="When the token was revoked",
     )
 
     revocation_reason: Mapped[Optional[str]] = mapped_column(
         String(50),
         nullable=True,
-        comment="Reason for revocation: logout, password_change, admin, security"
+        comment="Reason for revocation: logout, password_change, admin, security",
     )
 
     # Optional: Store partial token for debugging (not full token!)
     token_signature: Mapped[Optional[str]] = mapped_column(
         String(100),
         nullable=True,
-        comment="Last 8 chars of token for debugging (not full token!)"
+        comment="Last 8 chars of token for debugging (not full token!)",
     )
 
     # Metadata
     __table_args__ = (
-        Index('ix_token_blacklist_jti_expires', 'jti', 'expires_at'),
-        Index('ix_token_blacklist_user_expires', 'user_id', 'expires_at'),
-        Index('ix_token_blacklist_expires_at', 'expires_at'),
-        UniqueConstraint('jti', name='uq_token_blacklist_jti'),
-        {'comment': 'Blacklisted JWT tokens for security and logout'}
+        Index("ix_token_blacklist_jti_expires", "jti", "expires_at"),
+        Index("ix_token_blacklist_user_expires", "user_id", "expires_at"),
+        Index("ix_token_blacklist_expires_at", "expires_at"),
+        UniqueConstraint("jti", name="uq_token_blacklist_jti"),
+        {"comment": "Blacklisted JWT tokens for security and logout"},
     )
 
     def __repr__(self) -> str:
@@ -124,6 +124,7 @@ class RefreshToken(BaseModel):
     - Access tokens are stateless and verified by signature only
     - Cleanup job removes expired tokens
     """
+
     __tablename__ = "refresh_tokens"
 
     # Primary Key
@@ -131,7 +132,7 @@ class RefreshToken(BaseModel):
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid4,
-        comment="Refresh token unique identifier"
+        comment="Refresh token unique identifier",
     )
 
     # Token Information
@@ -140,7 +141,7 @@ class RefreshToken(BaseModel):
         unique=True,
         nullable=False,
         index=True,
-        comment="JWT ID from refresh token"
+        comment="JWT ID from refresh token",
     )
 
     # User Reference
@@ -148,7 +149,7 @@ class RefreshToken(BaseModel):
         UUID(as_uuid=True),
         nullable=False,
         index=True,
-        comment="User who owns this token"
+        comment="User who owns this token",
     )
 
     # Token Metadata
@@ -156,7 +157,7 @@ class RefreshToken(BaseModel):
         DateTime(timezone=True),
         nullable=False,
         index=True,
-        comment="Token expiration timestamp"
+        comment="Token expiration timestamp",
     )
 
     is_revoked: Mapped[bool] = mapped_column(
@@ -164,26 +165,22 @@ class RefreshToken(BaseModel):
         default=False,
         nullable=False,
         index=True,
-        comment="Token revocation status"
+        comment="Token revocation status",
     )
 
     revoked_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        comment="When the token was revoked"
+        DateTime(timezone=True), nullable=True, comment="When the token was revoked"
     )
 
     # Session Tracking
     device_info: Mapped[Optional[str]] = mapped_column(
-        String(255),
-        nullable=True,
-        comment="User agent or device information"
+        String(255), nullable=True, comment="User agent or device information"
     )
 
     ip_address: Mapped[Optional[str]] = mapped_column(
         String(45),
         nullable=True,
-        comment="IP address when token was created (IPv6 compatible)"
+        comment="IP address when token was created (IPv6 compatible)",
     )
 
     # Token Family (for rotation detection)
@@ -191,28 +188,26 @@ class RefreshToken(BaseModel):
         UUID(as_uuid=True),
         nullable=True,
         index=True,
-        comment="Token family ID for rotation tracking"
+        comment="Token family ID for rotation tracking",
     )
 
     parent_jti: Mapped[Optional[str]] = mapped_column(
-        String(36),
-        nullable=True,
-        comment="JTI of the token that was refreshed"
+        String(36), nullable=True, comment="JTI of the token that was refreshed"
     )
 
     # Usage Tracking
     used_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
-        comment="When the token was used for refresh"
+        comment="When the token was used for refresh",
     )
 
     # Metadata
     __table_args__ = (
-        Index('ix_refresh_tokens_user_active', 'user_id', 'is_revoked', 'expires_at'),
-        Index('ix_refresh_tokens_family', 'family_id', 'created_at'),
-        UniqueConstraint('jti', name='uq_refresh_tokens_jti'),
-        {'comment': 'Active refresh tokens for session management'}
+        Index("ix_refresh_tokens_user_active", "user_id", "is_revoked", "expires_at"),
+        Index("ix_refresh_tokens_family", "family_id", "created_at"),
+        UniqueConstraint("jti", name="uq_refresh_tokens_jti"),
+        {"comment": "Active refresh tokens for session management"},
     )
 
     def __repr__(self) -> str:

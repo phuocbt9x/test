@@ -44,7 +44,6 @@ __all__ = [
     # Password utilities
     "hash_password",
     "verify_password",
-
     # JWT management
     "JWTManager",
     "TokenPayload",
@@ -53,14 +52,12 @@ __all__ = [
     "create_refresh_token",
     "verify_token",
     "decode_token",
-
     # Authentication dependencies
     "get_current_user",
     "get_current_active_user",
     "get_token_payload",
     "optional_auth",
     "CurrentUser",
-
     # Authorization dependencies
     "require_roles",
     "require_permissions",

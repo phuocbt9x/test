@@ -3,6 +3,7 @@ User Schemas (Pydantic)
 
 Request/Response schemas for user operations.
 """
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -12,11 +13,17 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 # ==================== Request Schemas ====================
 
+
 class UserCreateRequest(BaseModel):
     """Schema for creating a new user"""
+
     email: EmailStr = Field(..., description="User email address")
-    username: str = Field(..., min_length=3, max_length=50, description="Unique username")
-    password: str = Field(..., min_length=8, max_length=100, description="User password")
+    username: str = Field(
+        ..., min_length=3, max_length=50, description="Unique username"
+    )
+    password: str = Field(
+        ..., min_length=8, max_length=100, description="User password"
+    )
     full_name: Optional[str] = Field(None, max_length=100, description="Full name")
     phone: Optional[str] = Field(None, max_length=20, description="Phone number")
 
@@ -30,6 +37,7 @@ class UserCreateRequest(BaseModel):
 
 class UserUpdateRequest(BaseModel):
     """Schema for updating user profile"""
+
     full_name: Optional[str] = Field(None, max_length=100)
     phone: Optional[str] = Field(None, max_length=20)
     avatar_url: Optional[str] = Field(None, max_length=500)
@@ -37,14 +45,19 @@ class UserUpdateRequest(BaseModel):
 
 class UserPasswordChangeRequest(BaseModel):
     """Schema for changing password"""
+
     current_password: str = Field(..., description="Current password")
-    new_password: str = Field(..., min_length=8, max_length=100, description="New password")
+    new_password: str = Field(
+        ..., min_length=8, max_length=100, description="New password"
+    )
 
 
 # ==================== Response Schemas ====================
 
+
 class UserResponse(BaseModel):
     """Schema for user response (without sensitive data)"""
+
     id: UUID
     email: str
     username: str
@@ -63,6 +76,7 @@ class UserResponse(BaseModel):
 
 class UserDetailResponse(UserResponse):
     """Detailed user response (for admin or self)"""
+
     failed_login_attempts: int
     locked_until: Optional[datetime]
     password_changed_at: Optional[datetime]
@@ -70,6 +84,7 @@ class UserDetailResponse(UserResponse):
 
 class UserListResponse(BaseModel):
     """Paginated user list response"""
+
     data: list[UserResponse]
     total: int
     page: int

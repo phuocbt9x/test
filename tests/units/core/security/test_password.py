@@ -8,6 +8,7 @@ Tests cover:
 - Hash update detection
 - Common weak password detection
 """
+
 import pytest
 from src.core.security.password import (
     PasswordHasher,
@@ -218,7 +219,10 @@ class TestConvenienceFunctions:
         with pytest.raises(ValidationException) as exc_info:
             validate_and_hash_password(weak_password)
 
-        assert "Password" in exc_info.value.message or "password" in exc_info.value.message.lower()
+        assert (
+            "Password" in exc_info.value.message
+            or "password" in exc_info.value.message.lower()
+        )
 
     def test_validate_and_hash_password_no_uppercase(self):
         """Test validate_and_hash_password without uppercase."""

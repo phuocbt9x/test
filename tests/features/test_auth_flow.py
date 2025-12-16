@@ -9,13 +9,11 @@ Tests cover complete user authentication workflows:
 - Password change with token revocation
 - Protected endpoint access
 """
+
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
-from uuid import uuid4
 
 from src.core.security.jwt import JWTManager
-from src.core.security.password import PasswordHasher
 from src.modules.user.models import User
 
 
@@ -30,7 +28,7 @@ class TestUserRegistrationFlow:
             "email": "newuser@example.com",
             "username": "newuser",
             "password": "NewUser@123",
-            "full_name": "New User"
+            "full_name": "New User",
         }
 
         # Note: This assumes you have a registration endpoint
@@ -107,7 +105,9 @@ class TestUserLoginFlow:
         assert data["token_type"] == "bearer"
 
     @pytest.mark.asyncio
-    async def test_login_with_username_success(self, client: AsyncClient, test_user: User):
+    async def test_login_with_username_success(
+        self, client: AsyncClient, test_user: User
+    ):
         """Test successful login with username."""
         payload = {
             "username": test_user.username,
@@ -180,9 +180,7 @@ class TestTokenRefreshFlow:
     @pytest.mark.asyncio
     async def test_refresh_token_success(self, client: AsyncClient, test_tokens: dict):
         """Test successful token refresh."""
-        payload = {
-            "refresh_token": test_tokens["refresh_token"]
-        }
+        payload = {"refresh_token": test_tokens["refresh_token"]}
 
         response = await client.post("/api/v1/auth/refresh", json=payload)
 
@@ -198,7 +196,9 @@ class TestTokenRefreshFlow:
         assert data["access_token"] != test_tokens["access_token"]
 
     @pytest.mark.asyncio
-    async def test_refresh_with_access_token_fails(self, client: AsyncClient, test_tokens: dict):
+    async def test_refresh_with_access_token_fails(
+        self, client: AsyncClient, test_tokens: dict
+    ):
         """Test that using access token for refresh fails."""
         payload = {
             "refresh_token": test_tokens["access_token"]  # Wrong token type
@@ -214,9 +214,7 @@ class TestTokenRefreshFlow:
     @pytest.mark.asyncio
     async def test_refresh_with_invalid_token(self, client: AsyncClient):
         """Test refresh with invalid token."""
-        payload = {
-            "refresh_token": "invalid.token.here"
-        }
+        payload = {"refresh_token": "invalid.token.here"}
 
         response = await client.post("/api/v1/auth/refresh", json=payload)
 
@@ -262,7 +260,9 @@ class TestProtectedEndpointAccess:
     """Test access to protected endpoints."""
 
     @pytest.mark.asyncio
-    async def test_access_protected_with_valid_token(self, client: AsyncClient, auth_headers: dict):
+    async def test_access_protected_with_valid_token(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test accessing protected endpoint with valid token."""
         response = await client.get("/api/v1/users/me", headers=auth_headers)
 
@@ -284,7 +284,9 @@ class TestProtectedEndpointAccess:
         assert response.status_code == 401
 
     @pytest.mark.asyncio
-    async def test_access_protected_with_expired_token(self, client: AsyncClient, redis_client):
+    async def test_access_protected_with_expired_token(
+        self, client: AsyncClient, redis_client
+    ):
         """Test accessing protected endpoint with expired token."""
         from datetime import timedelta
 
@@ -292,7 +294,7 @@ class TestProtectedEndpointAccess:
         expired_token = JWTManager.create_token(
             subject="user-123",
             token_type="access",
-            expires_delta=timedelta(seconds=-10)
+            expires_delta=timedelta(seconds=-10),
         )
 
         headers = {"Authorization": f"Bearer {expired_token}"}
@@ -311,7 +313,9 @@ class TestRoleBasedAccess:
     """Test role-based access control."""
 
     @pytest.mark.asyncio
-    async def test_admin_access_with_admin_role(self, client: AsyncClient, admin_auth_headers: dict):
+    async def test_admin_access_with_admin_role(
+        self, client: AsyncClient, admin_auth_headers: dict
+    ):
         """Test admin endpoint access with admin role."""
         response = await client.get("/api/v1/admin/users", headers=admin_auth_headers)
 
@@ -321,7 +325,9 @@ class TestRoleBasedAccess:
         assert response.status_code in [200, 403]  # Either works or forbidden
 
     @pytest.mark.asyncio
-    async def test_admin_access_without_admin_role(self, client: AsyncClient, auth_headers: dict):
+    async def test_admin_access_without_admin_role(
+        self, client: AsyncClient, auth_headers: dict
+    ):
         """Test admin endpoint access without admin role."""
         response = await client.get("/api/v1/admin/users", headers=auth_headers)
 
@@ -336,7 +342,9 @@ class TestCompleteAuthWorkflow:
     """Test complete authentication workflow from registration to logout."""
 
     @pytest.mark.asyncio
-    async def test_complete_user_lifecycle(self, client: AsyncClient, db_session, redis_client):
+    async def test_complete_user_lifecycle(
+        self, client: AsyncClient, db_session, redis_client
+    ):
         """
         Test complete user lifecycle:
         1. Register
@@ -351,10 +359,12 @@ class TestCompleteAuthWorkflow:
             "email": "lifecycle@example.com",
             "username": "lifecycle",
             "password": "Lifecycle@123",
-            "full_name": "Life Cycle"
+            "full_name": "Life Cycle",
         }
 
-        register_response = await client.post("/api/v1/auth/register", json=register_payload)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=register_payload
+        )
 
         if register_response.status_code == 404:
             pytest.skip("Auth endpoints not implemented yet")
@@ -364,7 +374,7 @@ class TestCompleteAuthWorkflow:
         # 2. Login
         login_payload = {
             "username": "lifecycle@example.com",
-            "password": "Lifecycle@123"
+            "password": "Lifecycle@123",
         }
 
         login_response = await client.post("/api/v1/auth/login", json=login_payload)
@@ -383,7 +393,9 @@ class TestCompleteAuthWorkflow:
 
         # 4. Refresh token
         refresh_payload = {"refresh_token": refresh_token}
-        refresh_response = await client.post("/api/v1/auth/refresh", json=refresh_payload)
+        refresh_response = await client.post(
+            "/api/v1/auth/refresh", json=refresh_payload
+        )
 
         if refresh_response.status_code != 404:
             assert refresh_response.status_code == 200

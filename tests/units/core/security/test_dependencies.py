@@ -9,11 +9,10 @@ Tests cover:
 - Role-based access control
 - Permission-based access control
 """
+
 import pytest
-import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 from uuid import uuid4
-from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 from src.core.security.dependencies import (
@@ -30,7 +29,6 @@ from src.core.security.dependencies import (
 from src.core.security.jwt import JWTManager, TokenPayload
 from src.core.exceptions import AuthenticationException, AuthorizationException
 from src.core.exceptions.types import ErrorCode
-from src.modules.user.models import User
 from src.core.utils.timezone import utcnow
 from datetime import timedelta
 
@@ -49,7 +47,7 @@ class TestCurrentUser:
             email="test@example.com",
             username="testuser",
             roles=["user", "admin"],
-            permissions=["read:posts", "write:posts"]
+            permissions=["read:posts", "write:posts"],
         )
 
         current_user = CurrentUser(payload)
@@ -68,7 +66,7 @@ class TestCurrentUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["user", "moderator"]
+            roles=["user", "moderator"],
         )
         user = CurrentUser(payload)
 
@@ -84,7 +82,7 @@ class TestCurrentUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["user"]
+            roles=["user"],
         )
         user = CurrentUser(payload)
 
@@ -100,7 +98,7 @@ class TestCurrentUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["user", "admin", "moderator"]
+            roles=["user", "admin", "moderator"],
         )
         user = CurrentUser(payload)
 
@@ -116,7 +114,7 @@ class TestCurrentUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            permissions=["read:posts", "write:posts"]
+            permissions=["read:posts", "write:posts"],
         )
         user = CurrentUser(payload)
 
@@ -131,7 +129,7 @@ class TestCurrentUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            permissions=["read:posts"]
+            permissions=["read:posts"],
         )
         user = CurrentUser(payload)
 
@@ -146,7 +144,7 @@ class TestCurrentUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            email="test@example.com"
+            email="test@example.com",
         )
         user = CurrentUser(payload)
 
@@ -186,8 +184,7 @@ class TestGetTokenPayload:
     async def test_get_token_payload_invalid_token(self, redis_client):
         """Test token extraction with invalid token."""
         credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer",
-            credentials="invalid.token.here"
+            scheme="Bearer", credentials="invalid.token.here"
         )
 
         with pytest.raises(AuthenticationException) as exc_info:
@@ -201,9 +198,7 @@ class TestGetTokenPayload:
         user_id = "expired-user"
         # Create expired token
         token = JWTManager.create_token(
-            subject=user_id,
-            token_type="access",
-            expires_delta=timedelta(seconds=-10)
+            subject=user_id, token_type="access", expires_delta=timedelta(seconds=-10)
         )
         credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
 
@@ -258,7 +253,7 @@ class TestGetCurrentUser:
             jti="test-jti",
             type="access",
             email="test@example.com",
-            username="testuser"
+            username="testuser",
         )
 
         current_user = await get_current_user(payload)
@@ -280,12 +275,12 @@ class TestGetCurrentActiveUser:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            email=test_user.email
+            email=test_user.email,
         )
         current_user = CurrentUser(payload)
 
         # Mock db session
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             active_user = await get_current_active_user(current_user)
@@ -300,11 +295,11 @@ class TestGetCurrentActiveUser:
             exp=int((utcnow() + timedelta(minutes=15)).timestamp()),
             iat=int(utcnow().timestamp()),
             jti="test-jti",
-            type="access"
+            type="access",
         )
         current_user = CurrentUser(payload)
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             with pytest.raises(AuthenticationException) as exc_info:
@@ -320,11 +315,11 @@ class TestGetCurrentActiveUser:
             exp=int((utcnow() + timedelta(minutes=15)).timestamp()),
             iat=int(utcnow().timestamp()),
             jti="test-jti",
-            type="access"
+            type="access",
         )
         current_user = CurrentUser(payload)
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             with pytest.raises(AuthenticationException) as exc_info:
@@ -345,11 +340,11 @@ class TestGetCurrentActiveUser:
             exp=int((utcnow() + timedelta(minutes=15)).timestamp()),
             iat=int(utcnow().timestamp()),
             jti="test-jti",
-            type="access"
+            type="access",
         )
         current_user = CurrentUser(payload)
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             with pytest.raises(AuthenticationException) as exc_info:
@@ -385,8 +380,7 @@ class TestOptionalAuth:
     async def test_optional_auth_with_invalid_token(self):
         """Test optional auth with invalid token."""
         credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer",
-            credentials="invalid.token"
+            scheme="Bearer", credentials="invalid.token"
         )
 
         user = await optional_auth(credentials)
@@ -406,13 +400,13 @@ class TestRequireRoles:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["admin", "user"]
+            roles=["admin", "user"],
         )
         current_user = CurrentUser(payload)
 
         check_roles = require_roles("admin")
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             result = await check_roles(current_user)
@@ -428,13 +422,13 @@ class TestRequireRoles:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["user"]
+            roles=["user"],
         )
         current_user = CurrentUser(payload)
 
         check_roles = require_roles("admin")
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             with pytest.raises(AuthorizationException) as exc_info:
@@ -455,13 +449,13 @@ class TestRequirePermissions:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            permissions=["read:users", "write:users"]
+            permissions=["read:users", "write:users"],
         )
         current_user = CurrentUser(payload)
 
         check_perms = require_permissions("read:users")
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             result = await check_perms(current_user)
@@ -477,13 +471,13 @@ class TestRequirePermissions:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            permissions=["read:users"]
+            permissions=["read:users"],
         )
         current_user = CurrentUser(payload)
 
         check_perms = require_permissions("delete:users")
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             with pytest.raises(AuthorizationException) as exc_info:
@@ -504,13 +498,13 @@ class TestRequireAllRoles:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["user", "admin", "moderator"]
+            roles=["user", "admin", "moderator"],
         )
         current_user = CurrentUser(payload)
 
         check_all = require_all_roles("user", "admin")
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             result = await check_all(current_user)
@@ -526,13 +520,13 @@ class TestRequireAllRoles:
             iat=int(utcnow().timestamp()),
             jti="test-jti",
             type="access",
-            roles=["user"]
+            roles=["user"],
         )
         current_user = CurrentUser(payload)
 
         check_all = require_all_roles("user", "admin")
 
-        with patch('src.core.security.dependencies.db.session') as mock_session:
+        with patch("src.core.security.dependencies.db.session") as mock_session:
             mock_session.return_value.__aenter__.return_value = db_session
 
             with pytest.raises(AuthorizationException) as exc_info:
