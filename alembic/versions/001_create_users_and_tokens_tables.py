@@ -33,9 +33,9 @@ def upgrade() -> None:
         sa.Column('is_verified', sa.Boolean(), nullable=False, comment='Email verification status'),
         sa.Column('is_superuser', sa.Boolean(), nullable=False, comment='Admin/superuser flag'),
         sa.Column('failed_login_attempts', sa.Integer(), nullable=False, comment='Number of failed login attempts'),
-        sa.Column('locked_until', sa.DateTime(), nullable=True, comment='Account locked until this timestamp'),
-        sa.Column('last_login_at', sa.DateTime(), nullable=True, comment='Last successful login timestamp'),
-        sa.Column('password_changed_at', sa.DateTime(), nullable=True, comment='Last password change timestamp'),
+        sa.Column('locked_until', sa.DateTime(timezone=True), nullable=True, comment='Account locked until this timestamp'),
+        sa.Column('last_login_at', sa.DateTime(timezone=True), nullable=True, comment='Last successful login timestamp'),
+        sa.Column('password_changed_at', sa.DateTime(timezone=True), nullable=True, comment='Last password change timestamp'),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False, comment='Creation timestamp'),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False, comment='Last update timestamp'),
         sa.PrimaryKeyConstraint('id'),
@@ -55,8 +55,8 @@ def upgrade() -> None:
         sa.Column('jti', sa.String(length=36), nullable=False, comment='JWT ID (unique token identifier)'),
         sa.Column('token_type', sa.String(length=20), nullable=False, comment='Token type: access or refresh'),
         sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False, comment='User who owned this token'),
-        sa.Column('expires_at', sa.DateTime(), nullable=False, comment='Token expiration timestamp (for cleanup)'),
-        sa.Column('revoked_at', sa.DateTime(), server_default=sa.text('NOW()'), nullable=False, comment='When the token was revoked'),
+        sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False, comment='Token expiration timestamp (for cleanup)'),
+        sa.Column('revoked_at', sa.DateTime(timezone=True), server_default=sa.text('NOW()'), nullable=False, comment='When the token was revoked'),
         sa.Column('revocation_reason', sa.String(length=50), nullable=True, comment='Reason for revocation: logout, password_change, admin, security'),
         sa.Column('token_signature', sa.String(length=100), nullable=True, comment='Last 8 chars of token for debugging (not full token!)'),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False, comment='Creation timestamp'),
@@ -77,21 +77,20 @@ def upgrade() -> None:
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False, comment='Refresh token unique identifier'),
         sa.Column('jti', sa.String(length=36), nullable=False, comment='JWT ID from refresh token'),
         sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False, comment='User who owns this token'),
-        sa.Column('expires_at', sa.DateTime(), nullable=False, comment='Token expiration timestamp'),
+        sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False, comment='Token expiration timestamp'),
         sa.Column('is_revoked', sa.Boolean(), nullable=False, comment='Token revocation status'),
-        sa.Column('revoked_at', sa.DateTime(), nullable=True, comment='When the token was revoked'),
+        sa.Column('revoked_at', sa.DateTime(timezone=True), nullable=True, comment='When the token was revoked'),
         sa.Column('device_info', sa.String(length=255), nullable=True, comment='User agent or device information'),
         sa.Column('ip_address', sa.String(length=45), nullable=True, comment='IP address when token was created (IPv6 compatible)'),
         sa.Column('family_id', postgresql.UUID(as_uuid=True), nullable=True, comment='Token family ID for rotation tracking'),
         sa.Column('parent_jti', sa.String(length=36), nullable=True, comment='JTI of the token that was refreshed'),
-        sa.Column('used_at', sa.DateTime(), nullable=True, comment='When the token was used for refresh'),
+        sa.Column('used_at', sa.DateTime(timezone=True), nullable=True, comment='When the token was used for refresh'),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False, comment='Creation timestamp'),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False, comment='Last update timestamp'),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('jti', name='uq_refresh_tokens_jti'),
         comment='Active refresh tokens for session management'
     )
-    op.create_index('ix_refresh_tokens_jti', 'refresh_tokens', ['jti'], unique=True)
     op.create_index('ix_refresh_tokens_user_id', 'refresh_tokens', ['user_id'], unique=False)
     op.create_index('ix_refresh_tokens_expires_at', 'refresh_tokens', ['expires_at'], unique=False)
     op.create_index('ix_refresh_tokens_is_revoked', 'refresh_tokens', ['is_revoked'], unique=False)

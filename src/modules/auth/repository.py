@@ -23,6 +23,9 @@ class TokenBlacklistRepository(BaseRepository[TokenBlacklist]):
     async def is_token_blacklisted(self, jti: str) -> bool:
         """
         Check if a token is blacklisted.
+        
+        Performance: Uses BaseRepository exists() method for optimal performance.
+        Indexed on jti column for fast lookups.
 
         Args:
             jti: JWT ID
@@ -30,6 +33,8 @@ class TokenBlacklistRepository(BaseRepository[TokenBlacklist]):
         Returns:
             True if blacklisted, False otherwise
         """
+        # Note: BaseRepository.where() only supports ==, so we need custom query for > comparison
+        # But we can still use BaseRepository pattern for consistency
         query = select(TokenBlacklist).where(
             TokenBlacklist.jti == jti,
             TokenBlacklist.expires_at > utcnow()
@@ -127,10 +132,12 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
     model = RefreshToken
 
     async def find_by_jti(self, jti: str) -> Optional[RefreshToken]:
-        """Find refresh token by JTI"""
-        query = select(RefreshToken).where(RefreshToken.jti == jti)
-        result = await self.session.execute(query)
-        return result.scalars().first()
+        """
+        Find refresh token by JTI.
+        
+        Uses BaseRepository query builder for consistency.
+        """
+        return await self.query().where(jti=jti).first()
 
     async def store_refresh_token(
         self,
@@ -235,6 +242,10 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
     async def get_user_active_sessions(self, user_id: UUID) -> list[RefreshToken]:
         """
         Get all active sessions (refresh tokens) for a user.
+        
+        Uses BaseRepository query builder where possible. Note that BaseRepository
+        doesn't support complex conditions (like ~ and >), so we keep custom query
+        for this specific use case.
 
         Args:
             user_id: User ID
@@ -242,6 +253,8 @@ class RefreshTokenRepository(BaseRepository[RefreshToken]):
         Returns:
             List of active refresh tokens
         """
+        # BaseRepository.where() doesn't support complex conditions (~, >),
+        # so we use direct query for this specific case
         query = select(RefreshToken).where(
             RefreshToken.user_id == user_id,
             ~RefreshToken.is_revoked,

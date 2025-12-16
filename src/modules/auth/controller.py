@@ -8,8 +8,7 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, status
 
 from src.core.controllers import BaseController, SuccessResponse
-from src.core.security.dependencies import get_current_active_user, get_token_from_header
-from src.modules.user.models import User
+from src.core.security.dependencies import CurrentUser, get_current_active_user, get_token_from_header
 from src.modules.user.schemas import UserResponse
 
 from .dependencies import get_auth_service, get_client_ip, get_device_info
@@ -22,6 +21,7 @@ from .schemas import (
     TokenResponse,
 )
 from .service import AuthService
+from uuid import UUID
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 controller = BaseController()
@@ -119,7 +119,7 @@ async def login(
 async def logout(
     service: Annotated[AuthService, Depends(get_auth_service)],
     access_token: Annotated[str, Depends(get_token_from_header)],
-    _: Annotated[User, Depends(get_current_active_user)],
+    _: Annotated[CurrentUser, Depends(get_current_active_user)],
     refresh_token: Optional[str] = None,
 ) -> SuccessResponse[None]:
     """
@@ -169,10 +169,23 @@ async def refresh_token(
     description="Get the currently authenticated user's information",
 )
 async def get_current_user(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
+    service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> SuccessResponse[UserResponse]:
-    """Get current authenticated user"""
-    user_data = UserResponse.model_validate(current_user)
+    """
+    Get current authenticated user.
+    
+    Fetches full user data from database for complete profile information.
+    """
+    
+    # Fetch full user data from database using service's repository
+    user = await service.user_repo.get(UUID(current_user.user_id))
+    
+    if not user:
+        from src.core.exceptions import NotFoundException
+        raise NotFoundException(resource="User", resource_id=current_user.user_id)
+    
+    user_data = UserResponse.model_validate(user)
     return controller.success(data=user_data, message="User retrieved successfully")
 
 
@@ -183,7 +196,7 @@ async def get_current_user(
     description="Get all active sessions (devices) for current user",
 )
 async def get_active_sessions(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
     service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> SuccessResponse[list[ActiveSessionResponse]]:
     """
@@ -191,11 +204,12 @@ async def get_active_sessions(
 
     Shows all devices/browsers where user is logged in.
     """
-    sessions = await service.get_active_sessions(current_user.id)
+    
+    sessions = await service.get_active_sessions(UUID(current_user.user_id))
 
     sessions_data = [
         ActiveSessionResponse(
-            id=session.id,
+            id=UUID(str(session.id)),
             device_info=session.device_info,
             ip_address=session.ip_address,
             created_at=session.created_at,
@@ -215,7 +229,7 @@ async def get_active_sessions(
 )
 async def revoke_session(
     session_id: str,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
     service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> None:
     """
@@ -223,10 +237,9 @@ async def revoke_session(
 
     Allows user to logout from a specific device.
     """
-    from uuid import UUID
 
     await service.revoke_session(
-        user_id=current_user.id,
+        user_id=UUID(current_user.user_id),
         session_id=UUID(session_id),
     )
 
@@ -238,7 +251,7 @@ async def revoke_session(
     description="Logout from all devices",
 )
 async def revoke_all_sessions(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
     service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> None:
     """
@@ -246,7 +259,8 @@ async def revoke_all_sessions(
 
     Useful when user suspects unauthorized access.
     """
+    
     await service.revoke_all_user_tokens(
-        user_id=current_user.id,
+        user_id=UUID(current_user.user_id),
         reason="user_revoke_all"
     )

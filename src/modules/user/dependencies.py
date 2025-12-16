@@ -10,9 +10,8 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.configs.database import get_db_session
-from src.core.security.dependencies import get_current_active_user
+from src.core.security.dependencies import CurrentUser, get_current_active_user
 
-from .models import User
 from .service import UserService
 
 
@@ -24,9 +23,9 @@ async def get_user_service(
 
 
 async def get_current_user_or_admin(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
     target_user_id: UUID,
-) -> User:
+) -> CurrentUser:
     """
     Check if current user is the target user or an admin.
 
@@ -45,7 +44,7 @@ async def get_current_user_or_admin(
     """
     from fastapi import HTTPException, status
 
-    if current_user.id != target_user_id and not current_user.is_superuser:
+    if UUID(current_user.user_id) != target_user_id and not current_user.has_role("admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to access this resource"

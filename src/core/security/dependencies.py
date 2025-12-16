@@ -10,6 +10,13 @@ import logging
 
 from src.core.security.jwt import JWTManager, TokenPayload
 from src.core.exceptions import AuthenticationException, AuthorizationException
+from src.core.exceptions.types import ErrorCode
+
+from uuid import UUID
+from src.core.configs.database import db
+from src.modules.user.models import User
+from sqlalchemy import select
+from src.core.utils.timezone import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +83,7 @@ async def get_token_payload(
     if not credentials:
         raise AuthenticationException(
             message="Missing authentication token",
-            error_code="MISSING_TOKEN"
+            error_code=ErrorCode.MISSING_TOKEN
         )
     
     token = credentials.credentials
@@ -94,7 +101,7 @@ async def get_token_payload(
         if is_revoked:
             raise AuthenticationException(
                 message="Token has been revoked",
-                error_code="TOKEN_REVOKED"
+                error_code=ErrorCode.TOKEN_REVOKED
             )
         
         return payload
@@ -105,7 +112,7 @@ async def get_token_payload(
         logger.error(f"Token verification failed: {e}")
         raise AuthenticationException(
             message="Invalid authentication token",
-            error_code="INVALID_TOKEN"
+            error_code=ErrorCode.TOKEN_INVALID
         )
 
 
@@ -135,12 +142,12 @@ async def get_current_active_user(
     current_user: CurrentUser = Depends(get_current_user)
 ) -> CurrentUser:
     """
-    Get current active user.
+    Get current active user with database verification.
     
-    You can extend this to check user status in database:
-    - is_active
-    - is_verified
-    - is_banned
+    Checks user status in database:
+    - User exists
+    - is_active flag
+    - Account is not locked
     
     Args:
         current_user: Current user from token
@@ -149,14 +156,34 @@ async def get_current_active_user(
         CurrentUser if active
     
     Raises:
-        AuthenticationException: If user is inactive
+        AuthenticationException: If user is inactive, locked, or not found
     """
-    # TODO: Add database check for user status
-    # Example:
-    # async with db.session(read_only=True) as session:
-    #     user = await session.get(User, current_user.user_id)
-    #     if not user or not user.is_active:
-    #         raise AuthenticationException("User account is inactive")
+    
+    # Check user status in database (using read replica for performance)
+    async with db.session(read_only=True) as session:
+        user_id = UUID(current_user.user_id)
+        query = select(User).where(User.id == user_id)
+        result = await session.execute(query)
+        user = result.scalars().first()
+        
+        if not user:
+            raise AuthenticationException(
+                message="User account not found",
+                error_code=ErrorCode.USER_NOT_FOUND
+            )
+        
+        if not user.is_active:
+            raise AuthenticationException(
+                message="User account is inactive",
+                error_code=ErrorCode.USER_INACTIVE
+            )
+        
+        # Check if account is locked
+        if user.locked_until and user.locked_until > utcnow():
+            raise AuthenticationException(
+                message="User account is locked. Please try again later.",
+                error_code=ErrorCode.ACCOUNT_LOCKED
+            )
     
     return current_user
 
@@ -219,7 +246,7 @@ def require_roles(*roles: str):
         if not current_user.has_any_role(list(roles)):
             raise AuthorizationException(
                 message=f"Required roles: {', '.join(roles)}",
-                error_code="INSUFFICIENT_PERMISSIONS"
+                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
             )
         return current_user
     
@@ -250,7 +277,7 @@ def require_permissions(*permissions: str):
         if not current_user.has_any_permission(list(permissions)):
             raise AuthorizationException(
                 message=f"Required permissions: {', '.join(permissions)}",
-                error_code="INSUFFICIENT_PERMISSIONS"
+                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
             )
         return current_user
     
@@ -274,7 +301,7 @@ def require_all_roles(*roles: str):
         if not current_user.has_all_roles(list(roles)):
             raise AuthorizationException(
                 message=f"Required all roles: {', '.join(roles)}",
-                error_code="INSUFFICIENT_PERMISSIONS"
+                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
             )
         return current_user
     
@@ -299,7 +326,7 @@ async def get_token_from_header(
     if not credentials:
         raise AuthenticationException(
             message="Missing authentication token",
-            error_code="MISSING_TOKEN"
+            error_code=ErrorCode.MISSING_TOKEN
         )
     return credentials.credentials
 

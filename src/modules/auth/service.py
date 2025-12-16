@@ -3,9 +3,15 @@ Auth Service
 
 Business logic layer for authentication operations.
 Implements JWT with database-backed blacklist instead of Redis.
+
+Design Patterns:
+- Service Layer Pattern
+- Repository Pattern for data access
+- Dependency Injection (SOLID - DIP)
+- Strategy Pattern for password validation
 """
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Protocol
 from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,16 +20,27 @@ from src.core.configs import settings
 from src.core.exceptions import (
     AuthenticationException,
     UnauthorizedException,
+    ValidationException,
 )
+from src.core.exceptions.types import ErrorCode
 from src.core.security.jwt import JWTManager, TokenPayload
-from src.core.security.password import PasswordHasher
+from src.core.security.password import PasswordHasher, validate_and_hash_password
 from src.core.utils.timezone import utcnow
 from src.modules.user.models import User
 from src.modules.user.repository import UserRepository
 
 from .models import RefreshToken
 from .repository import RefreshTokenRepository, TokenBlacklistRepository
-from .schemas import LoginRequest, RegisterRequest, TokenResponse
+from .schemas import LoginRequest, RegisterRequest
+from src.core.security.jwt import TokenResponse
+
+
+class IUserService(Protocol):
+    """Interface for UserService to follow Dependency Inversion Principle (DIP)"""
+    
+    async def create_user(self, data) -> User:
+        """Create a new user"""
+        ...
 
 
 class AuthService:
@@ -40,15 +57,29 @@ class AuthService:
     Design Patterns:
     - Service Layer Pattern
     - Repository Pattern for data access
-    - Strategy Pattern for password hashing
+    - Dependency Injection (SOLID - DIP)
+    - Strategy Pattern for password validation
     """
 
-    def __init__(self, session: AsyncSession):
+    def __init__(
+        self,
+        session: AsyncSession,
+        user_service: Optional[IUserService] = None,
+    ):
+        """
+        Initialize AuthService with dependencies.
+        
+        Args:
+            session: Database session
+            user_service: UserService instance (injected for DIP compliance)
+        """
         self.session = session
         self.user_repo = UserRepository(session)
         self.blacklist_repo = TokenBlacklistRepository(session)
         self.refresh_token_repo = RefreshTokenRepository(session)
         self.password_hasher = PasswordHasher()
+        # Dependency Injection: UserService is injected, not created here
+        self._user_service = user_service
 
     async def register(
         self,
@@ -62,6 +93,7 @@ class AuthService:
         Business Rules:
         - Email must be unique
         - Username must be unique
+        - Password strength is validated
         - Password is hashed before storage
         - User gets access + refresh token immediately
 
@@ -75,19 +107,58 @@ class AuthService:
 
         Raises:
             ConflictException: If email or username exists
+            ValidationException: If password is too weak
         """
-        from src.modules.user.service import UserService
-        from src.modules.user.schemas import UserCreateRequest
+        # Validate password strength
+        is_valid, error = self.password_hasher.validate_password_strength(data.password)
+        if not is_valid:
+            raise ValidationException(
+                message=error or "Password does not meet security requirements"
+            )
 
-        # Create user via UserService
-        user_service = UserService(self.session)
-        user_data = UserCreateRequest(
-            email=data.email,
-            username=data.username,
-            password=data.password,
-            full_name=data.full_name,
-        )
-        user = await user_service.create_user(user_data)
+        # Use injected UserService or create minimal user creation logic
+        # Following DIP: depend on abstraction, not concrete implementation
+        if self._user_service:
+            from src.modules.user.schemas import UserCreateRequest
+            
+            user_data = UserCreateRequest(
+                email=data.email,
+                username=data.username,
+                password=data.password,
+                full_name=data.full_name,
+                phone=None,  # Optional field
+            )
+            user = await self._user_service.create_user(user_data)
+        else:
+            # Fallback: Direct user creation (should be avoided in production)
+            # Check uniqueness
+            if await self.user_repo.exists_by_email(data.email):
+                from src.core.exceptions import ConflictException
+                raise ConflictException(
+                    message=f"Email '{data.email}' is already registered"
+                )
+            
+            if await self.user_repo.exists_by_username(data.username):
+                from src.core.exceptions import ConflictException
+                raise ConflictException(
+                    message=f"Username '{data.username}' is already taken"
+                )
+            
+            # Hash password
+            password_hash = validate_and_hash_password(data.password)
+            
+            # Create user (using dict for repository.create method)
+            user_data_dict: dict[str, str | int | bool | None] = {
+                "email": data.email.lower(),
+                "username": data.username.lower(),
+                "password_hash": password_hash,
+                "full_name": data.full_name,
+                "is_active": True,
+                "is_verified": False,
+                "is_superuser": False,
+                "failed_login_attempts": 0,
+            }
+            user = await self.user_repo.create(user_data_dict)
 
         # Generate tokens
         tokens = await self._create_token_pair(
@@ -138,11 +209,12 @@ class AuthService:
                 message="Account is locked. Try again later."
             )
 
-        # Verify password
+        # Verify password with constant-time comparison
         if not self.password_hasher.verify(data.password, user.password_hash):
-            # Increment failed login attempts
+            # Increment failed login attempts (security: prevent brute force)
             await self._handle_failed_login(user)
             await self.session.commit()
+            # Use generic error message to prevent user enumeration
             raise UnauthorizedException(message="Invalid email or password")
 
         # Check if account is active
@@ -236,19 +308,19 @@ class AuthService:
         if not refresh_token_record:
             raise AuthenticationException(
                 message="Refresh token not found",
-                error_code="INVALID_REFRESH_TOKEN"
+                error_code=ErrorCode.TOKEN_NOT_FOUND
             )
 
         if refresh_token_record.is_revoked:
             raise AuthenticationException(
                 message="Refresh token has been revoked",
-                error_code="TOKEN_REVOKED"
+                error_code=ErrorCode.TOKEN_REVOKED
             )
 
         if refresh_token_record.expires_at < utcnow():
             raise AuthenticationException(
                 message="Refresh token has expired",
-                error_code="TOKEN_EXPIRED"
+                error_code=ErrorCode.TOKEN_EXPIRED
             )
 
         # Get user
@@ -256,7 +328,7 @@ class AuthService:
         if not user or not user.is_active:
             raise AuthenticationException(
                 message="User not found or inactive",
-                error_code="USER_INACTIVE"
+                error_code=ErrorCode.USER_INACTIVE
             )
 
         # Revoke old refresh token
@@ -267,7 +339,7 @@ class AuthService:
             user=user,
             device_info=device_info or refresh_token_record.device_info,
             ip_address=ip_address or refresh_token_record.ip_address,
-            family_id=refresh_token_record.family_id,
+            family_id=UUID(str(refresh_token_record.family_id)) if refresh_token_record.family_id else None,
             parent_jti=payload.jti,
         )
 
@@ -302,7 +374,7 @@ class AuthService:
         if token_type and payload.get("type") != token_type:
             raise AuthenticationException(
                 message=f"Invalid token type. Expected {token_type}",
-                error_code="INVALID_TOKEN_TYPE"
+                error_code=ErrorCode.INVALID_TOKEN_TYPE
             )
 
         # Check if token is blacklisted (DB check)
@@ -312,7 +384,7 @@ class AuthService:
             if is_blacklisted:
                 raise AuthenticationException(
                     message="Token has been revoked",
-                    error_code="TOKEN_REVOKED"
+                    error_code=ErrorCode.TOKEN_REVOKED
                 )
 
         # Parse to TokenPayload
@@ -334,7 +406,11 @@ class AuthService:
         return count
 
     async def get_active_sessions(self, user_id: UUID) -> list[RefreshToken]:
-        """Get all active sessions for a user"""
+        """
+        Get all active sessions for a user.
+        
+        Returns list of active refresh tokens representing user's logged-in devices.
+        """
         return await self.refresh_token_repo.get_user_active_sessions(user_id)
 
     async def revoke_session(self, user_id: UUID, session_id: UUID) -> bool:
@@ -399,7 +475,7 @@ class AuthService:
             expires_at = datetime.fromtimestamp(refresh_exp)
             await self.refresh_token_repo.store_refresh_token(
                 jti=refresh_jti,
-                user_id=user.id,
+                user_id=UUID(str(user.id)),
                 expires_at=expires_at,
                 device_info=device_info,
                 ip_address=ip_address,
@@ -415,7 +491,7 @@ class AuthService:
         reason: str = "logout"
     ) -> None:
         """
-        Add token to blacklist.
+        Add token to blacklist (DB-based for consistency).
 
         Args:
             token: JWT token
@@ -429,8 +505,8 @@ class AuthService:
             token_type = payload.get("type", "access")
 
             if jti and user_id and exp:
-                expires_at = datetime.fromtimestamp(exp)
-                # Store last 8 chars of token for debugging
+                expires_at = datetime.fromtimestamp(exp, tz=utcnow().tzinfo)
+                # Store last 8 chars of token for debugging (not full token for security)
                 token_signature = token[-8:] if len(token) > 8 else None
 
                 await self.blacklist_repo.blacklist_token(
@@ -441,9 +517,11 @@ class AuthService:
                     reason=reason,
                     token_signature=token_signature,
                 )
-        except Exception:
-            # Log error but don't fail logout
-            pass
+        except Exception as e:
+            # Log error but don't fail logout (graceful degradation)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to blacklist token: {e}", exc_info=True)
 
     async def _handle_failed_login(self, user: User) -> None:
         """
@@ -455,7 +533,7 @@ class AuthService:
             user: User object
         """
         failed_attempts = user.failed_login_attempts + 1
-        update_data = {"failed_login_attempts": failed_attempts}
+        update_data: dict[str, int | datetime | None] = {"failed_login_attempts": failed_attempts}
 
         # Lock account if max attempts exceeded
         if failed_attempts >= settings.MAX_LOGIN_ATTEMPTS:

@@ -1,54 +1,54 @@
-
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
 dist/
-wheels/
-*.egg-info
+*.egg-info/
+.venv/
+venv/
+ENV/
+env/
 
-# mypy cache
-.mypy_cache/
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.json
+.tox/
 
-# ruff cache
-.ruff_cache/
-
-# Virtual environments
-.venv
-
-# IDE files
+# IDE
 .vscode/
 .idea/
-*.iml
-/docker
+*.swp
+.DS_Store
 
-# Environment files
+# Environment
 .env
 .env.local
-.env.*.local
 
-# Docker
-docker-compose.override.yml
-docker-compose.*.yml
-docker/
+# Database
+*.db
+*.sqlite
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache
+.claude
+
+# MyPy
+.mypy_cache/
 
 # Logs
-logs/
 *.log
+logs/*.log
+logs/*_*.log
+!logs/.gitkeep
 
-# Coverage reports
-.coverage
-coverage.xml
-htmlcov/
-
-# Test outputs
-.pytest_cache/
-nosetests.xml
-test-results/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Jupyter
-.ipynb_checkpoints/
+# Alembic
+alembic/versions/*.pyc
+docker

@@ -9,10 +9,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 
 from src.core.controllers import BaseController, SuccessResponse, PaginatedResponse
-from src.core.security.dependencies import get_current_active_user, require_superuser
+from src.core.security.dependencies import CurrentUser, get_current_active_user, require_superuser
 
 from .dependencies import get_user_service
-from .models import User
 from .schemas import (
     UserCreateRequest,
     UserDetailResponse,
@@ -36,7 +35,7 @@ controller = BaseController()
 async def create_user(
     data: UserCreateRequest,
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
 ) -> SuccessResponse[UserResponse]:
     """
     Create a new user (Admin only).
@@ -56,10 +55,12 @@ async def create_user(
     description="Get the profile of the currently authenticated user",
 )
 async def get_current_user_profile(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> SuccessResponse[UserDetailResponse]:
     """Get current user's own profile"""
-    user_data = UserDetailResponse.model_validate(current_user)
+    user = await service.get_user_by_id(UUID(current_user.user_id))
+    user_data = UserDetailResponse.model_validate(user)
     return controller.success(data=user_data, message="User profile retrieved successfully")
 
 
@@ -71,11 +72,11 @@ async def get_current_user_profile(
 )
 async def update_current_user_profile(
     data: UserUpdateRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> SuccessResponse[UserResponse]:
     """Update current user's own profile"""
-    user = await service.update_user(current_user.id, data)
+    user = await service.update_user(UUID(current_user.user_id), data)
     user_data = UserResponse.model_validate(user)
     return controller.updated(data=user_data, message="Profile updated successfully")
 
@@ -88,11 +89,11 @@ async def update_current_user_profile(
 )
 async def change_password(
     data: UserPasswordChangeRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[CurrentUser, Depends(get_current_active_user)],
     service: Annotated[UserService, Depends(get_user_service)],
 ) -> None:
     """Change current user's password"""
-    await service.change_password(current_user.id, data)
+    await service.change_password(UUID(current_user.user_id), data)
 
 
 @router.get(
@@ -103,7 +104,7 @@ async def change_password(
 )
 async def list_users(
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
 ) -> PaginatedResponse[UserResponse]:
@@ -128,7 +129,7 @@ async def list_users(
 async def get_user_by_id(
     user_id: UUID,
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
 ) -> SuccessResponse[UserDetailResponse]:
     """Get user by ID (Admin only)"""
     user = await service.get_user_by_id(user_id)
@@ -146,7 +147,7 @@ async def update_user(
     user_id: UUID,
     data: UserUpdateRequest,
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
 ) -> SuccessResponse[UserResponse]:
     """Update user by ID (Admin only)"""
     user = await service.update_user(user_id, data)
@@ -163,7 +164,7 @@ async def update_user(
 async def delete_user(
     user_id: UUID,
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
 ) -> None:
     """Delete user by ID (Admin only)"""
     await service.delete_user(user_id)
@@ -178,7 +179,7 @@ async def delete_user(
 async def deactivate_user(
     user_id: UUID,
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
 ) -> None:
     """Deactivate user (Admin only)"""
     await service.deactivate_user(user_id)
@@ -193,7 +194,7 @@ async def deactivate_user(
 async def activate_user(
     user_id: UUID,
     service: Annotated[UserService, Depends(get_user_service)],
-    _: Annotated[User, Depends(require_superuser)],
+    _: Annotated[CurrentUser, Depends(require_superuser)],
 ) -> None:
     """Activate user (Admin only)"""
     await service.activate_user(user_id)

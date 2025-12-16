@@ -9,15 +9,28 @@ from fastapi import Depends, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.configs.database import get_db_session
+from src.modules.user.service import UserService
 
 from .service import AuthService
 
 
-async def get_auth_service(
+async def get_user_service_for_auth(
     session: Annotated[AsyncSession, Depends(get_db_session)]
+) -> UserService:
+    """Helper dependency to get UserService for AuthService"""
+    return UserService(session)
+
+
+async def get_auth_service(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    user_service: Annotated[UserService, Depends(get_user_service_for_auth)],
 ) -> AuthService:
-    """Dependency to get AuthService instance"""
-    return AuthService(session)
+    """
+    Dependency to get AuthService instance.
+    
+    Injects UserService following Dependency Inversion Principle (DIP).
+    """
+    return AuthService(session, user_service=user_service)
 
 
 def get_device_info(user_agent: Optional[str] = Header(None)) -> Optional[str]:

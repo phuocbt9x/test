@@ -34,12 +34,13 @@ from datetime import timedelta
 from typing import Any, Dict, Optional
 import logging
 
-from jose import JWTError, jwt
+from jose import JWTError, jwt  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field
 
 from src.core.configs import settings
 from src.core.configs.redis import redis_manager
 from src.core.exceptions import AuthenticationException
+from src.core.exceptions.types import ErrorCode
 from src.core.utils.timezone import utcnow
 
 logger = logging.getLogger(__name__)
@@ -211,15 +212,15 @@ class JWTManager:
         Returns:
             TokenResponse with both tokens
         """
-        claims = {}
+        claims: dict[str, str | list[str] | int] = {}
         if email:
             claims["email"] = email
         if username:
             claims["username"] = username
         if roles:
-            claims["roles"] = roles
+            claims["roles"] = roles  # type: ignore[assignment]
         if permissions:
-            claims["permissions"] = permissions
+            claims["permissions"] = permissions  # type: ignore[assignment]
         
         access_token = JWTManager.create_access_token(user_id, claims)
         refresh_token = JWTManager.create_refresh_token(user_id, claims)
@@ -260,18 +261,18 @@ class JWTManager:
         except jwt.ExpiredSignatureError:
             raise AuthenticationException(
                 message="Token has expired",
-                error_code="TOKEN_EXPIRED"
+                error_code=ErrorCode.TOKEN_EXPIRED
             )
         except jwt.JWTClaimsError as e:
             raise AuthenticationException(
                 message=f"Invalid token claims: {str(e)}",
-                error_code="INVALID_CLAIMS"
+                error_code=ErrorCode.INVALID_CLAIMS
             )
         except JWTError as e:
             logger.error(f"JWT decode error: {e}")
             raise AuthenticationException(
                 message="Could not validate credentials",
-                error_code="INVALID_TOKEN"
+                error_code=ErrorCode.TOKEN_INVALID
             )
     
     @staticmethod
@@ -316,7 +317,7 @@ class JWTManager:
         if token_type and payload.get("type") != token_type:
             raise AuthenticationException(
                 message=f"Invalid token type. Expected {token_type}",
-                error_code="INVALID_TOKEN_TYPE"
+                error_code=ErrorCode.INVALID_TOKEN_TYPE
             )
 
         # Check if token is blacklisted (async)
@@ -326,7 +327,7 @@ class JWTManager:
             if is_blacklisted:
                 raise AuthenticationException(
                     message="Token has been revoked",
-                    error_code="TOKEN_REVOKED"
+                    error_code=ErrorCode.TOKEN_REVOKED
                 )
 
         # Parse to TokenPayload
@@ -336,7 +337,7 @@ class JWTManager:
             logger.error(f"Failed to parse token payload: {e}")
             raise AuthenticationException(
                 message="Invalid token payload",
-                error_code="INVALID_TOKEN"
+                error_code=ErrorCode.TOKEN_INVALID
             )
 
     @staticmethod

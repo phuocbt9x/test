@@ -18,45 +18,36 @@ dependencies = [
     "fastapi>=0.124.2",
     "uvicorn[standard]>=0.38.0",
     "python-multipart>=0.0.20",
-
     # Database
     "sqlalchemy[asyncio]>=2.0.45",
     "alembic>=1.17.2",
     "asyncpg>=0.31.0",
     "pgvector>=0.4.2",
-
     # Cache & Session Management
     "redis[hiredis]>=7.1.0",
-
     # Security & Auth
     "python-jose[cryptography]>=3.5.0",
     "passlib[bcrypt]>=1.7.4",
     "argon2-cffi>=23.1.0",
     "cryptography>=44.0.0",
     "python-dotenv>=1.0.1",
-
     # Validation & Settings
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
     "pydantic-extra-types>=2.10.1",
     "email-validator>=2.2.0",
     "phonenumbers>=8.13.51",
-
     # Timezone & Date
     "python-dateutil>=2.9.0",
     "tzdata>=2025.2",
-
     # Performance
     "orjson>=3.10.14",
     "uvloop>=0.21.0",
     "httptools>=0.6.4",
-
     # Rate Limiting
     "slowapi>=0.1.9",
-
     # Retry & Resilience
     "tenacity>=9.0.0",
-
     # Monitoring & Observability
     "prometheus-client>=0.21.1",
     "sentry-sdk[fastapi]>=2.20.0",
@@ -65,13 +56,12 @@ dependencies = [
     "opentelemetry-instrumentation-fastapi>=0.50b0",
     "opentelemetry-instrumentation-sqlalchemy>=0.50b0",
     "opentelemetry-instrumentation-redis>=0.50b0",
-
     # HTTP Client
     "httpx>=0.28.1",
-
     # Utilities
     "python-slugify>=8.0.4",
     "pillow>=11.1.0",
+    "aiosqlite>=0.22.0",
 ]
 
 [dependency-groups]

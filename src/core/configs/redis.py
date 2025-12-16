@@ -494,7 +494,7 @@ class RedisManager(metaclass=SingletonMeta):
             key = self._prefixed_key(key)
             # Ensure mapping values are float (or str/int/bytes if needed)
             safe_mapping: dict[str, float] = {k: float(v) for k, v in mapping.items()}
-            return await cast(Awaitable[int], client.zadd(key, safe_mapping))
+            return await cast(Awaitable[int], client.zadd(key, safe_mapping))  # type: ignore[arg-type]
         except RedisError as e:
             logger.error("Redis ZADD error: %s", e)
             return 0

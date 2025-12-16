@@ -111,7 +111,7 @@ class UserService:
         """
         user = await self.repository.get(user_id)
         if not user:
-            raise NotFoundException(message="User not found")
+            raise NotFoundException(resource="User", resource_id=str(user_id))
         return user
 
     async def get_user_by_email(self, email: str) -> Optional[User]:
@@ -130,6 +130,10 @@ class UserService:
         """
         Update user profile.
 
+        Business Rules:
+        - Only allowed fields can be updated
+        - Email and username changes require separate validation (not in this method)
+
         Args:
             user_id: User UUID
             data: Update data
@@ -139,10 +143,22 @@ class UserService:
 
         Raises:
             NotFoundException: If user not found
+            BadRequestException: If validation fails
         """
         user = await self.get_user_by_id(user_id)
 
         update_data = data.model_dump(exclude_unset=True)
+        
+        # Validate update data if needed
+        # For example, phone number format validation
+        if "phone" in update_data and update_data["phone"]:
+            # Basic phone validation (can be extended)
+            phone = update_data["phone"].strip()
+            if phone and (len(phone) < 10 or len(phone) > 20):
+                raise BadRequestException(
+                    message="Phone number must be between 10 and 20 characters"
+                )
+            update_data["phone"] = phone
 
         if update_data:
             updated_user = await self.repository.update(user_id, update_data)
@@ -188,8 +204,17 @@ class UserService:
                 message="New password must be different from current password"
             )
 
+        # Validate new password strength
+        is_valid, error = self.password_hasher.validate_password_strength(data.new_password)
+        if not is_valid:
+            from src.core.exceptions import ValidationException
+            raise ValidationException(
+                message=error or "New password does not meet security requirements"
+            )
+
         # Hash new password
-        new_password_hash = self.password_hasher.hash(data.new_password)
+        from src.core.security.password import validate_and_hash_password
+        new_password_hash = validate_and_hash_password(data.new_password)
 
         # Update password
         await self.repository.update(
@@ -198,11 +223,23 @@ class UserService:
                 "password_hash": new_password_hash,
                 "password_changed_at": utcnow(),
                 "failed_login_attempts": 0,  # Reset failed attempts
+                "locked_until": None,  # Unlock account on password change
             }
         )
         await self.session.commit()
 
-        # TODO: Revoke all user tokens (will be implemented in auth service)
+        # Revoke all user tokens after password change (security best practice)
+        # Note: This requires AuthService - consider event-based architecture for better decoupling
+        try:
+            from src.modules.auth.repository import RefreshTokenRepository
+            refresh_token_repo = RefreshTokenRepository(self.session)
+            await refresh_token_repo.revoke_all_user_tokens(user_id)
+            await self.session.commit()
+        except Exception:
+            # Log but don't fail password change if token revocation fails
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to revoke tokens for user {user_id} after password change", exc_info=True)
 
         return user
 
