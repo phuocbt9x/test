@@ -130,8 +130,9 @@ timima/
    # Using UV (recommended)
    uv sync
 
-   # Or using pip
-   pip install -e .
+   # Install pre-commit
+   uv tool install pre-commit
+   pre-commit install
    ```
 
 4. **Start infrastructure services**
@@ -422,6 +423,9 @@ Logs are written to:
 - Keep functions focused and small
 - Use meaningful variable names
 - Add tests for new features
+
+### Commit Rules
+https://www.conventionalcommits.org/en/v1.0.0/
 
 ### Adding a New Module
 
