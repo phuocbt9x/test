@@ -366,13 +366,6 @@ gunicorn main:app \
   --bind 0.0.0.0:8000
 ```
 
-#### Production Checklist
-
-- [ ] Set strong JWT secret key
-- [ ] Configure production database with connection pooling
-- [ ] Set up Redis with persistence (RDB + AOF)
-- [ ] Configure CORS with specific allowed origins
-
 ### Monitoring & Logging
 
 #### Logging
@@ -404,28 +397,7 @@ Logs are written to:
    uv run mypy src/
    ```
 
-4. Commit your changes (pre-commit hooks will run)
-   ```bash
-   git add .
-   git commit -m "Description of changes"
-   ```
-
-5. Push and create a pull request
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-### Code Style
-
-- Follow PEP 8 guidelines
-- Use type hints for all functions
-- Write docstrings for public APIs
-- Keep functions focused and small
-- Use meaningful variable names
-- Add tests for new features
-
-### Commit Rules
-https://www.conventionalcommits.org/en/v1.0.0/
+### Code convention follow `coding-rules/README.md`
 
 ### Adding a New Module
 
