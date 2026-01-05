@@ -17,6 +17,7 @@ from src.core import (
 )
 from src.core.configs.database import db
 from src.core.configs.redis import redis_manager
+from src.core import _
 
 logger = get_logger(__name__)
 
@@ -217,6 +218,14 @@ def create_app() -> FastAPI:
             return {
                 "success": success,
                 "message": "Cache flushed" if success else "Failed",
+            }
+
+        @app.get("/test/multi-lang", tags=["Test"])
+        async def test_multi_lang() -> dict[str, Any]:
+            """Test multi-language support."""
+            return {
+                "message": _("testing.hello_world"),
+                "message_2": _("Hello World!"),
             }
 
     return app

@@ -115,6 +115,17 @@ from src.core.utils import (
     format_datetime,
 )
 
+# I18n
+from src.core.i18n import (
+    LocaleManager,
+    LocaleContext,
+    get_locale,
+    current_locale,
+    get_translations,
+    get_babel_locale,
+    _,
+)
+
 __all__ = [
     # ========== Configuration & Settings ==========
     "settings",
@@ -192,4 +203,12 @@ __all__ = [
     "to_utc",
     "get_timezone",
     "format_datetime",
+    # ========== I18n ==========
+    "LocaleManager",
+    "LocaleContext",
+    "get_locale",
+    "current_locale",
+    "get_translations",
+    "get_babel_locale",
+    "_",
 ]
