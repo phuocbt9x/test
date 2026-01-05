@@ -1,34 +1,3 @@
-"""
-Core Module - Main Package Exports
-
-This module provides the main public API for the application core functionality.
-All commonly used utilities, configurations, and dependencies are exported here.
-
-Usage:
-    # Import everything you need from core
-    from src.core import (
-        settings,
-        db,
-        get_db,
-        redis_manager,
-        cached,
-        get_logger,
-        BaseModel,
-        BaseRepository,
-        hash_password,
-        verify_password,
-        create_access_token,
-        get_current_user,
-        utcnow,
-    )
-
-    # Or import specific submodules
-    from src.core.configs import settings
-    from src.core.security import JWTManager
-    from src.core.utils import utcnow, now
-"""
-
-# Configuration & Settings
 from src.core.configs import (
     settings,
     logging_settings,
@@ -50,11 +19,7 @@ from src.core.configs import (
     RedisQueue,
     SessionStore,
 )
-
-# Middlewares
 from src.core.middlewares import setup_middlewares, limiter
-
-# Logging
 from src.core.loggings import (
     get_logger,
     setup_logging,
@@ -63,8 +28,6 @@ from src.core.loggings import (
     LoggingContext,
     DataMasker,
 )
-
-# Exceptions
 from src.core.exceptions import (
     setup_exception_handlers,
     BaseAppException,
@@ -75,14 +38,8 @@ from src.core.exceptions import (
     ConflictException,
     RateLimitException,
 )
-
-# Routers
 from src.core.routers import auto_load_routers, print_routes_table
-
-# Database
 from src.core.databases import BaseModel, BaseRepository
-
-# Security
 from src.core.security import (
     hash_password,
     verify_password,
@@ -104,8 +61,6 @@ from src.core.security import (
     require_all_roles,
     CurrentUser,
 )
-
-# Utilities
 from src.core.utils import (
     utcnow,
     now,
@@ -114,25 +69,19 @@ from src.core.utils import (
     get_timezone,
     format_datetime,
 )
-
-# I18n
 from src.core.i18n import (
-    LocaleManager,
-    LocaleContext,
-    get_locale,
-    current_locale,
-    get_translations,
-    get_babel_locale,
     _,
+    n_,
+    get_language_from_request,
+    translation_manager,
+    current_language,
 )
 
 __all__ = [
-    # ========== Configuration & Settings ==========
     "settings",
     "logging_settings",
     "Environment",
     "JWTAlgorithm",
-    # ========== Database ==========
     "db",
     "DatabaseManager",
     "get_db",
@@ -140,7 +89,6 @@ __all__ = [
     "get_write_db",
     "BaseModel",
     "BaseRepository",
-    # ========== Redis & Cache ==========
     "redis_manager",
     "RedisManager",
     "cached",
@@ -151,17 +99,14 @@ __all__ = [
     "DistributedLock",
     "RedisQueue",
     "SessionStore",
-    # ========== Middlewares ==========
     "setup_middlewares",
     "limiter",
-    # ========== Logging ==========
     "get_logger",
     "setup_logging",
     "JSONFormatter",
     "ColoredFormatter",
     "LoggingContext",
     "DataMasker",
-    # ========== Exceptions ==========
     "setup_exception_handlers",
     "BaseAppException",
     "ValidationException",
@@ -170,13 +115,10 @@ __all__ = [
     "NotFoundException",
     "ConflictException",
     "RateLimitException",
-    # ========== Routers ==========
     "auto_load_routers",
     "print_routes_table",
-    # ========== Security - Password ==========
     "hash_password",
     "verify_password",
-    # ========== Security - JWT ==========
     "JWTManager",
     "TokenPayload",
     "TokenResponse",
@@ -184,7 +126,6 @@ __all__ = [
     "create_refresh_token",
     "verify_token",
     "decode_token",
-    # ========== Security - Authentication ==========
     "get_current_user",
     "get_current_active_user",
     "get_token_payload",
@@ -192,23 +133,18 @@ __all__ = [
     "require_auth",
     "require_active_user",
     "CurrentUser",
-    # ========== Security - Authorization ==========
     "require_roles",
     "require_permissions",
     "require_all_roles",
-    # ========== Utilities - Timezone ==========
     "utcnow",
     "now",
     "to_timezone",
     "to_utc",
     "get_timezone",
     "format_datetime",
-    # ========== I18n ==========
-    "LocaleManager",
-    "LocaleContext",
-    "get_locale",
-    "current_locale",
-    "get_translations",
-    "get_babel_locale",
     "_",
+    "n_",
+    "get_language_from_request",
+    "translation_manager",
+    "current_language",
 ]
