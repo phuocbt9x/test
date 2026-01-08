@@ -161,11 +161,15 @@ class RouterLoader:
                 if errors:
                     logger.error(f"Router validation failed: {module_path} - {errors}")
                     return None
-            metadata = self._process_router(router, module_path, str(file_path))
-            self.app.include_router(router)
+
+            final_prefix = self._calculate_final_prefix(router.prefix)
+            self.app.include_router(router, prefix=self.config.prefix)
+            metadata = self._create_metadata(
+                router, module_path, str(file_path), final_prefix
+            )
             self._loaded[module_path] = metadata
             logger.info(
-                f"✓ Loaded: {module_path} -> {router.prefix} ({len(router.routes)} routes)"
+                f"Loaded: {module_path} -> {final_prefix} ({len(router.routes)} routes)"
             )
             return metadata
         except Exception as e:
@@ -184,6 +188,32 @@ class RouterLoader:
         if self.config.cache_modules:
             self._cache.set(module_path, module)
         return module
+
+    def _calculate_final_prefix(self, router_prefix: str) -> str:
+        if not self.config.prefix:
+            return router_prefix
+
+        return self.config.prefix + router_prefix
+
+    def _create_metadata(
+        self, router: APIRouter, module_path: str, file_path: str, final_prefix: str
+    ) -> RouterMetadata:
+        """Create router metadata."""
+        if not router.tags:
+            tag = self._generate_tag(module_path)
+            router.tags = [tag]
+
+        tags: List[str] = (
+            [str(tag) for tag in router.tags] if hasattr(router, "tags") else []
+        )
+
+        return RouterMetadata(
+            module_path=module_path,
+            file_path=file_path,
+            prefix=final_prefix,
+            tags=tags,
+            route_count=len(router.routes),
+        )
 
     def _process_router(
         self, router: APIRouter, module_path: str, file_path: str
