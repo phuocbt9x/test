@@ -15,7 +15,7 @@ Security Features:
 - User-level token revocation
 
 Usage:
-    # Create tokens
+
     from src.core.security.jwt import JWTManager
 
     token_pair = JWTManager.create_token_pair(
@@ -24,10 +24,10 @@ Usage:
         roles=["user", "admin"]
     )
 
-    # Verify token
+
     payload = JWTManager.verify_token(token_pair.access_token, token_type="access")
 
-    # Revoke token
+
     await JWTManager.revoke_token(token_pair.access_token)
 """
 
@@ -39,10 +39,9 @@ from jose import JWTError, jwt  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field
 
 from src.core.configs import settings
-from src.core.configs.redis import redis_manager
-from src.core.exceptions import AuthenticationException
-from src.core.exceptions.types import ErrorCode
-from src.core.utils.timezone import utcnow
+from src.core.exceptions import AuthenticationException, ErrorCode
+from src.core.i18n import __
+from src.core.utils import utcnow
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +57,6 @@ class TokenPayload(BaseModel):
     iss: str = Field(default=settings.JWT_ISSUER, description="Issuer")
     aud: str = Field(default=settings.JWT_AUDIENCE, description="Audience")
 
-    # Optional custom claims
     email: Optional[str] = None
     username: Optional[str] = None
     roles: list[str] = Field(default_factory=list)
@@ -125,7 +123,6 @@ class JWTManager:
         now = utcnow()
         expire = now + expires_delta
 
-        # Base payload
         payload: Dict[str, Any] = {
             "sub": str(subject),
             "exp": int(expire.timestamp()),
@@ -136,11 +133,9 @@ class JWTManager:
             "aud": settings.JWT_AUDIENCE,
         }
 
-        # Add additional claims
         if additional_claims:
             payload.update(additional_claims)
 
-        # Encode token
         token = jwt.encode(
             payload,
             settings.JWT_SECRET_KEY,
@@ -264,33 +259,36 @@ class JWTManager:
 
         except jwt.ExpiredSignatureError:
             raise AuthenticationException(
-                message="Token has expired", error_code=ErrorCode.TOKEN_EXPIRED
+                message=__("auth.token.expired"), error_code=ErrorCode.TOKEN_EXPIRED
             )
-        except jwt.JWTClaimsError as e:
+        except jwt.JWTClaimsError:
             raise AuthenticationException(
-                message=f"Invalid token claims: {str(e)}",
+                message=__("auth.token.invalid_claims"),
                 error_code=ErrorCode.INVALID_CLAIMS,
             )
         except JWTError as e:
             logger.error(f"JWT decode error: {e}")
             raise AuthenticationException(
-                message="Could not validate credentials",
+                message=__("auth.token.invalid"),
                 error_code=ErrorCode.TOKEN_INVALID,
             )
 
     @staticmethod
-    async def verify_token(
+    def verify_token_structure(
         token: str, token_type: Optional[str] = None
     ) -> TokenPayload:
         """
-        Verify and parse a JWT token (async version).
+        Verify JWT token structure and signature.
 
-        This method performs comprehensive token validation including:
+        This method performs JWT structure validation including:
         1. Signature verification
         2. Expiration check
         3. Token type validation
-        4. Blacklist check (via Redis)
-        5. User revocation check
+        4. Claims validation (issuer, audience)
+
+        Note:
+            Database validation (revocation check, user status) is handled
+            separately in dependencies.py for better separation of concerns.
 
         Args:
             token: JWT token string to verify
@@ -301,243 +299,32 @@ class JWTManager:
             TokenPayload: Parsed and validated token payload containing user claims
 
         Raises:
-            AuthenticationException: If token is invalid, expired, wrong type,
-                                   blacklisted, or user has been revoked
+            AuthenticationException: If token is invalid, expired, or wrong type
 
         Example:
-            >>> # Verify access token
-            >>> payload = await JWTManager.verify_token(
+            >>>
+            >>> payload = JWTManager.verify_token_structure(
             ...     token="eyJ0eXAiOiJKV1QiLCJhbGc...",
             ...     token_type="access"
             ... )
-            >>> print(payload.sub)  # User ID
+            >>> print(payload.sub)
             user_123
-            >>> print(payload.email)
-            user@example.com
         """
-        # Decode token
         payload = JWTManager.decode_token(token, verify=True)
 
-        # Check token type
         if token_type and payload.get("type") != token_type:
             raise AuthenticationException(
-                message=f"Invalid token type. Expected {token_type}",
+                message=__("auth.token.invalid_type", type=token_type),
                 error_code=ErrorCode.INVALID_TOKEN_TYPE,
             )
 
-        # Check if token is blacklisted (async)
-        jti = payload.get("jti")
-        if jti:
-            is_blacklisted = await JWTManager.is_token_blacklisted(jti)
-            if is_blacklisted:
-                raise AuthenticationException(
-                    message="Token has been revoked", error_code=ErrorCode.TOKEN_REVOKED
-                )
-
-        # Parse to TokenPayload
         try:
             return TokenPayload(**payload)
         except Exception as e:
             logger.error(f"Failed to parse token payload: {e}")
             raise AuthenticationException(
-                message="Invalid token payload", error_code=ErrorCode.TOKEN_INVALID
+                message=__("auth.token.invalid"), error_code=ErrorCode.TOKEN_INVALID
             )
-
-    @staticmethod
-    async def is_token_blacklisted(jti: str) -> bool:
-        """
-        Check if a token has been blacklisted (async version).
-
-        This method queries Redis to determine if a token with the given JWT ID
-        has been explicitly revoked/blacklisted.
-
-        Args:
-            jti: JWT ID (unique token identifier)
-
-        Returns:
-            bool: True if the token is blacklisted, False otherwise.
-                  Returns False if Redis is not initialized (fail-open for availability).
-
-        Example:
-            >>> is_blacklisted = await JWTManager.is_token_blacklisted("abc-123-def")
-            >>> if is_blacklisted:
-            ...     print("Token has been revoked")
-
-        Note:
-            This method fails open (returns False) if Redis is unavailable to
-            maintain system availability. For production systems with strict
-            security requirements, consider failing closed instead.
-        """
-        try:
-            if not redis_manager.is_initialized:
-                logger.warning("Redis not initialized, cannot check token blacklist")
-                return False
-
-            key = f"blacklist:token:{jti}"
-            value = await redis_manager.get(key)
-            return value is not None
-
-        except Exception as e:
-            logger.error(f"Error checking token blacklist: {e}")
-            # Fail open: allow access if blacklist check fails
-            # For stricter security, change to: return True (fail closed)
-            return False
-
-    @staticmethod
-    async def blacklist_token(jti: str, expires_in: int) -> bool:
-        """
-        Add token to blacklist.
-
-        Args:
-            jti: JWT ID
-            expires_in: Time until token naturally expires (seconds)
-
-        Returns:
-            True if successful
-        """
-        try:
-            if not redis_manager.is_initialized:
-                logger.warning("Redis not initialized, cannot blacklist token")
-                return False
-
-            key = f"blacklist:token:{jti}"
-            await redis_manager.set(key, "1", ttl=expires_in)
-            logger.info(f"Token {jti} blacklisted for {expires_in}s")
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to blacklist token: {e}")
-            return False
-
-    @staticmethod
-    async def revoke_token(token: str) -> bool:
-        """
-        Revoke a token by adding it to the blacklist.
-
-        This method extracts the token's JWT ID and expiration time, then adds
-        it to the Redis blacklist for the remaining duration until expiration.
-
-        Args:
-            token: JWT token string to revoke
-
-        Returns:
-            bool: True if token was successfully blacklisted, False otherwise
-
-        Example:
-            >>> # Revoke a user's token (e.g., during logout)
-            >>> success = await JWTManager.revoke_token(user_token)
-            >>> if success:
-            ...     print("Token revoked successfully")
-
-        Note:
-            The token is only blacklisted until its natural expiration time.
-            After expiration, the blacklist entry is automatically removed by Redis TTL.
-        """
-        try:
-            payload = JWTManager.decode_token(token, verify=False)
-            jti = payload.get("jti")
-            exp = payload.get("exp")
-
-            if not jti or not exp:
-                logger.error("Token missing jti or exp claim")
-                return False
-
-            # Calculate remaining time until expiration
-            now = int(utcnow().timestamp())
-            expires_in = max(0, exp - now)
-
-            return await JWTManager.blacklist_token(jti, expires_in)
-
-        except Exception as e:
-            logger.error(f"Failed to revoke token: {e}")
-            return False
-
-    @staticmethod
-    async def revoke_all_user_tokens(user_id: str) -> bool:
-        """
-        Revoke all tokens for a specific user.
-
-        This method sets a user-level revocation timestamp. All tokens issued
-        before this timestamp will be considered invalid, even if they haven't
-        expired yet.
-
-        Implementation Notes:
-            This is a simple user-level revocation mechanism. For production systems
-            with high security requirements, consider:
-            1. Storing individual token JTIs per user in Redis Sets
-            2. Using a user token version number that increments on revocation
-            3. Implementing a hybrid approach with both strategies
-
-        Args:
-            user_id: Unique identifier of the user whose tokens should be revoked
-
-        Returns:
-            bool: True if revocation was successful, False otherwise
-
-        Example:
-            >>> # Revoke all tokens when user changes password
-            >>> success = await JWTManager.revoke_all_user_tokens("user_123")
-            >>> if success:
-            ...     print("All user tokens revoked")
-
-            >>> # Use case: Force logout on all devices
-            >>> await JWTManager.revoke_all_user_tokens(user.id)
-
-        Note:
-            The revocation marker is stored with a TTL longer than the maximum
-            refresh token lifetime to ensure all tokens are properly invalidated.
-        """
-        try:
-            if not redis_manager.is_initialized:
-                logger.warning("Redis not initialized, cannot revoke user tokens")
-                return False
-
-            # Set user revocation marker with current timestamp
-            key = f"revoked:user:{user_id}"
-            # Set with long TTL (longer than max refresh token life)
-            ttl = settings.JWT_REFRESH_TOKEN_EXPIRE_SECONDS + 3600
-            revocation_timestamp = str(int(utcnow().timestamp()))
-
-            await redis_manager.set(key, revocation_timestamp, ttl=ttl)
-
-            logger.info(f"All tokens revoked for user {user_id}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to revoke user tokens: {e}")
-            return False
-
-    @staticmethod
-    async def is_user_revoked(user_id: str, issued_at: int) -> bool:
-        """
-        Check if user's tokens have been revoked.
-
-        Args:
-            user_id: User ID
-            issued_at: Token issued at timestamp
-
-        Returns:
-            True if user tokens revoked after this token was issued
-        """
-        try:
-            if not redis_manager.is_initialized:
-                return False
-
-            key = f"revoked:user:{user_id}"
-            revoked_at = await redis_manager.get(key)
-
-            if not revoked_at:
-                return False
-
-            return int(revoked_at) > issued_at
-
-        except Exception as e:
-            logger.error(f"Error checking user revocation: {e}")
-            return False
-
-
-# ==================== Convenience Functions ====================
-# These are simplified wrappers for common operations
 
 
 def create_access_token(user_id: str, **claims) -> str:
@@ -574,9 +361,14 @@ def create_refresh_token(user_id: str, **claims) -> str:
     return JWTManager.create_refresh_token(user_id, claims)
 
 
-async def verify_token(token: str, token_type: Optional[str] = None) -> TokenPayload:
+def verify_token_structure(
+    token: str, token_type: Optional[str] = None
+) -> TokenPayload:
     """
-    Verify a JWT token (async convenience wrapper).
+    Verify JWT token structure (convenience wrapper).
+
+    Note: This only verifies the token structure. Database validation
+    should be performed separately in the authentication flow.
 
     Args:
         token: JWT token string
@@ -589,9 +381,9 @@ async def verify_token(token: str, token_type: Optional[str] = None) -> TokenPay
         AuthenticationException: If token is invalid
 
     Example:
-        >>> payload = await verify_token(token, token_type="access")
+        >>> payload = verify_token_structure(token, token_type="access")
     """
-    return await JWTManager.verify_token(token, token_type)
+    return JWTManager.verify_token_structure(token, token_type)
 
 
 def decode_token(token: str) -> Dict[str, Any]:
@@ -610,6 +402,6 @@ def decode_token(token: str) -> Dict[str, Any]:
 
     Example:
         >>> payload = decode_token(token)
-        >>> print(payload['sub'])  # User ID
+        >>> print(payload['sub'])
     """
     return JWTManager.decode_token(token, verify=False)

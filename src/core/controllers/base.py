@@ -1,35 +1,121 @@
-from typing import Any, Dict, Generic, List, Optional, TypeVar
-from pydantic import BaseModel, Field
+from typing import Any, Dict, Generic, List, Optional, TypeVar, get_args
+from pydantic import BaseModel, Field, ConfigDict
 from fastapi import status
 from datetime import datetime
+from src.core.i18n import __
 
 T = TypeVar("T")
 
 
-class SuccessResponse(BaseModel, Generic[T]):
-    """Standard success response wrapper"""
+def _get_example_from_type(model_type: Any) -> Any:
+    if hasattr(model_type, "model_config"):
+        config = model_type.model_config
+        if isinstance(config, dict) and "json_schema_extra" in config:
+            extra = config["json_schema_extra"]
+            if isinstance(extra, dict) and "example" in extra:
+                return extra["example"]
+            elif callable(extra):
+                try:
+                    result = extra({}, model_type)
+                    if isinstance(result, dict) and "example" in result:
+                        return result["example"]
+                except Exception:
+                    pass
+    if hasattr(model_type, "Config") and hasattr(
+        model_type.Config, "json_schema_extra"
+    ):
+        extra = model_type.Config.json_schema_extra
+        if isinstance(extra, dict) and "example" in extra:
+            return extra["example"]
+    return None
 
+
+def _generate_success_response_example(
+    schema: Dict[str, Any], model_class: Any
+) -> Dict[str, Any]:
+    example = {
+        "success": True,
+        "message": __("messages.operation_completed"),
+        "data": None,
+        "timestamp": "2024-01-15T10:30:00Z",
+    }
+
+    if hasattr(model_class, "__origin__") or hasattr(model_class, "__args__"):
+        args = get_args(model_class)
+        if args:
+            generic_type = args[0]
+            data_example = _get_example_from_type(generic_type)
+            if data_example:
+                example["data"] = data_example
+    else:
+        if hasattr(model_class, "__orig_bases__"):
+            for base in model_class.__orig_bases__:
+                if hasattr(base, "__args__") and base.__args__:
+                    generic_type = base.__args__[0]
+                    data_example = _get_example_from_type(generic_type)
+                    if data_example:
+                        example["data"] = data_example
+                        break
+
+    return {"example": example}
+
+
+def _generate_paginated_response_example(
+    schema: Dict[str, Any], model_class: Any
+) -> Dict[str, Any]:
+    example = {
+        "success": True,
+        "message": __("messages.data_retrieved"),
+        "data": [],
+        "meta": {
+            "page": 1,
+            "per_page": 20,
+            "total": 100,
+            "total_pages": 5,
+            "has_next": True,
+            "has_prev": False,
+        },
+        "timestamp": "2024-01-15T10:30:00Z",
+    }
+
+    if hasattr(model_class, "__origin__") or hasattr(model_class, "__args__"):
+        args = get_args(model_class)
+        if args:
+            generic_type = args[0]
+            item_example = _get_example_from_type(generic_type)
+            if item_example:
+                example["data"] = [item_example]
+    else:
+        if hasattr(model_class, "__orig_bases__"):
+            for base in model_class.__orig_bases__:
+                if hasattr(base, "__args__") and base.__args__:
+                    generic_type = base.__args__[0]
+                    item_example = _get_example_from_type(generic_type)
+                    if item_example:
+                        example["data"] = [item_example]
+                        break
+
+    return {"example": example}
+
+
+class SuccessResponse(BaseModel, Generic[T]):
     success: bool = Field(default=True, description="Response status")
-    message: str = Field(default="Success", description="Response message")
+    message: str = Field(
+        default_factory=lambda: __("messages.operation_completed"),
+        description="Response message",
+        json_schema_extra={"example": __("messages.operation_completed")},
+    )
     data: Optional[T] = Field(default=None, description="Response data")
     timestamp: datetime = Field(
         default_factory=datetime.utcnow, description="Response timestamp"
     )
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "success": True,
-                "message": "Operation completed successfully",
-                "data": {"id": "123", "name": "Example"},
-                "timestamp": "2024-01-15T10:30:00Z",
-            }
-        }
+    model_config = ConfigDict(
+        json_schema_extra=_generate_success_response_example  # type: ignore[typeddict-item]
+    )
 
 
 class ErrorResponse(BaseModel):
-    """Standard error response wrapper"""
-
     success: bool = Field(default=False, description="Response status")
     message: str = Field(description="Error message")
     error_code: Optional[str] = Field(default=None, description="Error code")
@@ -42,7 +128,7 @@ class ErrorResponse(BaseModel):
         json_schema_extra = {
             "example": {
                 "success": False,
-                "message": "Validation error",
+                "message": __("messages.validation_error"),
                 "error_code": "VALIDATION_ERROR",
                 "details": {"field": "email", "issue": "Invalid format"},
                 "timestamp": "2024-01-15T10:30:00Z",
@@ -51,8 +137,6 @@ class ErrorResponse(BaseModel):
 
 
 class PaginationMeta(BaseModel):
-    """Pagination metadata"""
-
     page: int = Field(description="Current page number")
     per_page: int = Field(description="Items per page")
     total: int = Field(description="Total items count")
@@ -74,113 +158,62 @@ class PaginationMeta(BaseModel):
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    """Standard paginated response wrapper"""
-
     success: bool = Field(default=True, description="Response status")
-    message: str = Field(default="Success", description="Response message")
+    message: str = Field(
+        default_factory=lambda: __("messages.operation_completed"),
+        description="Response message",
+        json_schema_extra={"example": __("messages.data_retrieved")},
+    )
     data: List[T] = Field(default_factory=list, description="Response data items")
     meta: PaginationMeta = Field(description="Pagination metadata")
     timestamp: datetime = Field(
         default_factory=datetime.utcnow, description="Response timestamp"
     )
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "success": True,
-                "message": "Data retrieved successfully",
-                "data": [{"id": "1", "name": "Item 1"}, {"id": "2", "name": "Item 2"}],
-                "meta": {
-                    "page": 1,
-                    "per_page": 20,
-                    "total": 100,
-                    "total_pages": 5,
-                    "has_next": True,
-                    "has_prev": False,
-                },
-                "timestamp": "2024-01-15T10:30:00Z",
-            }
-        }
+    model_config = ConfigDict(
+        json_schema_extra=_generate_paginated_response_example  # type: ignore[typeddict-item]
+    )
 
 
 class BaseController:
-    """
-    Base controller class providing standard response methods.
-
-    This class ensures consistent API responses across all controllers.
-    All controller classes should inherit from this base class.
-    """
-
     @staticmethod
     def success(
         data: Any = None,
-        message: str = "Success",
+        message: str | None = None,
         status_code: int = status.HTTP_200_OK,
     ) -> SuccessResponse:
-        """
-        Create a standard success response.
-
-        Args:
-            data: Response data
-            message: Success message
-            status_code: HTTP status code
-
-        Returns:
-            SuccessResponse instance
-        """
         return SuccessResponse(
-            success=True, message=message, data=data, timestamp=datetime.utcnow()
+            success=True,
+            message=message or __("messages.operation_completed"),
+            data=data,
+            timestamp=datetime.utcnow(),
         )
 
     @staticmethod
-    def created(
-        data: Any = None, message: str = "Resource created successfully"
-    ) -> SuccessResponse:
-        """
-        Create a standard 201 Created response.
-
-        Args:
-            data: Created resource data
-            message: Success message
-
-        Returns:
-            SuccessResponse instance
-        """
+    def created(data: Any = None, message: str | None = None) -> SuccessResponse:
         return SuccessResponse(
-            success=True, message=message, data=data, timestamp=datetime.utcnow()
+            success=True,
+            message=message or __("messages.created_successfully"),
+            data=data,
+            timestamp=datetime.utcnow(),
         )
 
     @staticmethod
-    def updated(
-        data: Any = None, message: str = "Resource updated successfully"
-    ) -> SuccessResponse:
-        """
-        Create a standard update response.
-
-        Args:
-            data: Updated resource data
-            message: Success message
-
-        Returns:
-            SuccessResponse instance
-        """
+    def updated(data: Any = None, message: str | None = None) -> SuccessResponse:
         return SuccessResponse(
-            success=True, message=message, data=data, timestamp=datetime.utcnow()
+            success=True,
+            message=message or __("messages.updated_successfully"),
+            data=data,
+            timestamp=datetime.utcnow(),
         )
 
     @staticmethod
-    def deleted(message: str = "Resource deleted successfully") -> SuccessResponse:
-        """
-        Create a standard delete response.
-
-        Args:
-            message: Success message
-
-        Returns:
-            SuccessResponse instance
-        """
+    def deleted(message: str | None = None) -> SuccessResponse:
         return SuccessResponse(
-            success=True, message=message, data=None, timestamp=datetime.utcnow()
+            success=True,
+            message=message or __("messages.deleted_successfully"),
+            data=None,
+            timestamp=datetime.utcnow(),
         )
 
     @staticmethod
@@ -189,21 +222,8 @@ class BaseController:
         page: int,
         per_page: int,
         total: int,
-        message: str = "Data retrieved successfully",
+        message: str | None = None,
     ) -> PaginatedResponse:
-        """
-        Create a standard paginated response.
-
-        Args:
-            data: List of items
-            page: Current page number
-            per_page: Items per page
-            total: Total items count
-            message: Success message
-
-        Returns:
-            PaginatedResponse instance
-        """
         total_pages = (total + per_page - 1) // per_page
 
         meta = PaginationMeta(
@@ -217,7 +237,7 @@ class BaseController:
 
         return PaginatedResponse(
             success=True,
-            message=message,
+            message=message or __("messages.data_retrieved"),
             data=data,
             meta=meta,
             timestamp=datetime.utcnow(),
@@ -230,18 +250,6 @@ class BaseController:
         details: Optional[Dict[str, Any]] = None,
         status_code: int = status.HTTP_400_BAD_REQUEST,
     ) -> ErrorResponse:
-        """
-        Create a standard error response.
-
-        Args:
-            message: Error message
-            error_code: Error code
-            details: Additional error details
-            status_code: HTTP status code
-
-        Returns:
-            ErrorResponse instance
-        """
         return ErrorResponse(
             success=False,
             message=message,

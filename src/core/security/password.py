@@ -12,15 +12,13 @@ from src.core.configs import settings
 from src.core.exceptions import ValidationException
 
 
-# Initialize password context with argon2 (preferred) and bcrypt (fallback)
-# argon2 is more secure and resistant to GPU attacks
 pwd_context = CryptContext(
-    schemes=["argon2", "bcrypt"],  # argon2 first for new hashes
+    schemes=["argon2", "bcrypt"],
     deprecated="auto",
-    argon2__rounds=4,  # Time cost (iterations)
-    argon2__memory_cost=65536,  # Memory cost in KiB (64 MB)
-    argon2__parallelism=4,  # Number of parallel threads
-    bcrypt__rounds=settings.BCRYPT_ROUNDS,  # Cost factor (10-15)
+    argon2__rounds=4,
+    argon2__memory_cost=65536,
+    argon2__parallelism=4,
+    bcrypt__rounds=settings.BCRYPT_ROUNDS,
 )
 
 
@@ -105,7 +103,6 @@ class PasswordHasher:
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
             return False, "Password must contain at least one special character"
 
-        # Check for common weak passwords
         weak_passwords = {
             "password",
             "password123",
@@ -124,7 +121,6 @@ class PasswordHasher:
         return True, None
 
 
-# Convenience functions
 def hash_password(password: str) -> str:
     """Hash a password"""
     return PasswordHasher.hash(password)

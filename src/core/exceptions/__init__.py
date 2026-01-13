@@ -8,6 +8,7 @@ from .base import (
     RateLimitException,
     BadRequestException,
     UnauthorizedException,
+    ErrorCode,
 )
 from .handlers import setup_exception_handlers
 
@@ -22,4 +23,5 @@ __all__ = [
     "BadRequestException",
     "UnauthorizedException",
     "setup_exception_handlers",
+    "ErrorCode",
 ]
