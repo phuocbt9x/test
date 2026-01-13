@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -33,13 +33,6 @@ class AccessToken(BaseModel):
         DateTime(timezone=True), nullable=True
     )
 
-    __table_args__ = (
-        Index("ix_access_tokens_jti", "jti", unique=True),
-        Index("ix_access_tokens_expires_at", "expires_at"),
-        Index("ix_access_tokens_is_revoked", "is_revoked"),
-        Index("ix_access_tokens_user_id", "user_id"),
-    )
-
 
 class RefreshToken(BaseModel):
     __tablename__ = "refresh_tokens"
@@ -67,12 +60,4 @@ class RefreshToken(BaseModel):
     )
     revoked_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
-    )
-
-    __table_args__ = (
-        Index("ix_refresh_tokens_token", "token", unique=True),
-        Index("ix_refresh_tokens_jti", "jti", unique=True),
-        Index("ix_refresh_tokens_expires_at", "expires_at"),
-        Index("ix_refresh_tokens_is_revoked", "is_revoked"),
-        Index("ix_refresh_tokens_user_id", "user_id"),
     )
