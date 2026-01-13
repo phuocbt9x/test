@@ -52,3 +52,5 @@ logs/*_*.log
 # Alembic
 alembic/versions/*.pyc
 docker
+TIMIMA/*
+timima/*

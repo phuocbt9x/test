@@ -1,17 +1,64 @@
 # =============================================================================
-# Docker Compose - Timima FastAPI Project
+# Docker Compose - Timima FastAPI Project (Production/CI-CD)
 # =============================================================================
 version: '3.9'
 
 networks:
-  timima_network:
-    name: ${COMPOSE_PROJECT_NAME}_network
+  app_network:
+    name: ${APP_NAME}_network
     driver: bridge
 
 services:
+  # =============================================================================
+  # FastAPI Application Service (Python)
+  # =============================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.13}
+    image: timima_app:${APP_VERSION:-latest}
+    container_name: ${APP_NAME}_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./${APP_NAME}/logs:/app/logs
+      - ./${APP_NAME}/uploads:/app/uploads
+    networks:
+      - app_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # =============================================================================
+  # PostgreSQL Database Service
+  # =============================================================================
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: ${COMPOSE_PROJECT_NAME}_postgres
+    container_name: ${APP_NAME}_postgres
     restart: unless-stopped
     env_file:
       - .env
@@ -24,18 +71,11 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./${APP_NAME}/postgres_data:/var/lib/postgresql/data
+      - ./${APP_NAME}/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./${APP_NAME}/backups:/backups
     networks:
-      - timima_network
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+      - app_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
@@ -49,37 +89,13 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    command: >
-      postgres
-      -c shared_buffers=${POSTGRES_SHARED_BUFFERS:-512MB}
-      -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE:-2GB}
-      -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM:-256MB}
-      -c max_connections=${POSTGRES_MAX_CONNECTIONS:-200}
-      -c work_mem=${POSTGRES_WORK_MEM:-8MB}
-      -c shared_preload_libraries='pg_stat_statements'
-      -c pg_stat_statements.track=all
-      -c pg_stat_statements.max=10000
-      -c log_min_duration_statement=100
-      -c log_line_prefix='%t [%p]: user=%u,db=%d '
-      -c log_checkpoints=on
-      -c log_connections=on
-      -c log_disconnections=on
-      -c log_lock_waits=on
-      -c checkpoint_completion_target=0.9
-      -c wal_buffers=16MB
-      -c default_statistics_target=100
-      -c random_page_cost=1.1
-      -c effective_io_concurrency=200
-      -c min_wal_size=1GB
-      -c max_wal_size=4GB
-      -c max_worker_processes=4
-      -c max_parallel_workers_per_gather=2
-      -c max_parallel_workers=4
-      -c max_parallel_maintenance_workers=2
 
+  # =============================================================================
+  # Redis Cache Service
+  # =============================================================================
   redis:
     image: redis:7.4-alpine
-    container_name: ${COMPOSE_PROJECT_NAME}_redis
+    container_name: ${APP_NAME}_redis
     restart: unless-stopped
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -87,38 +103,9 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
-      - redis_data:/data
+      - ./${APP_NAME}/redis_data:/data
     networks:
-      - timima_network
-    command:
-      - sh
-      - -c
-      - |
-        if [ -n "$${REDIS_PASSWORD}" ]; then
-          PASS_ARG="--requirepass $${REDIS_PASSWORD}"
-        else
-          PASS_ARG=""
-        fi
-        exec redis-server \
-          $$PASS_ARG \
-          --maxmemory ${REDIS_MAX_MEMORY:-512mb} \
-          --maxmemory-policy ${REDIS_EVICTION_POLICY:-allkeys-lru} \
-          --save 900 1 \
-          --save 300 10 \
-          --save 60 10000 \
-          --appendonly yes \
-          --appendfsync everysec \
-          --tcp-backlog 511 \
-          --tcp-keepalive 300 \
-          --loglevel notice
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
+      - app_network
     healthcheck:
       test: |
         sh -c '
@@ -139,12 +126,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  postgres_data:
-    name: ${COMPOSE_PROJECT_NAME}_postgres_data
-    driver: local
-
-  redis_data:
-    name: ${COMPOSE_PROJECT_NAME}_redis_data
-    driver: local
