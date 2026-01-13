@@ -17,7 +17,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION:-3.14}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.13}
     image: timima_app:${APP_VERSION:-latest}
     container_name: ${APP_NAME}_app
     restart: unless-stopped
