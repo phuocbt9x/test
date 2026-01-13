@@ -22,17 +22,15 @@ test-build:
     - apt-get update && apt-get install -y --no-install-recommends gcc g++ libpq-dev
     - echo "Installing Python dependencies"
     - pip install --no-cache-dir uv
-    - uv venv
-    - source .venv/bin/activate
-    - uv pip install -e ".[dev]"
+    - uv sync --group dev
   script:
     - echo "Check format and lint"
-    - ruff check .
-    - ruff format --check .
+    - uv run ruff check .
+    - uv run ruff format --check .
     - echo "Type checking"
-    - mypy src/
+    - uv run mypy src/
     - echo "Running tests"
-    - pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
+    - uv run pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
     reports:
