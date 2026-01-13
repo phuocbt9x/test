@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 from fastapi import status
+from src.core.i18n import __
 from .types import ErrorCode, ErrorDetail
 
 
@@ -7,8 +8,8 @@ class BaseAppException(Exception):
     def __init__(
         self,
         message: str,
-        status_code: int = status.HTTP_400_BAD_REQUEST,
-        error_code: ErrorCode = ErrorCode.BAD_REQUEST,
+        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
+        error_code: ErrorCode = ErrorCode.INTERNAL_SERVER_ERROR,
         details: Optional[Union[List[ErrorDetail], Dict[str, Any]]] = None,
         headers: Optional[Dict[str, str]] = None,
     ):
@@ -23,9 +24,22 @@ class BaseAppException(Exception):
 class ValidationException(BaseAppException):
     def __init__(
         self,
-        message: str = "Validation error",
+        message: Optional[str] = None,
         details: Optional[List[ErrorDetail]] = None,
+        errors: Optional[Dict[str, List[str]]] = None,
     ):
+        if errors:
+            details_list = []
+            for field, messages in errors.items():
+                for msg in messages:
+                    details_list.append(
+                        ErrorDetail(field=field, message=msg, code="validation_error")
+                    )
+            details = details_list
+
+        if message is None:
+            message = __("exceptions.validation_error")
+
         super().__init__(
             message=message,
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -37,9 +51,12 @@ class ValidationException(BaseAppException):
 class AuthenticationException(BaseAppException):
     def __init__(
         self,
-        message: str = "Authentication failed",
+        message: Optional[str] = None,
         error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED,
     ):
+        if message is None:
+            message = __("exceptions.authentication_failed")
+
         super().__init__(
             message=message,
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -51,9 +68,12 @@ class AuthenticationException(BaseAppException):
 class AuthorizationException(BaseAppException):
     def __init__(
         self,
-        message: str = "Access denied",
+        message: Optional[str] = None,
         error_code: ErrorCode = ErrorCode.FORBIDDEN,
     ):
+        if message is None:
+            message = __("exceptions.access_denied")
+
         super().__init__(
             message=message,
             status_code=status.HTTP_403_FORBIDDEN,
@@ -63,9 +83,14 @@ class AuthorizationException(BaseAppException):
 
 class NotFoundException(BaseAppException):
     def __init__(self, resource: str = "Resource", resource_id: Optional[str] = None):
-        message = f"{resource} not found"
         if resource_id:
-            message = f"{resource} with ID '{resource_id}' not found"
+            message = __(
+                "exceptions.resource_not_found_with_id",
+                resource=resource,
+                resource_id=resource_id,
+            )
+        else:
+            message = __("exceptions.resource_not_found", resource=resource)
 
         super().__init__(
             message=message,
@@ -75,13 +100,14 @@ class NotFoundException(BaseAppException):
 
 
 class ConflictException(BaseAppException):
-    """Resource conflict exception."""
-
     def __init__(
         self,
-        message: str = "Resource already exists",
+        message: Optional[str] = None,
         error_code: ErrorCode = ErrorCode.CONFLICT,
     ):
+        if message is None:
+            message = __("exceptions.resource_already_exists")
+
         super().__init__(
             message=message,
             status_code=status.HTTP_409_CONFLICT,
@@ -100,7 +126,10 @@ class BusinessRuleException(BaseAppException):
 
 
 class ExternalServiceException(BaseAppException):
-    def __init__(self, service: str, message: str = "External service error"):
+    def __init__(self, service: str, message: Optional[str] = None):
+        if message is None:
+            message = __("exceptions.external_service_error")
+
         super().__init__(
             message=f"{service}: {message}",
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -110,8 +139,11 @@ class ExternalServiceException(BaseAppException):
 
 class RateLimitException(BaseAppException):
     def __init__(
-        self, message: str = "Rate limit exceeded", retry_after: Optional[int] = None
+        self, message: Optional[str] = None, retry_after: Optional[int] = None
     ):
+        if message is None:
+            message = __("exceptions.rate_limit_exceeded")
+
         headers = {"Retry-After": str(retry_after)} if retry_after else None
         super().__init__(
             message=message,
@@ -122,14 +154,15 @@ class RateLimitException(BaseAppException):
 
 
 class BadRequestException(BaseAppException):
-    """Bad request exception (400)"""
-
     def __init__(
         self,
-        message: str = "Bad request",
+        message: Optional[str] = None,
         error_code: ErrorCode = ErrorCode.BAD_REQUEST,
         details: Optional[Dict[str, Any]] = None,
     ):
+        if message is None:
+            message = __("exceptions.bad_request")
+
         super().__init__(
             message=message,
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -139,13 +172,14 @@ class BadRequestException(BaseAppException):
 
 
 class UnauthorizedException(BaseAppException):
-    """Unauthorized exception (401) - alias for AuthenticationException"""
-
     def __init__(
         self,
-        message: str = "Unauthorized",
+        message: Optional[str] = None,
         error_code: ErrorCode = ErrorCode.AUTHENTICATION_FAILED,
     ):
+        if message is None:
+            message = __("exceptions.unauthorized")
+
         super().__init__(
             message=message,
             status_code=status.HTTP_401_UNAUTHORIZED,
