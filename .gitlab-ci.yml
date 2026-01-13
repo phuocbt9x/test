@@ -114,7 +114,7 @@ deploying-dev:
     - ssh-keyscan -H $DEV_SSH_HOST >> ~/.ssh/known_hosts
   script:
     - echo "Deploying to server Development"
-    - ssh -o StrictHostKeyChecking=no $DEV_SSH_USER@$DEV_SSH_HOST "bash /var/www/html/timima01/backend/deploy-dev.sh"
+    - ssh -o StrictHostKeyChecking=no $DEV_SSH_USER@$DEV_SSH_HOST "cd /var/www/html/timima01/backend && bash deploy-dev.sh"
     - echo "Deployed successfully"
   only:
     - develop
