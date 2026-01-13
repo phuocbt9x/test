@@ -27,7 +27,7 @@ docker compose exec -T app alembic upgrade head 2>/dev/null || docker-compose ex
 
 # Health check
 echo "Performing health check..."
-MAX_RETRIES=10
+MAX_RETRIES=5
 RETRY_COUNT=0
 HEALTH_URL="http://localhost:8000/health"
 
@@ -38,7 +38,6 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
         warning "Health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying in 2 seconds..."
-        sleep 2
     fi
 done
 
