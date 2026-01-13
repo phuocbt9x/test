@@ -10,7 +10,7 @@ from slowapi.errors import RateLimitExceeded
 
 def create_validation_error_response(
     errors: Dict[str, list[str]],
-    status_code: int = status.HTTP_422_UNPROCESSABLE_ENTITY,
+    status_code: int = status.HTTP_422_UNPROCESSABLE_CONTENT,
     message: Optional[str] = None,
 ) -> Dict[str, Any]:
     return {
@@ -161,12 +161,12 @@ def setup_exception_handlers(app: FastAPI, debug: bool = False) -> None:
 
         response_content = create_validation_error_response(
             errors=errors_dict,
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             message=__("exceptions.validation_error"),
         )
 
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             content=response_content,
         )
 
@@ -174,7 +174,7 @@ def setup_exception_handlers(app: FastAPI, debug: bool = False) -> None:
     async def http_exception_handler(
         request: Request, exc: HTTPException
     ) -> JSONResponse:
-        if exc.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
+        if exc.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT:
             errors_dict = format_http_exception_detail(exc.detail)
             response_content = create_validation_error_response(
                 errors=errors_dict,
