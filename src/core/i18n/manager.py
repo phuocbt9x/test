@@ -163,9 +163,9 @@ async def get_language_from_request(request: Request) -> str:
     return lang
 
 
-def _(message: str, **kwargs) -> str:
+def __(message: str, **kwargs) -> str:
     return translation_manager.translate(message, **kwargs)
 
 
-def n_(singular: str, plural: str, n: int, **kwargs) -> str:
+def n__(singular: str, plural: str, n: int, **kwargs) -> str:
     return translation_manager.ntranslate(singular, plural, n, **kwargs)

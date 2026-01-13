@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
-from src.core.configs import settings, Environment
+from .setting import settings, Environment
 
 logger = logging.getLogger(__name__)
 
@@ -150,34 +150,28 @@ class DatabaseManager(metaclass=SingletonMeta):
         )
         is_production = settings.APP_ENV == Environment.PRODUCTION
 
-        # Use QueuePool for all environments (better performance)
-        # Development: smaller pool for resource efficiency
-        # Production: full pool for high concurrency
         engine_args: dict[str, object] = {
             "echo": settings.DB_ECHO,
-            "pool_pre_ping": True,  # Verify connections before use
-            # DO NOT set poolclass for async engine
+            "pool_pre_ping": True,
             "connect_args": {
                 "server_settings": {
                     "application_name": f"{settings.APP_NAME}_{'write' if is_write else 'read'}",
-                    "jit": "off",  # Disable JIT compilation for predictable performance
+                    "jit": "off",
                 },
-                "command_timeout": 60,  # Query timeout in seconds
-                "timeout": 10,  # Connection timeout in seconds
+                "command_timeout": 60,
+                "timeout": 10,
             },
         }
 
-        # Configure pool size based on environment
         if is_production:
             engine_args["pool_size"] = pool_size
             engine_args["max_overflow"] = max_overflow
             engine_args["pool_recycle"] = settings.DB_POOL_RECYCLE
             engine_args["pool_timeout"] = settings.DB_POOL_TIMEOUT
         else:
-            # Smaller pool for development to save resources
             engine_args["pool_size"] = 5
             engine_args["max_overflow"] = 10
-            engine_args["pool_recycle"] = 3600  # 1 hour
+            engine_args["pool_recycle"] = 3600
             engine_args["pool_timeout"] = 30
 
         return create_async_engine(database_url, **engine_args)
@@ -256,6 +250,24 @@ class DatabaseManager(metaclass=SingletonMeta):
     def is_initialized(self) -> bool:
         return self._initialized
 
+    def get_read_session(self) -> AsyncSession:
+        if not self._initialized:
+            raise RuntimeError(
+                "Database not initialized. Call await db.init() first in app lifespan."
+            )
+        if self._read_session_factory is None:
+            raise RuntimeError("Read session factory not available")
+        return self._read_session_factory()
+
+    def get_write_session(self) -> AsyncSession:
+        if not self._initialized:
+            raise RuntimeError(
+                "Database not initialized. Call await db.init() first in app lifespan."
+            )
+        if self._write_session_factory is None:
+            raise RuntimeError("Write session factory not available")
+        return self._write_session_factory()
+
     async def create_pgvector_extension(self) -> None:
         async with self.session(read_only=False) as session:
             await session.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
@@ -288,17 +300,17 @@ class DatabaseManager(metaclass=SingletonMeta):
                 pool = self._write_engine.pool
                 pool_status["write"] = {
                     "size": pool.size() if hasattr(pool, "size") else "N/A",
-                    "checked_out": pool.checkedout()
-                    if hasattr(pool, "checkedout")
-                    else "N/A",
+                    "checked_out": (
+                        pool.checkedout() if hasattr(pool, "checkedout") else "N/A"
+                    ),
                 }
             if self._read_engine and self._read_engine != self._write_engine:
                 pool = self._read_engine.pool
                 pool_status["read"] = {
                     "size": pool.size() if hasattr(pool, "size") else "N/A",
-                    "checked_out": pool.checkedout()
-                    if hasattr(pool, "checkedout")
-                    else "N/A",
+                    "checked_out": (
+                        pool.checkedout() if hasattr(pool, "checkedout") else "N/A"
+                    ),
                 }
         return status
 

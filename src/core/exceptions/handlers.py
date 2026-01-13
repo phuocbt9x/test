@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from src.core.utils.timezone import utcnow
-from fastapi import FastAPI, Request, status
+from src.core.i18n import __
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
@@ -50,37 +51,78 @@ def setup_exception_handlers(app: FastAPI, debug: bool = False) -> None:
             headers=exc.headers,
         )
 
-    @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
-    ) -> JSONResponse:
-        errors = []
-        for error in exc.errors():
-            field_path = (
-                ".".join(str(loc) for loc in error["loc"][1:])
-                if len(error["loc"]) > 1
-                else str(error["loc"][0])
-            )
-            errors.append(
-                {
-                    "field": field_path,
-                    "message": error["msg"],
-                    "type": error["type"],
-                }
-            )
+    def _format_validation_error(error: Dict[str, Any]) -> Dict[str, Any]:
+        """Format a single validation error"""
+        loc_start_index = 1 if error["loc"] and error["loc"][0] == "body" else 0
+        field_path = (
+            ".".join(str(loc) for loc in error["loc"][loc_start_index:])
+            if error.get("loc")
+            else None
+        )
 
+        error_type = error["type"]
+        msg = error["msg"]
+
+        if error_type == "missing":
+            field_name = field_path or "field"
+            field_key = f"field.{field_name}"
+            field_label = __(field_key)
+            if field_label == field_key:
+                field_label = field_name.replace("_", " ").title()
+            msg = __("validation.required", attribute=field_label)
+        elif msg.startswith("Value error, "):
+            msg = msg.replace("Value error, ", "", 1)
+
+        return {
+            "field": field_path,
+            "message": msg,
+            "type": error_type,
+        }
+
+    def _create_validation_error_response(
+        request: Request,
+        details: list,
+        status_code: int = status.HTTP_422_UNPROCESSABLE_ENTITY,
+    ) -> JSONResponse:
         response_content = create_error_response(
             request=request,
             error_code=ErrorCode.VALIDATION_ERROR,
             message="Input validation failed",
-            details=errors,
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            details=details,
+            status_code=status_code,
+        )
+        return JSONResponse(status_code=status_code, content=response_content)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        errors = [_format_validation_error(error) for error in exc.errors()]
+        return _create_validation_error_response(request, errors)
+
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(
+        request: Request, exc: HTTPException
+    ) -> JSONResponse:
+        if exc.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+            )
+
+        details = (
+            exc.detail
+            if isinstance(exc.detail, list)
+            else [
+                {
+                    "field": None,
+                    "message": exc.detail,
+                    "type": "http_exception",
+                }
+            ]
         )
 
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content=response_content,
-        )
+        return _create_validation_error_response(request, details)
 
     @app.exception_handler(IntegrityError)
     async def integrity_error_handler(

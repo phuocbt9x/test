@@ -5,36 +5,31 @@ Provides reusable dependencies for JWT authentication and authorization.
 """
 
 from typing import Optional, List
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
-from src.core.security.jwt import JWTManager, TokenPayload
-from src.core.exceptions import AuthenticationException, AuthorizationException
-from src.core.exceptions.types import ErrorCode
-
-from uuid import UUID
-from src.core.configs.database import db
-from src.modules.user.models import User
-from sqlalchemy import select
-from src.core.utils.timezone import utcnow
+from .jwt import JWTManager, TokenPayload
+from src.core.exceptions import (
+    AuthenticationException,
+    AuthorizationException,
+    ErrorCode,
+)
+from src.core.i18n import __
+from src.core.utils import utcnow
+from src.core.configs.database import get_read_db, get_write_db
 
 logger = logging.getLogger(__name__)
 
-# HTTP Bearer token scheme
 security = HTTPBearer(
     scheme_name="JWT",
     description="Enter JWT token",
-    auto_error=False,  # Don't auto raise 403, we handle it
+    auto_error=False,
 )
 
 
 class CurrentUser:
-    """
-    Current authenticated user data.
-    Extracted from JWT token.
-    """
-
     def __init__(self, token_payload: TokenPayload):
         self.user_id: str = token_payload.sub
         self.email: Optional[str] = token_payload.email
@@ -69,39 +64,68 @@ class CurrentUser:
 
 async def get_token_payload(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    read_session: AsyncSession = Depends(get_read_db),
+    write_session: AsyncSession = Depends(get_write_db),
 ) -> TokenPayload:
-    """
-    Extract and verify JWT token.
-
-    Args:
-        credentials: HTTP Bearer credentials from request
-
-    Returns:
-        Verified token payload
-
-    Raises:
-        AuthenticationException: If token is invalid or missing
-    """
     if not credentials:
         raise AuthenticationException(
-            message="Missing authentication token", error_code=ErrorCode.MISSING_TOKEN
+            message=__("auth.authentication_failed"),
+            error_code=ErrorCode.AUTHENTICATION_FAILED,
         )
 
     token = credentials.credentials
 
     try:
-        # Verify token
-        payload = await JWTManager.verify_token(token, token_type="access")
+        payload = JWTManager.decode_token(token, verify=True)
 
-        # Check if user's tokens have been revoked
-        is_revoked = await JWTManager.is_user_revoked(payload.sub, payload.iat)
-
-        if is_revoked:
+        if payload.get("type") != "access":
             raise AuthenticationException(
-                message="Token has been revoked", error_code=ErrorCode.TOKEN_REVOKED
+                message="Invalid token type. Expected access token",
+                error_code=ErrorCode.INVALID_TOKEN_TYPE,
             )
 
-        return payload
+        jti = payload.get("jti")
+        if jti:
+            from src.modules.auth import AccessTokenRepository
+            from src.modules.user import UserRepository
+
+            access_token_repo = AccessTokenRepository(read_session, write_session)
+            token_record = await access_token_repo.find_by_jti(jti)
+
+            if not token_record:
+                raise AuthenticationException(
+                    message=__("auth.token.not_found"),
+                    error_code=ErrorCode.TOKEN_NOT_FOUND,
+                )
+
+            if token_record.is_revoked:
+                raise AuthenticationException(
+                    message=__("auth.token.revoked"),
+                    error_code=ErrorCode.TOKEN_REVOKED,
+                )
+
+            if token_record.expires_at < utcnow():
+                raise AuthenticationException(
+                    message=__("auth.token.expired"),
+                    error_code=ErrorCode.TOKEN_EXPIRED,
+                )
+
+            user_repo = UserRepository(read_session, write_session)
+            user = await user_repo.get(token_record.user_id)
+
+            if not user:
+                raise AuthenticationException(
+                    message=__("auth.account.not_found"),
+                    error_code=ErrorCode.USER_NOT_FOUND,
+                )
+
+            if not user.is_active:
+                raise AuthenticationException(
+                    message=__("auth.account.inactive"),
+                    error_code=ErrorCode.USER_INACTIVE,
+                )
+
+        return TokenPayload(**payload)
 
     except AuthenticationException:
         raise
@@ -135,50 +159,10 @@ async def get_current_user(
 
 
 async def get_current_active_user(
+    request: Request,
     current_user: CurrentUser = Depends(get_current_user),
 ) -> CurrentUser:
-    """
-    Get current active user with database verification.
-
-    Checks user status in database:
-    - User exists
-    - is_active flag
-    - Account is not locked
-
-    Args:
-        current_user: Current user from token
-
-    Returns:
-        CurrentUser if active
-
-    Raises:
-        AuthenticationException: If user is inactive, locked, or not found
-    """
-
-    # Check user status in database (using read replica for performance)
-    async with db.session(read_only=True) as session:
-        user_id = UUID(current_user.user_id)
-        query = select(User).where(User.id == user_id)
-        result = await session.execute(query)
-        user = result.scalars().first()
-
-        if not user:
-            raise AuthenticationException(
-                message="User account not found", error_code=ErrorCode.USER_NOT_FOUND
-            )
-
-        if not user.is_active:
-            raise AuthenticationException(
-                message="User account is inactive", error_code=ErrorCode.USER_INACTIVE
-            )
-
-        # Check if account is locked
-        if user.locked_until and user.locked_until > utcnow():
-            raise AuthenticationException(
-                message="User account is locked. Please try again later.",
-                error_code=ErrorCode.ACCOUNT_LOCKED,
-            )
-
+    request.state.current_user = current_user
     return current_user
 
 
@@ -195,10 +179,8 @@ async def optional_auth(
         @app.get("/items")
         async def get_items(user: Optional[CurrentUser] = Depends(optional_auth)):
             if user:
-                # Show personalized items
                 pass
             else:
-                # Show public items
                 pass
 
     Args:
@@ -272,8 +254,8 @@ def require_permissions(*permissions: str):
     ) -> CurrentUser:
         if not current_user.has_any_permission(list(permissions)):
             raise AuthorizationException(
-                message=f"Required permissions: {', '.join(permissions)}",
-                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
+                message=__("auth.unauthorized"),
+                error_code=ErrorCode.UNAUTHORIZED,
             )
         return current_user
 
@@ -297,8 +279,8 @@ def require_all_roles(*roles: str):
     ) -> CurrentUser:
         if not current_user.has_all_roles(list(roles)):
             raise AuthorizationException(
-                message=f"Required all roles: {', '.join(roles)}",
-                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
+                message=__("auth.unauthorized"),
+                error_code=ErrorCode.UNAUTHORIZED,
             )
         return current_user
 
@@ -322,12 +304,12 @@ async def get_token_from_header(
     """
     if not credentials:
         raise AuthenticationException(
-            message="Missing authentication token", error_code=ErrorCode.MISSING_TOKEN
+            message=__("auth.authentication_failed"),
+            error_code=ErrorCode.AUTHENTICATION_FAILED,
         )
     return credentials.credentials
 
 
-# Convenience aliases
 require_auth = get_current_user
 require_active_user = get_current_active_user
 require_superuser = require_roles("admin")

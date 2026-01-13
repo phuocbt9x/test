@@ -29,6 +29,7 @@
 	"Created successfully": "Created successfully",
 	"Changes saved": "Changes saved",
 	"Operation completed": "Operation completed",
+	"Operation completed successfully": "Operation completed successfully",
 	"Something went wrong": "Something went wrong",
 	"An unexpected error occurred": "An unexpected error occurred",
 	"Network error": "Network error",
@@ -60,5 +61,12 @@
 	"Invalid credentials": "Invalid credentials",
 	"Account is disabled": "Account is disabled",
 	"Please verify your email": "Please verify your email",
-	"Showing {start} to {end} of {total} results": "Showing {start} to {end} of {total} results"
+	"Showing {start} to {end} of {total} results": "Showing {start} to {end} of {total} results",
+	"success": "Success",
+	"operation_completed": "Operation completed successfully",
+	"data_retrieved": "Data retrieved successfully",
+	"validation_error": "Validation error",
+	"created_successfully": "Resource created successfully",
+	"updated_successfully": "Resource updated successfully",
+	"deleted_successfully": "Resource deleted successfully"
 }
