@@ -10,7 +10,7 @@ from uuid import UUID
 
 from sqlalchemy import or_, select
 
-from src.core.databases.base_repository import BaseRepository
+from src.core.orm.base_repository import BaseRepository
 from .models import User
 
 
@@ -34,37 +34,22 @@ class UserRepository(BaseRepository[User]):
         """
         return await self.query().where(email=email.lower()).first()
 
-    async def find_by_username(self, username: str) -> Optional[User]:
+    async def find_by_email_or_name(self, identifier: str) -> Optional[User]:
         """
-        Find user by username.
+        Find user by email or name.
 
-        Performance: Uses indexed query on username column.
-        Uses BaseRepository query builder for consistency.
+        Useful for login where user can use either email or name.
 
         Args:
-            username: Username
-
-        Returns:
-            User if found, None otherwise
-        """
-        return await self.query().where(username=username.lower()).first()
-
-    async def find_by_email_or_username(self, identifier: str) -> Optional[User]:
-        """
-        Find user by email or username.
-
-        Useful for login where user can use either email or username.
-
-        Args:
-            identifier: Email or username
+            identifier: Email or name
 
         Returns:
             User if found, None otherwise
         """
         query = select(User).where(
-            or_(User.email == identifier.lower(), User.username == identifier.lower())
+            or_(User.email == identifier.lower(), User.name == identifier.lower())
         )
-        result = await self.session.execute(query)
+        result = await self.read_session.execute(query)
         return result.scalars().first()
 
     async def exists_by_email(
@@ -90,35 +75,9 @@ class UserRepository(BaseRepository[User]):
             query = select(User).where(
                 User.email == email.lower(), User.id != exclude_id
             )
-            result = await self.session.execute(query)
+            result = await self.read_session.execute(query)
             return result.scalars().first() is not None
         return await query_builder.exists()
-
-    async def exists_by_username(
-        self, username: str, exclude_id: Optional[UUID] = None
-    ) -> bool:
-        """
-        Check if username already exists.
-
-        Performance: Uses BaseRepository exists() method for optimal performance.
-
-        Args:
-            username: Username to check
-            exclude_id: User ID to exclude from check (for updates)
-
-        Returns:
-            True if username exists, False otherwise
-        """
-        if exclude_id:
-            # Need to manually add exclude condition since BaseRepository.where doesn't support !=
-            from sqlalchemy import select
-
-            query = select(User).where(
-                User.username == username.lower(), User.id != exclude_id
-            )
-            result = await self.session.execute(query)
-            return result.scalars().first() is not None
-        return await self.query().where(username=username.lower()).exists()
 
     async def get_active_users(self, page: int = 1, per_page: int = 20) -> dict:
         """
@@ -138,7 +97,7 @@ class UserRepository(BaseRepository[User]):
         result = await (
             self.query()
             .where(is_active=True)
-            .order_by("created_at", desc=True)
+            .order_by("created_at", order="desc")
             .paginate(page=page, per_page=per_page)
         )
 

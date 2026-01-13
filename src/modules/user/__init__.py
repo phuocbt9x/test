@@ -8,5 +8,7 @@ This module handles user management functionality including:
 """
 
 from .models import User
+from .repository import UserRepository
+from .service import UserService
 
-__all__ = ["User"]
+__all__ = ["User", "UserRepository", "UserService"]

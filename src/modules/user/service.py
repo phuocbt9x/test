@@ -17,7 +17,6 @@ from src.core.exceptions import (
     UnauthorizedException,
 )
 from src.core.security.password import PasswordHasher
-from src.core.utils.timezone import utcnow
 
 from .models import User
 from .repository import UserRepository
@@ -40,9 +39,10 @@ class UserService:
     - Single Responsibility Principle
     """
 
-    def __init__(self, session: AsyncSession):
-        self.session = session
-        self.repository = UserRepository(session)
+    def __init__(self, read_session: AsyncSession, write_session: AsyncSession):
+        self.read_session = read_session
+        self.write_session = write_session
+        self.repository = UserRepository(read_session, write_session)
         self.password_hasher = PasswordHasher()
 
     async def create_user(self, data: UserCreateRequest) -> User:
@@ -51,9 +51,8 @@ class UserService:
 
         Business Rules:
         - Email must be unique
-        - Username must be unique
         - Password is hashed before storage
-        - New users are active but unverified by default
+        - New users are active by default
 
         Args:
             data: User creation data
@@ -62,18 +61,12 @@ class UserService:
             Created user
 
         Raises:
-            ConflictException: If email or username already exists
+            ConflictException: If email already exists
         """
         # Check email uniqueness
         if await self.repository.exists_by_email(data.email):
             raise ConflictException(
                 message=f"Email '{data.email}' is already registered"
-            )
-
-        # Check username uniqueness
-        if await self.repository.exists_by_username(data.username):
-            raise ConflictException(
-                message=f"Username '{data.username}' is already taken"
             )
 
         # Hash password
@@ -82,18 +75,14 @@ class UserService:
         # Create user
         user_data = {
             "email": data.email.lower(),
-            "username": data.username.lower(),
-            "password_hash": password_hash,
-            "full_name": data.full_name,
+            "name": data.full_name or data.email.split("@")[0],
+            "password": password_hash,
             "phone": data.phone,
             "is_active": True,
-            "is_verified": False,
-            "is_superuser": False,
-            "failed_login_attempts": 0,
         }
 
         user = await self.repository.create(user_data)
-        await self.session.commit()
+        await self.write_session.commit()
 
         return user
 
@@ -119,17 +108,13 @@ class UserService:
         """Get user by email (returns None if not found)"""
         return await self.repository.find_by_email(email)
 
-    async def get_user_by_username(self, username: str) -> Optional[User]:
-        """Get user by username (returns None if not found)"""
-        return await self.repository.find_by_username(username)
-
     async def update_user(self, user_id: UUID, data: UserUpdateRequest) -> User:
         """
         Update user profile.
 
         Business Rules:
         - Only allowed fields can be updated
-        - Email and username changes require separate validation (not in this method)
+        - Email changes require separate validation (not in this method)
 
         Args:
             user_id: User UUID
@@ -146,6 +131,13 @@ class UserService:
 
         update_data = data.model_dump(exclude_unset=True)
 
+        # Map full_name to name (User model uses 'name' not 'full_name')
+        if "full_name" in update_data:
+            update_data["name"] = update_data.pop("full_name")
+
+        # Remove avatar_url if present (not in User model)
+        update_data.pop("avatar_url", None)
+
         # Validate update data if needed
         # For example, phone number format validation
         if "phone" in update_data and update_data["phone"]:
@@ -159,7 +151,7 @@ class UserService:
 
         if update_data:
             updated_user = await self.repository.update(user_id, update_data)
-            await self.session.commit()
+            await self.write_session.commit()
             return updated_user or user
 
         return user
@@ -190,7 +182,7 @@ class UserService:
         user = await self.get_user_by_id(user_id)
 
         # Verify current password
-        if not self.password_hasher.verify(data.current_password, user.password_hash):
+        if not self.password_hasher.verify(data.current_password, user.password):
             raise UnauthorizedException(message="Current password is incorrect")
 
         # Check new password is different
@@ -219,22 +211,21 @@ class UserService:
         await self.repository.update(
             user_id,
             {
-                "password_hash": new_password_hash,
-                "password_changed_at": utcnow(),
-                "failed_login_attempts": 0,  # Reset failed attempts
-                "locked_until": None,  # Unlock account on password change
+                "password": new_password_hash,
             },
         )
-        await self.session.commit()
+        await self.write_session.commit()
 
         # Revoke all user tokens after password change (security best practice)
         # Note: This requires AuthService - consider event-based architecture for better decoupling
         try:
             from src.modules.auth.repository import RefreshTokenRepository
 
-            refresh_token_repo = RefreshTokenRepository(self.session)
+            refresh_token_repo = RefreshTokenRepository(
+                self.read_session, self.write_session
+            )
             await refresh_token_repo.revoke_all_user_tokens(user_id)
-            await self.session.commit()
+            await self.write_session.commit()
         except Exception:
             # Log but don't fail password change if token revocation fails
             import logging
@@ -251,7 +242,7 @@ class UserService:
         """Deactivate user account"""
         user = await self.get_user_by_id(user_id)
         await self.repository.update(user_id, {"is_active": False})
-        await self.session.commit()
+        await self.write_session.commit()
         return user
 
     async def activate_user(self, user_id: UUID) -> User:
@@ -261,11 +252,9 @@ class UserService:
             user_id,
             {
                 "is_active": True,
-                "failed_login_attempts": 0,
-                "locked_until": None,
             },
         )
-        await self.session.commit()
+        await self.write_session.commit()
         return user
 
     async def list_users(self, page: int = 1, per_page: int = 20) -> dict:
@@ -287,5 +276,5 @@ class UserService:
         """
         await self.get_user_by_id(user_id)
         success = await self.repository.delete(user_id)
-        await self.session.commit()
+        await self.write_session.commit()
         return success
