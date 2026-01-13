@@ -1,5 +1,4 @@
 #!/bin/bash
-cd /var/www/html/timima01/backend
 
 # =============================================================================
 # Deployment Script for Timima Backend API (Development)
