@@ -6,7 +6,7 @@
 # Stage 1: Builder - Install dependencies
 # -----------------------------------------------------------------------------
 ARG PYTHON_VERSION=3.13
-FROM python:${PYTHON_VERSION}-slim as builder
+FROM python:${PYTHON_VERSION}-slim AS builder
 
 # Set working directory
 WORKDIR /build
