@@ -1,13 +1,9 @@
-"""
-Auth Module
+from .models import AccessToken, RefreshToken
+from .repository import AccessTokenRepository, RefreshTokenRepository
 
-This module handles authentication and authorization:
-- User login/logout
-- Token management (JWT)
-- Token blacklisting (DB-based)
-- User registration
-"""
-
-from .models import RefreshToken, TokenBlacklist
-
-__all__ = ["TokenBlacklist", "RefreshToken"]
+__all__ = [
+    "AccessToken",
+    "RefreshToken",
+    "AccessTokenRepository",
+    "RefreshTokenRepository",
+]

@@ -10,17 +10,18 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.configs.database import get_db_session
+from src.core.configs.database import get_read_db, get_write_db
 from src.core.security.dependencies import CurrentUser, get_current_active_user
 
 from .service import UserService
 
 
 async def get_user_service(
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    read_session: Annotated[AsyncSession, Depends(get_read_db)],
+    write_session: Annotated[AsyncSession, Depends(get_write_db)],
 ) -> UserService:
     """Dependency to get UserService instance"""
-    return UserService(session)
+    return UserService(read_session, write_session)
 
 
 async def get_current_user_or_admin(

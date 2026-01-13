@@ -1,540 +1,286 @@
-"""
-Auth Service
-
-Business logic layer for authentication operations.
-Implements JWT with database-backed blacklist instead of Redis.
-
-Design Patterns:
-- Service Layer Pattern
-- Repository Pattern for data access
-- Dependency Injection (SOLID - DIP)
-- Strategy Pattern for password validation
-"""
-
-from datetime import datetime, timedelta
-from typing import Optional, Protocol
-from uuid import UUID, uuid4
+from datetime import datetime
+from typing import Optional
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.configs import settings
-from src.core.exceptions import (
-    AuthenticationException,
+from src.core import (
+    __,
+    JWTManager,
+    PasswordHasher,
+    TokenPayload,
+    utcnow,
     UnauthorizedException,
-    ValidationException,
+    NotFoundException,
+    AuthenticationException,
+    ErrorCode,
+    validate_and_hash_password,
+    unique,
+    verify_password,
 )
-from src.core.exceptions.types import ErrorCode
-from src.core.security.jwt import JWTManager, TokenPayload
-from src.core.security.password import PasswordHasher, validate_and_hash_password
-from src.core.utils.timezone import utcnow
-from src.modules.user.models import User
-from src.modules.user.repository import UserRepository
+from src.modules.auth.schemas.request import UpdateCurrentUserRequest
+from src.modules.user import User, UserRepository
+from .models import AccessToken, RefreshToken
+from .repository import AccessTokenRepository, RefreshTokenRepository
 
-from .models import RefreshToken
-from .repository import RefreshTokenRepository, TokenBlacklistRepository
-from .schemas import LoginRequest, RegisterRequest
-from src.core.security.jwt import TokenResponse
-
-
-class IUserService(Protocol):
-    """Interface for UserService to follow Dependency Inversion Principle (DIP)"""
-
-    async def create_user(self, data) -> User:
-        """Create a new user"""
-        ...
+from .schemas import (
+    LoginRequest,
+    RegisterRequest,
+    RegisterResponse,
+    UserResponse,
+    TokenResponse,
+    LogoutResponse,
+)
 
 
 class AuthService:
-    """
-    Authentication Service
-
-    Handles:
-    - User login/logout
-    - Token generation and validation
-    - JWT blacklisting (DB-based)
-    - Refresh token rotation
-    - Session management
-
-    Design Patterns:
-    - Service Layer Pattern
-    - Repository Pattern for data access
-    - Dependency Injection (SOLID - DIP)
-    - Strategy Pattern for password validation
-    """
-
-    def __init__(
-        self,
-        session: AsyncSession,
-        user_service: Optional[IUserService] = None,
-    ):
-        """
-        Initialize AuthService with dependencies.
-
-        Args:
-            session: Database session
-            user_service: UserService instance (injected for DIP compliance)
-        """
-        self.session = session
-        self.user_repo = UserRepository(session)
-        self.blacklist_repo = TokenBlacklistRepository(session)
-        self.refresh_token_repo = RefreshTokenRepository(session)
+    def __init__(self, read_session: AsyncSession, write_session: AsyncSession):
+        self.read_session = read_session
+        self.write_session = write_session
+        self.user_repo = UserRepository(read_session, write_session)
+        self.access_token_repo = AccessTokenRepository(read_session, write_session)
+        self.refresh_token_repo = RefreshTokenRepository(read_session, write_session)
         self.password_hasher = PasswordHasher()
-        # Dependency Injection: UserService is injected, not created here
-        self._user_service = user_service
+        self.session = write_session
 
-    async def register(
-        self,
-        data: RegisterRequest,
-        device_info: Optional[str] = None,
-        ip_address: Optional[str] = None,
-    ) -> tuple[User, TokenResponse]:
-        """
-        Register a new user and return tokens.
-
-        Business Rules:
-        - Email must be unique
-        - Username must be unique
-        - Password strength is validated
-        - Password is hashed before storage
-        - User gets access + refresh token immediately
-
-        Args:
-            data: Registration data
-            device_info: User agent/device info
-            ip_address: Client IP
-
-        Returns:
-            Tuple of (created user, tokens)
-
-        Raises:
-            ConflictException: If email or username exists
-            ValidationException: If password is too weak
-        """
-        # Validate password strength
-        is_valid, error = self.password_hasher.validate_password_strength(data.password)
-        if not is_valid:
-            raise ValidationException(
-                message=error or "Password does not meet security requirements"
-            )
-
-        # Use injected UserService or create minimal user creation logic
-        # Following DIP: depend on abstraction, not concrete implementation
-        if self._user_service:
-            from src.modules.user.schemas import UserCreateRequest
-
-            user_data = UserCreateRequest(
-                email=data.email,
-                username=data.username,
-                password=data.password,
-                full_name=data.full_name,
-                phone=None,  # Optional field
-            )
-            user = await self._user_service.create_user(user_data)
+    async def verify_token_in_db(
+        self, jti: str, token_type: str = "access"
+    ) -> tuple[bool, Optional[AccessToken | RefreshToken]]:
+        token: Optional[AccessToken | RefreshToken] = None
+        if token_type == "access":
+            token = await self.access_token_repo.find_by_jti(jti)
         else:
-            # Fallback: Direct user creation (should be avoided in production)
-            # Check uniqueness
-            if await self.user_repo.exists_by_email(data.email):
-                from src.core.exceptions import ConflictException
+            token = await self.refresh_token_repo.find_by_jti(jti)
 
-                raise ConflictException(
-                    message=f"Email '{data.email}' is already registered"
-                )
+        if not token:
+            return False, None
 
-            if await self.user_repo.exists_by_username(data.username):
-                from src.core.exceptions import ConflictException
+        if token.is_revoked:
+            return False, token
 
-                raise ConflictException(
-                    message=f"Username '{data.username}' is already taken"
-                )
+        if token.expires_at < utcnow():
+            return False, token
 
-            # Hash password
-            password_hash = validate_and_hash_password(data.password)
+        return True, token
 
-            # Create user (using dict for repository.create method)
-            user_data_dict: dict[str, str | int | bool | None] = {
-                "email": data.email.lower(),
-                "username": data.username.lower(),
-                "password_hash": password_hash,
-                "full_name": data.full_name,
-                "is_active": True,
-                "is_verified": False,
-                "is_superuser": False,
-                "failed_login_attempts": 0,
-            }
-            user = await self.user_repo.create(user_data_dict)
+    async def register(self, data: RegisterRequest) -> RegisterResponse:
+        await unique(data.email, User, "email", field_label=__("field.email"))
 
-        # Generate tokens
-        tokens = await self._create_token_pair(
-            user=user,
-            device_info=device_info,
-            ip_address=ip_address,
+        user_data = {
+            "name": data.name,
+            "email": data.email.lower(),
+            "password": validate_and_hash_password(data.password),
+            "phone": data.phone,
+            "line_user_id": data.line_user_id,
+            "is_active": data.is_active if data.is_active else True,
+            "is_admin": data.is_admin if data.is_admin else False,
+        }
+
+        user = await self.user_repo.create(user_data)
+        tokens = await self._create_token_pair(user)
+        await self.session.commit()
+
+        return RegisterResponse(
+            access_token=tokens.access_token,
+            refresh_token=tokens.refresh_token,
+            token_type=tokens.token_type,
+            expires_in=tokens.expires_in,
+            user_info=UserResponse.model_validate(user),
         )
 
-        await self.session.commit()
-        return user, tokens
+    async def login(self, data: LoginRequest) -> RegisterResponse:
+        user = await self.user_repo.find_by_email(data.email.lower())
 
-    async def login(
-        self,
-        data: LoginRequest,
-        device_info: Optional[str] = None,
-        ip_address: Optional[str] = None,
-    ) -> tuple[User, TokenResponse]:
-        """
-        Authenticate user and return tokens.
+        if not user or not verify_password(data.password, user.password):
+            raise UnauthorizedException(message=__("auth.login.failed"))
 
-        Business Rules:
-        - User can login with email or username
-        - Password must match
-        - Account must be active
-        - Failed login attempts are tracked
-        - Account locks after max failed attempts
-
-        Args:
-            data: Login credentials
-            device_info: User agent/device info
-            ip_address: Client IP
-
-        Returns:
-            Tuple of (user, tokens)
-
-        Raises:
-            UnauthorizedException: If credentials invalid or account locked
-        """
-        # Find user by email or username
-        user = await self.user_repo.find_by_email_or_username(data.email)
-
-        if not user:
-            raise UnauthorizedException(message="Invalid email or password")
-
-        # Check if account is locked
-        if user.locked_until and user.locked_until > utcnow():
-            raise UnauthorizedException(message="Account is locked. Try again later.")
-
-        # Verify password with constant-time comparison
-        if not self.password_hasher.verify(data.password, user.password_hash):
-            # Increment failed login attempts (security: prevent brute force)
-            await self._handle_failed_login(user)
-            await self.session.commit()
-            # Use generic error message to prevent user enumeration
-            raise UnauthorizedException(message="Invalid email or password")
-
-        # Check if account is active
         if not user.is_active:
-            raise UnauthorizedException(message="Account is deactivated")
+            raise UnauthorizedException(message=__("auth.account.inactive"))
 
-        # Reset failed login attempts and update last login
-        await self.user_repo.update(
-            user.id,
-            {
-                "failed_login_attempts": 0,
-                "locked_until": None,
-                "last_login_at": utcnow(),
-            },
-        )
-
-        # Generate tokens
-        tokens = await self._create_token_pair(
-            user=user,
-            device_info=device_info,
-            ip_address=ip_address,
-        )
-
+        tokens = await self._create_token_pair(user)
         await self.session.commit()
-        return user, tokens
+
+        return RegisterResponse(
+            access_token=tokens.access_token,
+            refresh_token=tokens.refresh_token,
+            token_type=tokens.token_type,
+            expires_in=tokens.expires_in,
+            user_info=UserResponse.model_validate(user),
+        )
 
     async def logout(
         self,
         access_token: str,
-        refresh_token: Optional[str] = None,
-    ) -> None:
-        """
-        Logout user by blacklisting tokens.
+    ) -> LogoutResponse:
+        try:
+            payload = JWTManager.decode_token(access_token, verify=False)
+            user_id_str = payload.get("sub")
 
-        Args:
-            access_token: Access token to blacklist
-            refresh_token: Refresh token to revoke (optional)
+            if not user_id_str:
+                raise AuthenticationException(
+                    message="Invalid token: missing user id",
+                    error_code=ErrorCode.TOKEN_INVALID,
+                )
 
-        Raises:
-            AuthenticationException: If token is invalid
-        """
-        # Blacklist access token
-        await self._blacklist_token(token=access_token, reason="logout")
+            user_id = UUID(user_id_str)
+            await self.access_token_repo.revoke_all_user_tokens(user_id)
+            await self.refresh_token_repo.revoke_all_user_tokens(user_id)
 
-        # Revoke refresh token if provided
-        if refresh_token:
-            try:
-                payload = JWTManager.decode_token(refresh_token, verify=False)
-                jti = payload.get("jti")
-                if jti:
-                    await self.refresh_token_repo.revoke_token(jti)
-            except Exception:
-                pass  # Ignore errors for refresh token
+            await self.session.commit()
+            return LogoutResponse(message=__("auth.logout.success"))
+        except Exception:
+            return LogoutResponse(message=__("auth.logout.failed"))
 
-        await self.session.commit()
+    async def refresh_access_token(self, refresh_token: str) -> TokenResponse:
+        payload = JWTManager.decode_token(refresh_token, verify=True)
 
-    async def refresh_access_token(
-        self,
-        refresh_token: str,
-        device_info: Optional[str] = None,
-        ip_address: Optional[str] = None,
-    ) -> TokenResponse:
-        """
-        Refresh access token using refresh token.
-
-        Implements token rotation for security:
-        - Old refresh token is revoked
-        - New refresh token is issued
-        - New access token is issued
-
-        Args:
-            refresh_token: Current refresh token
-            device_info: User agent/device info
-            ip_address: Client IP
-
-        Returns:
-            New token pair
-
-        Raises:
-            AuthenticationException: If refresh token is invalid or revoked
-        """
-        # Verify refresh token
-        payload = await self.verify_token(refresh_token, token_type="refresh")
-
-        # Check if refresh token exists in DB and is not revoked
-        refresh_token_record = await self.refresh_token_repo.find_by_jti(payload.jti)
-
-        if not refresh_token_record:
+        if payload.get("type") != "refresh":
             raise AuthenticationException(
-                message="Refresh token not found", error_code=ErrorCode.TOKEN_NOT_FOUND
+                message=__("auth.token.invalid_type").format(type="refresh"),
+                error_code=ErrorCode.INVALID_TOKEN_TYPE,
             )
 
-        if refresh_token_record.is_revoked:
+        jti = payload.get("jti")
+        if not jti:
             raise AuthenticationException(
-                message="Refresh token has been revoked",
+                message=__("auth.token.invalid"), error_code=ErrorCode.TOKEN_INVALID
+            )
+
+        is_valid, token_record = await self.verify_token_in_db(
+            jti, token_type="refresh"
+        )
+        if not is_valid or not token_record:
+            raise AuthenticationException(
+                message=__("auth.token.not_found"),
                 error_code=ErrorCode.TOKEN_REVOKED,
             )
 
-        if refresh_token_record.expires_at < utcnow():
-            raise AuthenticationException(
-                message="Refresh token has expired", error_code=ErrorCode.TOKEN_EXPIRED
-            )
+        user = await self.user_repo.get(token_record.user_id)
 
-        # Get user
-        user = await self.user_repo.get(refresh_token_record.user_id)
         if not user or not user.is_active:
             raise AuthenticationException(
-                message="User not found or inactive", error_code=ErrorCode.USER_INACTIVE
+                message=__("auth.account.not_found"), error_code=ErrorCode.USER_INACTIVE
             )
 
-        # Revoke old refresh token
-        await self.refresh_token_repo.revoke_token(payload.jti)
+        user_id_uuid = UUID(str(user.id))
+        await self.refresh_token_repo.revoke_all_user_tokens(user_id_uuid)
+        await self.access_token_repo.revoke_all_user_tokens(user_id_uuid)
 
-        # Create new token pair (token rotation)
-        tokens = await self._create_token_pair(
-            user=user,
-            device_info=device_info or refresh_token_record.device_info,
-            ip_address=ip_address or refresh_token_record.ip_address,
-            family_id=UUID(str(refresh_token_record.family_id))
-            if refresh_token_record.family_id
-            else None,
-            parent_jti=payload.jti,
-        )
-
-        # Mark old token as used
-        refresh_token_record.used_at = utcnow()
-
+        tokens = await self._create_token_pair(user)
         await self.session.commit()
+
         return tokens
+
+    async def refresh_token(self, refresh_token: str) -> TokenResponse:
+        return await self.refresh_access_token(refresh_token)
 
     async def verify_token(
         self, token: str, token_type: Optional[str] = None
     ) -> TokenPayload:
-        """
-        Verify JWT token and check blacklist (DB-based).
-
-        Args:
-            token: JWT token
-            token_type: Expected token type
-
-        Returns:
-            Token payload
-
-        Raises:
-            AuthenticationException: If token is invalid or blacklisted
-        """
-        # Decode and verify token signature
         payload = JWTManager.decode_token(token, verify=True)
 
-        # Check token type
         if token_type and payload.get("type") != token_type:
             raise AuthenticationException(
-                message=f"Invalid token type. Expected {token_type}",
+                message=__("auth.token.invalid_type").format(type=token_type),
                 error_code=ErrorCode.INVALID_TOKEN_TYPE,
             )
 
-        # Check if token is blacklisted (DB check)
         jti = payload.get("jti")
         if jti:
-            is_blacklisted = await self.blacklist_repo.is_token_blacklisted(jti)
-            if is_blacklisted:
+            is_valid, _ = await self.verify_token_in_db(
+                jti, token_type=token_type or payload.get("type", "access")
+            )
+            if not is_valid:
                 raise AuthenticationException(
-                    message="Token has been revoked", error_code=ErrorCode.TOKEN_REVOKED
+                    message=__("auth.token.revoked"),
+                    error_code=ErrorCode.TOKEN_REVOKED,
                 )
 
-        # Parse to TokenPayload
         return TokenPayload(**payload)
 
-    async def revoke_all_user_tokens(
-        self, user_id: UUID, reason: str = "user_action"
-    ) -> int:
-        """
-        Revoke all tokens for a user (e.g., on password change).
+    async def update_current_user(
+        self, user_id: UUID, data: dict | UpdateCurrentUserRequest
+    ) -> User:
+        if isinstance(data, UpdateCurrentUserRequest):
+            data = data.model_dump(exclude_none=True)
+        update_data = {k: v for k, v in data.items() if v is not None}
+        update_data.pop("email", None)
+        password = update_data.pop("password", None)
 
-        Args:
-            user_id: User ID
-            reason: Revocation reason
+        password_changed = False
+        if password:
+            update_data["password"] = validate_and_hash_password(password)
+            password_changed = True
 
-        Returns:
-            Number of tokens revoked
-        """
-        count = await self.refresh_token_repo.revoke_all_user_tokens(user_id)
+        if not update_data:
+            user = await self.user_repo.get(user_id)
+            if not user:
+                raise NotFoundException(resource="User", resource_id=str(user_id))
+            return user
+
+        user = await self.user_repo.update(user_id, update_data)
+        if not user:
+            raise NotFoundException(resource="User", resource_id=str(user_id))
+
+        if password_changed:
+            await self.access_token_repo.revoke_all_user_tokens(user_id)
+            await self.refresh_token_repo.revoke_all_user_tokens(user_id)
+
         await self.session.commit()
-        return count
+        return user
 
-    async def get_active_sessions(self, user_id: UUID) -> list[RefreshToken]:
-        """
-        Get all active sessions for a user.
+    async def get_current_user(self, user_id: str) -> User:
+        user = await self.user_repo.get(UUID(user_id))
+        if not user:
+            raise NotFoundException(resource="User", resource_id=user_id)
+        return user
 
-        Returns list of active refresh tokens representing user's logged-in devices.
-        """
-        return await self.refresh_token_repo.get_user_active_sessions(user_id)
-
-    async def revoke_session(self, user_id: UUID, session_id: UUID) -> bool:
-        """
-        Revoke a specific session.
-
-        Args:
-            user_id: User ID (for authorization)
-            session_id: Refresh token ID
-
-        Returns:
-            True if revoked successfully
-        """
-        # Get refresh token
-        token = await self.refresh_token_repo.get(session_id)
-        if not token or token.user_id != user_id:
-            return False
-
-        # Revoke it
-        success = await self.refresh_token_repo.revoke_token(token.jti)
-        await self.session.commit()
-        return success
-
-    # ==================== Private Helper Methods ====================
-
-    async def _create_token_pair(
-        self,
-        user: User,
-        device_info: Optional[str] = None,
-        ip_address: Optional[str] = None,
-        family_id: Optional[UUID] = None,
-        parent_jti: Optional[str] = None,
-    ) -> TokenResponse:
-        """
-        Create access and refresh token pair.
-
-        Args:
-            user: User object
-            device_info: User agent/device info
-            ip_address: Client IP
-            family_id: Token family ID for rotation
-            parent_jti: Parent token JTI
-
-        Returns:
-            Token response with both tokens
-        """
-        # Create tokens using JWTManager
+    async def _create_token_pair(self, user: User) -> TokenResponse:
         token_pair = JWTManager.create_token_pair(
             user_id=str(user.id),
             email=user.email,
-            username=user.username,
-            roles=["admin"] if user.is_superuser else ["user"],
+            username=user.name,
+            roles=["admin"] if user.is_admin else ["user"],
         )
 
-        # Extract refresh token JTI and expiration
+        access_payload = JWTManager.decode_token(token_pair.access_token, verify=False)
         refresh_payload = JWTManager.decode_token(
             token_pair.refresh_token, verify=False
         )
+
+        access_jti = access_payload.get("jti")
+        access_exp = access_payload.get("exp")
         refresh_jti = refresh_payload.get("jti")
         refresh_exp = refresh_payload.get("exp")
 
-        # Store refresh token in database
-        if refresh_jti and refresh_exp:
-            expires_at = datetime.fromtimestamp(refresh_exp)
-            await self.refresh_token_repo.store_refresh_token(
-                jti=refresh_jti,
-                user_id=UUID(str(user.id)),
-                expires_at=expires_at,
-                device_info=device_info,
-                ip_address=ip_address,
-                family_id=family_id or uuid4(),  # Create new family if not provided
-                parent_jti=parent_jti,
+        if access_jti and access_exp:
+            expires_at = datetime.fromtimestamp(access_exp, tz=utcnow().tzinfo)
+            await self.access_token_repo.create(
+                {
+                    "user_id": user.id,
+                    "jti": access_jti,
+                    "expires_at": expires_at,
+                    "is_revoked": False,
+                }
             )
 
-        return token_pair
+        if refresh_jti and refresh_exp:
+            expires_at = datetime.fromtimestamp(refresh_exp, tz=utcnow().tzinfo)
+            await self.refresh_token_repo.create(
+                {
+                    "user_id": user.id,
+                    "token": token_pair.refresh_token,
+                    "jti": refresh_jti,
+                    "expires_at": expires_at,
+                    "is_revoked": False,
+                }
+            )
 
-    async def _blacklist_token(self, token: str, reason: str = "logout") -> None:
-        """
-        Add token to blacklist (DB-based for consistency).
+        await self.session.commit()
 
-        Args:
-            token: JWT token
-            reason: Revocation reason
-        """
-        try:
-            payload = JWTManager.decode_token(token, verify=False)
-            jti = payload.get("jti")
-            user_id = payload.get("sub")
-            exp = payload.get("exp")
-            token_type = payload.get("type", "access")
-
-            if jti and user_id and exp:
-                expires_at = datetime.fromtimestamp(exp, tz=utcnow().tzinfo)
-                # Store last 8 chars of token for debugging (not full token for security)
-                token_signature = token[-8:] if len(token) > 8 else None
-
-                await self.blacklist_repo.blacklist_token(
-                    jti=jti,
-                    user_id=UUID(user_id),
-                    token_type=token_type,
-                    expires_at=expires_at,
-                    reason=reason,
-                    token_signature=token_signature,
-                )
-        except Exception as e:
-            # Log error but don't fail logout (graceful degradation)
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to blacklist token: {e}", exc_info=True)
-
-    async def _handle_failed_login(self, user: User) -> None:
-        """
-        Handle failed login attempt.
-
-        Increments failed login counter and locks account if needed.
-
-        Args:
-            user: User object
-        """
-        failed_attempts = user.failed_login_attempts + 1
-        update_data: dict[str, int | datetime | None] = {
-            "failed_login_attempts": failed_attempts
-        }
-
-        # Lock account if max attempts exceeded
-        if failed_attempts >= settings.MAX_LOGIN_ATTEMPTS:
-            lockout_duration = timedelta(seconds=settings.ACCOUNT_LOCKOUT_DURATION)
-            update_data["locked_until"] = utcnow() + lockout_duration
-
-        await self.user_repo.update(user.id, update_data)
+        return TokenResponse(
+            access_token=token_pair.access_token,
+            refresh_token=token_pair.refresh_token,
+            token_type=token_pair.token_type,
+            expires_in=token_pair.expires_in,
+        )
