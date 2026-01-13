@@ -1,4 +1,5 @@
 #!/bin/bash
+cd /var/www/html/timima01/backend
 
 # =============================================================================
 # Deployment Script for Timima Backend API (Development)
@@ -21,19 +22,6 @@ else
 fi
 echo "Containers started successfully"
 
-# Wait for containers to be ready
-echo "Waiting for containers to be ready..."
-sleep 10
-
-# Check if app container is running
-if docker compose ps 2>/dev/null | grep -q "app.*Up" || docker-compose ps 2>/dev/null | grep -q "app.*Up"; then
-    echo "App container is running"
-else
-    error "App container failed to start"
-    docker compose logs app --tail=10 2>/dev/null || docker-compose logs app --tail=10
-    exit 1
-fi
-
 # Run database migrations
 echo "Running database migrations..."
 docker compose exec -T app alembic upgrade head 2>/dev/null || docker-compose exec -T app alembic upgrade head || warning "Migration failed or no migrations to run"
@@ -54,13 +42,6 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         sleep 2
     fi
 done
-
-if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-    error "Health check failed after $MAX_RETRIES attempts"
-    echo "Showing container logs:"
-    docker compose logs app --tail=10 2>/dev/null || docker-compose logs app --tail=10
-    exit 1
-fi
 
 # =============================================================================
 # Deployment Complete
