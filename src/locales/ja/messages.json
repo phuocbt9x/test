@@ -68,5 +68,6 @@
 	"validation_error": "バリデーションエラー",
 	"created_successfully": "リソースの作成に成功しました",
 	"updated_successfully": "リソースの更新に成功しました",
-	"deleted_successfully": "リソースの削除に成功しました"
+	"deleted_successfully": "リソースの削除に成功しました",
+	"not_found": "{attribute}が登録されていません。"
 }
