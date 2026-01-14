@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+from starlette.requests import Request
 from src.core import (
     BaseController,
     ErrorResponse,
@@ -11,6 +12,7 @@ from src.core import (
     get_token_from_header,
     CurrentUser,
     __,
+    limiter,
 )
 from src.utils import create_common_responses
 from src.modules.auth.schemas import UpdateCurrentUserRequest
@@ -62,7 +64,9 @@ async def register(
         include_unauthorized=True,
     ),
 )
+@limiter.limit("1/minute")
 async def login(
+    request: Request,
     payload: LoginRequest,
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),

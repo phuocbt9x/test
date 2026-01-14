@@ -2,35 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-_DEFAULT_TEST_ENV = {
-    "APP_ENV": "development",
-    "APP_NAME": "TIMIMA_TEST",
-    "APP_HOST": "0.0.0.0",
-    "APP_PORT": "8000",
-    "APP_ROUTER_PREFIX": "/api/v1",
-    "APP_TIMEZONE": "Asia/Tokyo",
-    "CORS_ORIGINS": "http://localhost:3000,http://localhost:8000",
-    "CORS_CREDENTIALS": "true",
-    "CORS_METHODS": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-    "CORS_HEADERS": "Content-Type,Authorization,X-Request-ID",
-    "DB_HOST": "localhost",
-    "DB_PORT": "5432",
-    "DB_USER": "test_user",
-    "DB_PASSWORD": "test_password_min_12_chars",
-    "DB_NAME": "test_db",
-    "DB_ECHO": "false",
-    "DB_POOL_SIZE": "5",
-    "DB_MAX_OVERFLOW": "10",
-    "REDIS_HOST": "localhost",
-    "REDIS_PORT": "6379",
-    "REDIS_DB": "0",
-    "REDIS_PASSWORD": "",
-    "JWT_SECRET_KEY": "test_secret_key_for_testing_only_min_64_chars_required_for_validation_abc123",
-    "JWT_ALGORITHM": "HS256",
-    "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "60",
-    "JWT_REFRESH_TOKEN_EXPIRE_DAYS": "7",
-    "LOGGING_LEVEL": "ERROR",
-}
+_DEFAULT_TEST_ENV = {"RATE_LIMIT_ENABLED": "false"}
 
 if "--dev" in sys.argv:
     env_example_path = Path(".env.example")
@@ -38,7 +10,9 @@ if "--dev" in sys.argv:
         from dotenv import dotenv_values
 
         example_vars = dotenv_values(env_example_path)
-        _DEFAULT_TEST_ENV.update({k: v for k, v in example_vars.items() if v})
+        _DEFAULT_TEST_ENV.update(
+            {k: v for k, v in example_vars.items() if v and k not in _DEFAULT_TEST_ENV}
+        )
 
 for key, value in _DEFAULT_TEST_ENV.items():
     if key not in os.environ:
@@ -62,6 +36,8 @@ from sqlalchemy.ext.asyncio import (
 from src import create_app
 from src.core.configs.database import Base, db
 from src.core.configs.redis import redis_manager
+from unittest.mock import Mock
+from starlette.requests import Request
 
 
 def pytest_addoption(parser):
@@ -204,3 +180,14 @@ async def test_client(
     async with test_engine.begin() as conn:
         for table in reversed(Base.metadata.sorted_tables):
             await conn.execute(table.delete())
+
+
+@pytest.fixture
+def mock_request():
+    mock_req = Mock(spec=Request)
+    mock_req.client.host = "127.0.0.1"
+    mock_req.url.path = "/test"
+    mock_req.method = "POST"
+    mock_req.state = Mock()
+
+    return mock_req

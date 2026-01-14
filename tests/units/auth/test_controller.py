@@ -52,7 +52,7 @@ class TestAuthController:
             assert result.data is not None
             assert result.data.access_token is not None
 
-    async def test_login_controller(self, test_session: AsyncSession):
+    async def test_login_controller(self, test_session: AsyncSession, mock_request):
         email = f"logincontroller{uuid4().hex[:8]}@test.com"
         user_repo = UserRepository(test_session, test_session)
         await user_repo.create(
@@ -67,7 +67,10 @@ class TestAuthController:
         request = LoginRequest(email=email, password="SecurePass123!")
 
         result = await login(
-            request, read_session=test_session, write_session=test_session
+            request=mock_request,
+            payload=request,
+            read_session=test_session,
+            write_session=test_session,
         )
 
         assert result.success is True
