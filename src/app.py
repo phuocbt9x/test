@@ -1,7 +1,9 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, AsyncGenerator
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
+from fastapi.responses import FileResponse, JSONResponse
 
 from src.core import (
     auto_load_routers,
@@ -16,9 +18,69 @@ from src.core import (
     setup_middlewares,
     redis_manager,
     db,
+    storage_manager,
 )
 
 logger = get_logger(__name__)
+
+HEALTH_STATUS_HEALTHY = "healthy"
+HEALTH_STATUS_DEGRADED = "degraded"
+HEALTH_STATUS_UNHEALTHY = "unhealthy"
+HEALTH_STATUS_NOT_INITIALIZED = "not_initialized"
+MAX_CACHE_KEYS_DISPLAY = 100
+
+
+def is_development() -> bool:
+    return settings.APP_ENV == Environment.DEVELOPMENT
+
+
+async def initialize_database() -> None:
+    try:
+        await db.init()
+    except Exception as e:
+        logger.error("Database initialization failed: %s", e)
+        raise RuntimeError("Database initialization failed") from e
+
+
+async def initialize_redis() -> None:
+    try:
+        await redis_manager.init()
+    except Exception as e:
+        logger.error("Redis initialization failed: %s", e)
+        logger.warning("Application will continue without Redis")
+
+
+async def initialize_storage() -> None:
+    try:
+        storage_manager.initialize()
+    except Exception as e:
+        logger.error("Storage initialization failed: %s", e)
+        logger.warning("Application will continue without storage")
+
+
+async def perform_startup_health_checks() -> None:
+    try:
+        await db.health_check()
+        if redis_manager.is_initialized:
+            await redis_manager.health_check()
+    except Exception as e:
+        logger.warning("Health check warning: %s", e)
+
+
+async def shutdown_redis() -> None:
+    if redis_manager.is_initialized:
+        try:
+            await redis_manager.close()
+        except Exception as e:
+            logger.error("Redis close error: %s", e)
+
+
+async def shutdown_database() -> None:
+    if db.is_initialized:
+        try:
+            await db.close()
+        except Exception as e:
+            logger.error("Database close error: %s", e)
 
 
 @asynccontextmanager
@@ -27,87 +89,101 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logging_settings.LOGGING_JSON_FORMAT,
         logging_settings.LOGGING_LEVEL,
     )
-    try:
-        await db.init()
-        logger.info("Database initialized")
-    except Exception as e:
-        logger.error("Database initialization failed: %s", e)
-        raise RuntimeError("Database initialization failed") from e
 
-    try:
-        await redis_manager.init()
-        logger.info("Redis initialized")
-    except Exception as e:
-        logger.error("Redis initialization failed: %s", e)
-        logger.warning("Application will continue without Redis")
+    await initialize_database()
+    await initialize_redis()
+    await initialize_storage()
+    await perform_startup_health_checks()
 
-    try:
-        db_health = await db.health_check()
-        logger.info("Database health: %s", db_health.get("write_db"))
-
-        if redis_manager.is_initialized:
-            redis_health = await redis_manager.health_check()
-            logger.info("Redis health: %s", redis_health.get("status"))
-    except Exception as e:
-        logger.warning("Health check warning: %s", e)
-
-    if settings.APP_ENV == Environment.DEVELOPMENT:
+    if is_development():
         print_routes_table(app)
-
-    logger.info("Application startup complete")
 
     yield
 
-    logger.info("Application shutting down...")
+    await shutdown_redis()
+    await shutdown_database()
 
-    if redis_manager.is_initialized:
-        try:
-            await redis_manager.close()
-            logger.info("Redis closed")
-        except Exception as e:
-            logger.error("Redis close error: %s", e)
 
-    if db.is_initialized:
-        try:
-            await db.close()
-            logger.info("Database closed")
-        except Exception as e:
-            logger.error("Database close error: %s", e)
+def setup_static_files_handler(app: FastAPI) -> None:
+    base_dir = Path(settings.STORAGE_LOCAL_BASE_DIR)
+    base_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info("Application shutdown complete")
+    @app.exception_handler(status.HTTP_404_NOT_FOUND)
+    async def static_files_handler(request: Request, exc: HTTPException):
+        file_path = base_dir / request.url.path.lstrip("/")
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"detail": "Not Found"},
+        )
+
+
+def _get_docs_url() -> str | None:
+    return "/docs" if is_development() else None
+
+
+def _get_redoc_url() -> str | None:
+    return "/redoc" if is_development() else None
+
+
+def _get_openapi_url() -> str | None:
+    if is_development():
+        return f"{settings.APP_ROUTER_PREFIX}/openapi.json"
+    return None
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.APP_NAME,
-        docs_url="/docs" if settings.APP_ENV == Environment.DEVELOPMENT else None,
-        redoc_url="/redoc" if settings.APP_ENV == Environment.DEVELOPMENT else None,
-        openapi_url=(
-            f"{settings.APP_ROUTER_PREFIX}/openapi.json"
-            if settings.APP_ENV == Environment.DEVELOPMENT
-            else None
-        ),
+        docs_url=_get_docs_url(),
+        redoc_url=_get_redoc_url(),
+        openapi_url=_get_openapi_url(),
         lifespan=lifespan,
     )
 
     setup_middlewares(app)
     setup_exception_handlers(app)
-    auto_load_routers(
-        app=app,
-        modules_dir="src/modules",
-        prefix=settings.APP_ROUTER_PREFIX,
-        parallel=True,
-    )
-    logger.info("Routers loaded")
+    setup_static_files_handler(app)
 
-    @app.get("/", tags=["Root"])
+    async def _check_database_health() -> dict[str, Any]:
+        try:
+            db_health = await db.health_check()
+            if HEALTH_STATUS_UNHEALTHY in str(db_health):
+                return {"health": db_health, "status": HEALTH_STATUS_DEGRADED}
+            return {"health": db_health, "status": HEALTH_STATUS_HEALTHY}
+        except Exception as e:
+            return {
+                "health": {"status": HEALTH_STATUS_UNHEALTHY, "error": str(e)},
+                "status": HEALTH_STATUS_UNHEALTHY,
+            }
+
+    async def _check_redis_health() -> dict[str, Any]:
+        if not redis_manager.is_initialized:
+            return {"health": {"status": HEALTH_STATUS_NOT_INITIALIZED}, "status": None}
+
+        try:
+            redis_health = await redis_manager.health_check()
+            status = redis_health.get("status")
+            if status != HEALTH_STATUS_HEALTHY:
+                logger.warning("Redis is %s", status)
+            return {"health": redis_health, "status": status}
+        except Exception as e:
+            logger.warning("Redis health check failed: %s", e)
+            return {
+                "health": {"status": HEALTH_STATUS_UNHEALTHY, "error": str(e)},
+                "status": HEALTH_STATUS_UNHEALTHY,
+            }
+
+    @app.get("/", tags=["Root"], name="root")
     @limiter.exempt
     async def root(request: Request) -> dict[str, Any]:
         return {
             "message": "Welcome to FastAPI Clean Architecture",
             "app": settings.APP_NAME,
-            "version": "0.1.0",
-            "docs": "/docs" if settings.APP_ENV == Environment.DEVELOPMENT else None,
+            "version": settings.APP_VERSION,
+            "docs": _get_docs_url(),
+            "redoc": _get_redoc_url(),
             "health": "/health",
         }
 
@@ -115,7 +191,7 @@ def create_app() -> FastAPI:
     @limiter.exempt
     async def health_check() -> dict[str, Any]:
         health_status: dict[str, Any] = {
-            "status": "healthy",
+            "status": HEALTH_STATUS_HEALTHY,
             "app": {
                 "name": settings.APP_NAME,
                 "env": settings.APP_ENV,
@@ -123,28 +199,18 @@ def create_app() -> FastAPI:
             },
         }
 
-        try:
-            db_health = await db.health_check()
-            health_status["database"] = db_health
+        db_result = await _check_database_health()
+        health_status["database"] = db_result["health"]
+        if db_result["status"] == HEALTH_STATUS_UNHEALTHY:
+            health_status["status"] = HEALTH_STATUS_UNHEALTHY
+        elif db_result["status"] == HEALTH_STATUS_DEGRADED:
+            health_status["status"] = HEALTH_STATUS_DEGRADED
 
-            if "unhealthy" in str(db_health):
-                health_status["status"] = "degraded"
-        except Exception as e:
-            health_status["database"] = {"status": "unhealthy", "error": str(e)}
-            health_status["status"] = "unhealthy"
-
-        try:
-            if redis_manager.is_initialized:
-                redis_health = await redis_manager.health_check()
-                health_status["redis"] = redis_health
-
-                if redis_health.get("status") != "healthy":
-                    logger.warning("Redis is %s", redis_health.get("status"))
-            else:
-                health_status["redis"] = {"status": "not_initialized"}
-        except Exception as e:
-            health_status["redis"] = {"status": "unhealthy", "error": str(e)}
-            logger.warning("Redis health check failed: %s", e)
+        redis_result = await _check_redis_health()
+        health_status["redis"] = redis_result["health"]
+        if redis_result["status"] == HEALTH_STATUS_UNHEALTHY:
+            if health_status["status"] == HEALTH_STATUS_HEALTHY:
+                health_status["status"] = HEALTH_STATUS_DEGRADED
 
         return health_status
 
@@ -157,10 +223,10 @@ def create_app() -> FastAPI:
     @limiter.exempt
     async def redis_health() -> dict[str, Any]:
         if not redis_manager.is_initialized:
-            return {"status": "not_initialized"}
+            return {"status": HEALTH_STATUS_NOT_INITIALIZED}
         return await redis_manager.health_check()
 
-    if settings.APP_ENV == Environment.DEVELOPMENT:
+    if is_development():
 
         @app.get("/debug/cache/keys", tags=["Debug"])
         async def list_cache_keys(pattern: str = "*") -> dict[str, Any]:
@@ -168,7 +234,7 @@ def create_app() -> FastAPI:
             return {
                 "pattern": pattern,
                 "count": len(keys),
-                "keys": keys[:100],
+                "keys": keys[:MAX_CACHE_KEYS_DISPLAY],
             }
 
         @app.delete("/debug/cache/flush", tags=["Debug"])
@@ -178,6 +244,13 @@ def create_app() -> FastAPI:
                 "success": success,
                 "message": "Cache flushed" if success else "Failed",
             }
+
+    auto_load_routers(
+        app=app,
+        modules_dir="src/modules",
+        prefix=settings.APP_ROUTER_PREFIX,
+        parallel=True,
+    )
 
     return app
 

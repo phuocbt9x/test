@@ -114,6 +114,18 @@ class Settings(BaseSettings):
     LOGGING_REQUEST_BODY: bool = Field(default=False)
     LOGGING_RESPONSE_BODY: bool = Field(default=False)
 
+    # ==================== STORAGE SETTINGS ====================
+    STORAGE_PROVIDER: str = Field(default="local")
+    STORAGE_LOCAL_BASE_DIR: str = Field(default="public")
+    STORAGE_LOCAL_BASE_URL: str = Field(default="http://localhost:8000")
+    STORAGE_S3_BUCKET_NAME: Optional[str] = None
+    STORAGE_S3_REGION: str = Field(default="us-east-1")
+    STORAGE_S3_ACCESS_KEY_ID: Optional[str] = None
+    STORAGE_S3_SECRET_ACCESS_KEY: Optional[str] = None
+    STORAGE_S3_ENDPOINT_URL: Optional[str] = None
+    STORAGE_S3_PUBLIC_URL: Optional[str] = None
+    STORAGE_S3_ACL: str = Field(default="private")
+
     # ==================== VALIDATORS ====================
     # Note: APP_ENV and JWT_ALGORITHM are validated automatically by Enum types
 
@@ -162,10 +174,7 @@ class Settings(BaseSettings):
         origins = [o.strip() for o in v.split(",")]
 
         url_pattern = re.compile(
-            r"^https?://"
-            r"(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+"
-            r"(?::\d+)?"
-            r"(?:/.*)?$"
+            r"^https?://" r"(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+" r"(?::\d+)?" r"(?:/.*)?$"
         )
 
         for origin in origins:

@@ -91,6 +91,19 @@ from src.core.controllers import (
     ErrorResponse,
     PaginatedResponse,
 )
+from src.core.storage import (
+    BaseStorageProvider,
+    UploadResult,
+    DeleteResult,
+    LocalStorageProvider,
+    S3StorageProvider,
+    StorageProviderFactory,
+    StorageManager,
+    storage_manager,
+    extract_path_from_url,
+    sanitize_filename,
+    get_file_url,
+)
 
 __all__ = [
     "settings",
@@ -175,4 +188,15 @@ __all__ = [
     "SuccessResponse",
     "ErrorResponse",
     "PaginatedResponse",
+    "BaseStorageProvider",
+    "UploadResult",
+    "DeleteResult",
+    "LocalStorageProvider",
+    "S3StorageProvider",
+    "StorageProviderFactory",
+    "StorageManager",
+    "storage_manager",
+    "extract_path_from_url",
+    "sanitize_filename",
+    "get_file_url",
 ]
