@@ -2,9 +2,29 @@ import json
 from pathlib import Path
 from typing import Any
 from contextvars import ContextVar
+from threading import Lock
 from fastapi import Request
+from src.core.configs import settings
 
 current_language: ContextVar[str] = ContextVar("current_language", default="en")
+
+_default_locale: str | None = None
+_locale_lock = Lock()
+
+
+def get_default_locale() -> str:
+    global _default_locale
+    if _default_locale is not None:
+        return _default_locale
+
+    with _locale_lock:
+        if _default_locale is not None:
+            return _default_locale
+        try:
+            _default_locale = settings.APP_LOCALE
+        except Exception:
+            _default_locale = "en"
+        return _default_locale
 
 
 class TranslationManager:
@@ -14,23 +34,28 @@ class TranslationManager:
         )
         self._cache: dict[str, dict[str, Any]] = {}
         self._flat_cache: dict[str, dict[str, str]] = {}
+        self._cache_lock = Lock()
         self._languages = self._discover_languages()
 
-    __slots__ = ("locales_dir", "_cache", "_flat_cache", "_languages")
+    __slots__ = ("locales_dir", "_cache", "_flat_cache", "_cache_lock", "_languages")
 
     def _discover_languages(self) -> list[str]:
+        default_locale = get_default_locale()
         if not self.locales_dir.exists():
-            return ["en"]
-        return [
+            return [default_locale]
+        languages = [
             d.name
             for d in self.locales_dir.iterdir()
             if d.is_dir() and any(d.glob("*.json"))
-        ] or ["en"]
+        ]
+
+        return languages or [default_locale]
 
     def _load_language(self, lang: str) -> dict[str, Any]:
+        default_locale = get_default_locale()
         lang_dir = self.locales_dir / lang
         if not lang_dir.exists():
-            lang_dir = self.locales_dir / "en"
+            lang_dir = self.locales_dir / default_locale
 
         translations = {}
         for json_file in sorted(lang_dir.glob("*.json")):
@@ -60,9 +85,13 @@ class TranslationManager:
         self._flat_cache[lang] = flat
 
     def _get_translation(self, lang: str) -> dict[str, Any]:
-        if lang not in self._cache:
-            self._cache[lang] = self._load_language(lang)
-        return self._cache[lang]
+        if lang in self._cache:
+            return self._cache[lang]
+
+        with self._cache_lock:
+            if lang not in self._cache:
+                self._cache[lang] = self._load_language(lang)
+            return self._cache[lang]
 
     def _get_value(self, data: dict[str, Any], key: str) -> str | None:
         namespace, *rest = key.split(".", 1)
@@ -91,7 +120,7 @@ class TranslationManager:
         return None
 
     def translate(self, message: str, **kwargs) -> str:
-        lang = current_language.get()
+        lang = self._resolve_language()
         translations = self._get_translation(lang)
 
         text = (
@@ -99,7 +128,6 @@ class TranslationManager:
             or self._flat_cache.get(lang, {}).get(message)
             or message
         )
-
         if kwargs and ("{" in text and "}" in text):
             try:
                 return text.format(**kwargs)
@@ -107,10 +135,24 @@ class TranslationManager:
                 return text
         return text
 
+    def _resolve_language(self) -> str:
+        try:
+            lang = current_language.get()
+        except LookupError:
+            lang = get_default_locale()
+            current_language.set(lang)
+            return lang
+
+        if lang == "en":
+            default_locale = get_default_locale()
+            if default_locale != "en":
+                lang = default_locale
+                current_language.set(lang)
+        return lang
+
     def ntranslate(self, singular: str, plural: str, n: int, **kwargs) -> str:
-        plural_data = self._get_value(
-            self._get_translation(current_language.get()), singular
-        )
+        lang = self._resolve_language()
+        plural_data = self._get_value(self._get_translation(lang), singular)
 
         text = (
             plural_data.get("one" if n == 1 else "other", plural)
@@ -130,7 +172,8 @@ class TranslationManager:
         return text
 
     def has_key(self, key: str, lang: str | None = None) -> bool:
-        lang = lang or current_language.get()
+        if lang is None:
+            lang = self._resolve_language()
         translations = self._get_translation(lang)
         return self._get_value(
             translations, key
@@ -138,7 +181,7 @@ class TranslationManager:
 
     @property
     def current_lang(self) -> str:
-        return current_language.get()
+        return self._resolve_language()
 
     @property
     def supported_languages(self) -> list[str]:
@@ -149,15 +192,19 @@ translation_manager = TranslationManager()
 
 
 async def get_language_from_request(request: Request) -> str:
+    default_locale = get_default_locale()
     lang = (
-        request.headers.get("Accept-Language", "en").split(",")[0].split("-")[0].strip()
+        request.headers.get("Accept-Language", default_locale)
+        .split(",")[0]
+        .split("-")[0]
+        .strip()
     )
     lang = request.query_params.get("lang", lang)
     lang = request.query_params.get("locale", lang)
     lang = request.cookies.get("language", lang)
 
     if lang not in translation_manager.supported_languages:
-        lang = "en"
+        lang = default_locale
 
     current_language.set(lang)
     return lang

@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     APP_PORT: int = Field(default=8000, ge=1, le=65535)
     APP_ROUTER_PREFIX: str = Field(default="/api/v1")
     APP_VERSION: str = Field(default="1.0.0")
+    APP_LOCALE: str = Field(default="en")
 
     # ==================== CORS SETTINGS ====================
     CORS_ORIGINS: str = Field(...)

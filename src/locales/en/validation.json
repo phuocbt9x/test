@@ -129,5 +129,7 @@
 	"alpha_only": "{attribute} must contain only alphabetic characters.",
 	"alphanumeric_only": "{attribute} must contain only alphanumeric characters.",
 	"no_whitespace": "{attribute} cannot contain whitespace.",
-	"phone": "{attribute} must be a valid phone number."
+	"phone": "{attribute} must be a valid phone number.",
+	"failed": "Input validation failed.",
+	"password_strength": "{attribute} does not meet security requirements (minimum {min} characters, including uppercase, lowercase, and numbers)."
 }
