@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     APP_PORT: int = Field(default=8000, ge=1, le=65535)
     APP_ROUTER_PREFIX: str = Field(default="/api/v1")
     APP_VERSION: str = Field(default="1.0.0")
+    APP_LOCALE: str = Field(default="en")
 
     # ==================== CORS SETTINGS ====================
     CORS_ORIGINS: str = Field(...)
@@ -114,6 +115,18 @@ class Settings(BaseSettings):
     LOGGING_REQUEST_BODY: bool = Field(default=False)
     LOGGING_RESPONSE_BODY: bool = Field(default=False)
 
+    # ==================== STORAGE SETTINGS ====================
+    STORAGE_PROVIDER: str = Field(default="local")
+    STORAGE_LOCAL_BASE_DIR: str = Field(default="public")
+    STORAGE_LOCAL_BASE_URL: str = Field(default="http://localhost:8000")
+    STORAGE_S3_BUCKET_NAME: Optional[str] = None
+    STORAGE_S3_REGION: str = Field(default="us-east-1")
+    STORAGE_S3_ACCESS_KEY_ID: Optional[str] = None
+    STORAGE_S3_SECRET_ACCESS_KEY: Optional[str] = None
+    STORAGE_S3_ENDPOINT_URL: Optional[str] = None
+    STORAGE_S3_PUBLIC_URL: Optional[str] = None
+    STORAGE_S3_ACL: str = Field(default="private")
+
     # ==================== VALIDATORS ====================
     # Note: APP_ENV and JWT_ALGORITHM are validated automatically by Enum types
 
@@ -163,9 +176,9 @@ class Settings(BaseSettings):
 
         url_pattern = re.compile(
             r"^https?://"
-            r"(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+"
-            r"(?::\d+)?"
-            r"(?:/.*)?$"
+            + r"(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+"
+            + r"(?::\d+)?"
+            + r"(?:/.*)?$"
         )
 
         for origin in origins:
@@ -207,50 +220,40 @@ class Settings(BaseSettings):
             raise ValueError("REDIS_PASSWORD should be at least 16 characters if set")
         return v
 
+    def _validate_production_required(self) -> None:
+        """Validate required settings for production environment"""
+        if len(self.JWT_SECRET_KEY) < 64:
+            raise ValueError("Production JWT_SECRET_KEY must be at least 64 characters")
+        if self.DB_ECHO:
+            raise ValueError("DB_ECHO must be False in production (performance impact)")
+        if not self.RATE_LIMIT_ENABLED:
+            raise ValueError("RATE_LIMIT_ENABLED must be True in production")
+        if not self.ENABLE_SECURITY_HEADERS:
+            raise ValueError("ENABLE_SECURITY_HEADERS must be True in production")
+
+    def _validate_production_warnings(self) -> None:
+        """Emit warnings for production environment"""
+        if self.LOGGING_REQUEST_BODY or self.LOGGING_RESPONSE_BODY:
+            warnings.warn(
+                "Consider disabling body logging in production for performance"
+            )
+        if "localhost" in self.CORS_ORIGINS.lower():
+            warnings.warn("Production CORS should not include localhost origins")
+        if self.JWT_ACCESS_TOKEN_EXPIRE_MINUTES > 30:
+            warnings.warn("Access token lifetime >30min not recommended for production")
+        if self.DB_POOL_SIZE < 20:
+            warnings.warn("DB_POOL_SIZE <20 may cause performance issues under load")
+
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
         """Extra validation for production environment"""
         if self.APP_ENV == Environment.PRODUCTION:
-            if len(self.JWT_SECRET_KEY) < 64:
-                raise ValueError(
-                    "Production JWT_SECRET_KEY must be at least 64 characters"
-                )
-
-            if self.DB_ECHO:
-                raise ValueError(
-                    "DB_ECHO must be False in production (performance impact)"
-                )
-
-            if not self.RATE_LIMIT_ENABLED:
-                raise ValueError("RATE_LIMIT_ENABLED must be True in production")
-
-            if not self.ENABLE_SECURITY_HEADERS:
-                raise ValueError("ENABLE_SECURITY_HEADERS must be True in production")
-
-            if self.LOGGING_REQUEST_BODY or self.LOGGING_RESPONSE_BODY:
-                warnings.warn(
-                    "Consider disabling body logging in production for performance"
-                )
-
-            if "localhost" in self.CORS_ORIGINS.lower():
-                warnings.warn("Production CORS should not include localhost origins")
-
-            if self.JWT_ACCESS_TOKEN_EXPIRE_MINUTES > 30:
-                warnings.warn(
-                    "Access token lifetime >30min not recommended for production"
-                )
-
-            if self.DB_POOL_SIZE < 20:
-                warnings.warn(
-                    "DB_POOL_SIZE <20 may cause performance issues under load"
-                )
-
-        if self.APP_ENV == Environment.STAGING:
-            if self.DB_ECHO:
-                warnings.warn(
-                    "Consider disabling DB_ECHO in staging for performance testing"
-                )
-
+            self._validate_production_required()
+            self._validate_production_warnings()
+        elif self.APP_ENV == Environment.STAGING and self.DB_ECHO:
+            warnings.warn(
+                "Consider disabling DB_ECHO in staging for performance testing"
+            )
         return self
 
     # ==================== PROPERTIES ====================
