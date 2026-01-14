@@ -7,6 +7,16 @@ from src.core.utils import utcnow
 
 T = TypeVar("T")
 
+DESCRIPTION_RESPONSE_MESSAGE: Dict[str, str] = {
+    "success": "Response status",
+    "message": "Response message",
+    "data": "Response data",
+    "meta": "Pagination metadata",
+    "timestamp": "Response timestamp",
+    "error_code": "Application specific error code",
+    "details": "Error details",
+}
+
 
 def _get_example_from_type(model_type: Any) -> Any:
     if hasattr(model_type, "model_config"):
@@ -61,9 +71,7 @@ def _generate_success_response_example(
     return {"example": example}
 
 
-def _generate_paginated_response_example(
-    schema: Dict[str, Any], model_class: Any
-) -> Dict[str, Any]:
+def _generate_paginated_response_example(model_class: Any) -> Dict[str, Any]:
     example = {
         "success": True,
         "message": __("messages.data_retrieved"),
@@ -100,15 +108,19 @@ def _generate_paginated_response_example(
 
 
 class SuccessResponse(BaseModel, Generic[T]):
-    success: bool = Field(default=True, description="Response status")
+    success: bool = Field(
+        default=True, description=DESCRIPTION_RESPONSE_MESSAGE["success"]
+    )
     message: str = Field(
         default_factory=lambda: __("messages.operation_completed"),
-        description="Response message",
+        description=DESCRIPTION_RESPONSE_MESSAGE["message"],
         json_schema_extra={"example": __("messages.operation_completed")},
     )
-    data: Optional[T] = Field(default=None, description="Response data")
+    data: Optional[T] = Field(
+        default=None, description=DESCRIPTION_RESPONSE_MESSAGE["data"]
+    )
     timestamp: datetime = Field(
-        default_factory=utcnow, description="Response timestamp"
+        default_factory=utcnow, description=DESCRIPTION_RESPONSE_MESSAGE["timestamp"]
     )
 
     model_config = ConfigDict(
@@ -117,12 +129,21 @@ class SuccessResponse(BaseModel, Generic[T]):
 
 
 class ErrorResponse(BaseModel):
-    success: bool = Field(default=False, description="Response status")
-    message: str = Field(description="Error message")
-    error_code: Optional[str] = Field(default=None, description="Error code")
-    details: Optional[Dict[str, Any]] = Field(default=None, description="Error details")
+    success: bool = Field(
+        default=False, description=DESCRIPTION_RESPONSE_MESSAGE["success"]
+    )
+    message: str = Field(description=DESCRIPTION_RESPONSE_MESSAGE["message"])
+    error_code: Optional[str] = Field(
+        default=None,
+        description=DESCRIPTION_RESPONSE_MESSAGE["error_code"],
+    )
+    details: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description=DESCRIPTION_RESPONSE_MESSAGE["details"],
+    )
     timestamp: datetime = Field(
-        default_factory=utcnow, description="Response timestamp"
+        default_factory=utcnow,
+        description=DESCRIPTION_RESPONSE_MESSAGE["timestamp"],
     )
 
     model_config = ConfigDict(
@@ -161,16 +182,22 @@ class PaginationMeta(BaseModel):
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
-    success: bool = Field(default=True, description="Response status")
+    success: bool = Field(
+        default=True, description=DESCRIPTION_RESPONSE_MESSAGE["success"]
+    )
     message: str = Field(
         default_factory=lambda: __("messages.operation_completed"),
-        description="Response message",
+        description=DESCRIPTION_RESPONSE_MESSAGE["message"],
         json_schema_extra={"example": __("messages.data_retrieved")},
     )
-    data: List[T] = Field(default_factory=list, description="Response data items")
-    meta: PaginationMeta = Field(description="Pagination metadata")
+    data: List[T] = Field(
+        default_factory=list,
+        description=DESCRIPTION_RESPONSE_MESSAGE["data"],
+    )
+    meta: PaginationMeta = Field(description=DESCRIPTION_RESPONSE_MESSAGE["meta"])
     timestamp: datetime = Field(
-        default_factory=utcnow, description="Response timestamp"
+        default_factory=utcnow,
+        description=DESCRIPTION_RESPONSE_MESSAGE["timestamp"],
     )
 
     model_config = ConfigDict(
