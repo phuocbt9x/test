@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header, status, Depends
+from fastapi import APIRouter, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from src.core import (
@@ -12,7 +12,8 @@ from src.core import (
     CurrentUser,
     __,
 )
-from src.modules.auth.schemas.request import UpdateCurrentUserRequest
+from src.utils import create_common_responses
+from src.modules.auth.schemas import UpdateCurrentUserRequest
 
 from .schemas import (
     LoginRequest,
@@ -41,13 +42,10 @@ async def register(
     request: RegisterRequest,
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
-) -> SuccessResponse[RegisterResponse] | ErrorResponse:
-    try:
-        service = AuthService(read_session, write_session)
-        result = await service.register(request)
-        return controller.created(data=result, message=__("auth.register.success"))
-    except Exception:
-        return controller.error(message=__("auth.register.failed"))
+) -> SuccessResponse[RegisterResponse]:
+    service = AuthService(read_session, write_session)
+    result = await service.register(request)
+    return controller.created(data=result, message=__("auth.register.success"))
 
 
 @router.post(
@@ -56,18 +54,22 @@ async def register(
     summary="User login",
     description="Authenticate user with username/email and password to receive access token",
     response_description="Returns access token, refresh token and user information",
+    responses=create_common_responses(
+        include_validation=True,
+        include_rate_limit=True,
+        include_internal_error=True,
+        include_not_found=True,
+        include_unauthorized=True,
+    ),
 )
 async def login(
-    request: LoginRequest,
+    payload: LoginRequest,
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
-) -> SuccessResponse[RegisterResponse] | ErrorResponse:
-    try:
-        service = AuthService(read_session, write_session)
-        result = await service.login(request)
-        return controller.success(data=result, message=__("auth.login.success"))
-    except Exception:
-        return controller.error(message=__("auth.login.failed"))
+) -> SuccessResponse[RegisterResponse]:
+    service = AuthService(read_session, write_session)
+    result = await service.login(payload)
+    return controller.success(data=result, message=__("auth.login.success"))
 
 
 @router.post(
@@ -79,16 +81,12 @@ async def login(
 )
 async def logout(
     access_token: str = Depends(get_token_from_header),
-    refresh_token: str | None = Header(None, alias="X-Refresh-Token"),
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[LogoutResponse] | ErrorResponse:
-    try:
-        service = AuthService(read_session, write_session)
-        result = await service.logout(access_token)
-        return controller.success(data=result, message=__("auth.logout.success"))
-    except Exception:
-        return controller.error(message=__("auth.logout.failed"))
+    service = AuthService(read_session, write_session)
+    result = await service.logout(access_token)
+    return controller.success(data=result, message=__("auth.logout.success"))
 
 
 @router.post(
@@ -103,12 +101,9 @@ async def refresh_token(
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[TokenResponse] | ErrorResponse:
-    try:
-        service = AuthService(read_session, write_session)
-        result = await service.refresh_token(request.refresh_token)
-        return controller.success(data=result, message=__("auth.refresh.success"))
-    except Exception:
-        return controller.error(message=__("auth.refresh.failed"))
+    service = AuthService(read_session, write_session)
+    result = await service.refresh_token(request.refresh_token)
+    return controller.success(data=result, message=__("auth.refresh.success"))
 
 
 @router.get(
@@ -123,12 +118,9 @@ async def me(
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[UserResponse] | ErrorResponse:
-    try:
-        service = AuthService(read_session, write_session)
-        result = await service.get_current_user(current_user.user_id)
-        return controller.success(data=result, message=__("auth.me.success"))
-    except Exception:
-        return controller.error(message=__("auth.me.failed"))
+    service = AuthService(read_session, write_session)
+    result = await service.get_current_user(current_user.user_id)
+    return controller.success(data=result, message=__("auth.me.success"))
 
 
 @router.patch(
@@ -144,12 +136,9 @@ async def update_current_user_profile(
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[UserResponse] | ErrorResponse:
-    try:
-        service = AuthService(read_session, write_session)
-        result = await service.update_current_user(UUID(current_user.user_id), request)
-        return controller.success(
-            data=UserResponse.model_validate(result),
-            message=__("auth.update_me.success"),
-        )
-    except Exception:
-        return controller.error(message=__("auth.update_me.failed"))
+    service = AuthService(read_session, write_session)
+    result = await service.update_current_user(UUID(current_user.user_id), request)
+    return controller.success(
+        data=UserResponse.model_validate(result),
+        message=__("auth.update_me.success"),
+    )

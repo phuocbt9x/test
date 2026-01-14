@@ -9,6 +9,7 @@ from src.core import (
     phone_number,
     password_strength,
     confirmed,
+    half_width,
 )
 
 
@@ -49,7 +50,10 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_confirm_password(cls, v: str, info) -> str:
         field = __("field.confirm_password")
-        return confirmed(v, info.data["password"], field)
+        password = info.data.get("password")
+        if password is None:
+            return v
+        return confirmed(v, password, field)
 
     @field_validator("phone")
     @classmethod
@@ -93,14 +97,18 @@ class LoginRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("field.email")
+        field = __("auth.fields.email")
+        v = required(v, field)
+        v = max_length(v, 254, field, trim=False)
+        v = half_width(v, field)
         return email_format(v, field)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("field.password")
-        return between_length(v, 8, 255, field)
+        field = __("auth.fields.password")
+        v = required(v, field)
+        return password_strength(v, field)
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -161,7 +169,10 @@ class UpdateCurrentUserRequest(BaseModel):
     def validate_confirm_password(cls, v: str | None, info) -> str | None:
         if v is None:
             return None
-        return confirmed(v, info.data["password"], __("field.confirm_password"))
+        password = info.data.get("password")
+        if password is None:
+            return v
+        return confirmed(v, password, __("field.confirm_password"))
 
     @field_validator("phone")
     @classmethod

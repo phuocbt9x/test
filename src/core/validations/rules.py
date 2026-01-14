@@ -25,6 +25,7 @@ _COMPILED_PATTERNS = {
     "password_lowercase": re.compile(r"[a-z]"),
     "password_digits": re.compile(r"\d"),
     "password_special": re.compile(r"[!@#$%^&*(),.?\":{}|<>]"),
+    "half_width": re.compile(r"^[\x00-\x7F]+$"),
 }
 
 
@@ -223,7 +224,7 @@ def email_format(
         value = value.strip().lower()
     try:
         validated = validate_email(value, check_deliverability=check_deliverability)
-        return validated.email
+        return validated.normalized
     except EmailNotValidError as e:
         raise ValueError(__("validation.email", attribute=field)) from e
 
@@ -429,24 +430,33 @@ def password_strength(
     value = _validate_string(value, field)
     if trim:
         value = value.strip()
-    if len(value) < min_length:
-        raise ValueError(__("validation.min.string", attribute=field, min=min_length))
-    if require_uppercase and not _COMPILED_PATTERNS["password_uppercase"].search(value):
-        raise ValueError(
-            __("validation.password_strength", attribute=field, min=min_length)
-        )
-    if require_lowercase and not _COMPILED_PATTERNS["password_lowercase"].search(value):
-        raise ValueError(
-            __("validation.password_strength", attribute=field, min=min_length)
-        )
-    if require_digits and not _COMPILED_PATTERNS["password_digits"].search(value):
-        raise ValueError(
-            __("validation.password_strength", attribute=field, min=min_length)
-        )
-    if require_special and not _COMPILED_PATTERNS["password_special"].search(value):
-        raise ValueError(
-            __("validation.password_strength", attribute=field, min=min_length)
-        )
+
+    rules = [
+        (len(value) >= min_length, "password_length"),
+        (
+            not require_uppercase
+            or _COMPILED_PATTERNS["password_uppercase"].search(value),
+            "password_uppercase",
+        ),
+        (
+            not require_lowercase
+            or _COMPILED_PATTERNS["password_lowercase"].search(value),
+            "password_lowercase",
+        ),
+        (
+            not require_digits or _COMPILED_PATTERNS["password_digits"].search(value),
+            "password_digits",
+        ),
+        (
+            not require_special or _COMPILED_PATTERNS["password_special"].search(value),
+            "password_special",
+        ),
+    ]
+
+    for passed, _ in rules:
+        if not passed:
+            raise ValueError(__("validation.password_strength", attribute=field))
+
     return value
 
 
@@ -492,7 +502,7 @@ async def unique(
         result = await read_session.execute(stmt.limit(1))
         if result.scalar_one_or_none() is not None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=[
                     {
                         "field": field,
@@ -525,7 +535,7 @@ async def exists(
         result = await read_session.execute(stmt.limit(1))
         if result.scalar_one_or_none() is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=[
                     {
                         "field": field,
@@ -591,4 +601,14 @@ def image(
             image_mimes = ["image/jpeg", "image/png", "image/gif", "image/webp"]
             if value.content_type not in image_mimes:
                 raise ValueError(__("validation.image", attribute=field))
+    return value
+
+
+def half_width(value: str, field: str, trim: bool = True) -> str:
+    value = _validate_string(value, field)
+    value = _trim_if_needed(value, trim)
+
+    if not _COMPILED_PATTERNS["half_width"].match(value):
+        raise ValueError(__("validation.half_width", attribute=field))
+
     return value

@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 from pathlib import Path
 from dataclasses import dataclass, field
 from fastapi import APIRouter, FastAPI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 import importlib
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -19,8 +19,7 @@ class RouterMetadata(BaseModel):
     tags: List[str] = Field(default_factory=list)
     route_count: int = 0
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LoaderConfig(BaseModel):
@@ -38,8 +37,7 @@ class LoaderConfig(BaseModel):
     cache_modules: bool = True
     validate_before_load: bool = True
 
-    class Config:
-        frozen = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RouterValidator:

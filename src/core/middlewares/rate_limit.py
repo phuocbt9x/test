@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from src.core.configs import settings
 from slowapi import Limiter
 from typing import Union
+from slowapi.middleware import SlowAPIMiddleware
 
 
 class DummyLimiter:
@@ -28,6 +29,7 @@ else:
 
 def setup_rate_limit(app: FastAPI):
     if settings.RATE_LIMIT_ENABLED:
+        app.add_middleware(SlowAPIMiddleware)
         app.state.limiter = limiter
 
 

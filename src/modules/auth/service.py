@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
+from fastapi import status
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,9 +11,9 @@ from src.core import (
     PasswordHasher,
     TokenPayload,
     utcnow,
-    UnauthorizedException,
     NotFoundException,
     AuthenticationException,
+    BaseAppException,
     ErrorCode,
     validate_and_hash_password,
     unique,
@@ -89,24 +90,36 @@ class AuthService:
         )
 
     async def login(self, data: LoginRequest) -> RegisterResponse:
-        user = await self.user_repo.find_by_email(data.email.lower())
+        try:
+            user = await self.user_repo.find_by_email(data.email.lower())
 
-        if not user or not verify_password(data.password, user.password):
-            raise UnauthorizedException(message=__("auth.login.failed"))
+            if not user:
+                raise BaseAppException(
+                    message=__(
+                        "auth.messages.account.not_found", field=__("auth.fields.email")
+                    ),
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    error_code=ErrorCode.USER_NOT_FOUND,
+                )
 
-        if not user.is_active:
-            raise UnauthorizedException(message=__("auth.account.inactive"))
+            if not user.is_active or not verify_password(data.password, user.password):
+                raise AuthenticationException(
+                    message=__("auth.messages.login.failed"),
+                )
 
-        tokens = await self._create_token_pair(user)
-        await self.session.commit()
+            tokens = await self._create_token_pair(user)
+            await self.session.commit()
 
-        return RegisterResponse(
-            access_token=tokens.access_token,
-            refresh_token=tokens.refresh_token,
-            token_type=tokens.token_type,
-            expires_in=tokens.expires_in,
-            user_info=UserResponse.model_validate(user),
-        )
+            return RegisterResponse(
+                access_token=tokens.access_token,
+                refresh_token=tokens.refresh_token,
+                token_type=tokens.token_type,
+                expires_in=tokens.expires_in,
+                user_info=UserResponse.model_validate(user),
+            )
+        except Exception:
+            print(f"Error during login: {Exception}")
+            raise
 
     async def logout(
         self,

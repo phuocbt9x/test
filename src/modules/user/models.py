@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Index, String
+from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,12 +31,4 @@ class User(BaseModel):
     )
     deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
-    )
-
-    __table_args__ = (
-        Index("ix_users_email", "email", unique=True),
-        Index("ix_users_phone", "phone"),
-        Index("ix_users_line_user_id", "line_user_id"),
-        Index("ix_users_is_active", "is_active"),
-        Index("ix_users_deleted_at", "deleted_at"),
     )
