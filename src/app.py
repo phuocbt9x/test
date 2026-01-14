@@ -133,86 +133,85 @@ def _get_openapi_url() -> str | None:
     return None
 
 
-def create_app() -> FastAPI:
-    app = FastAPI(
-        title=settings.APP_NAME,
-        docs_url=_get_docs_url(),
-        redoc_url=_get_redoc_url(),
-        openapi_url=_get_openapi_url(),
-        lifespan=lifespan,
-    )
-
-    setup_middlewares(app)
-    setup_exception_handlers(app)
-    setup_static_files_handler(app)
-
-    async def _check_database_health() -> dict[str, Any]:
-        try:
-            db_health = await db.health_check()
-            if HEALTH_STATUS_UNHEALTHY in str(db_health):
-                return {"health": db_health, "status": HEALTH_STATUS_DEGRADED}
-            return {"health": db_health, "status": HEALTH_STATUS_HEALTHY}
-        except Exception as e:
-            return {
-                "health": {"status": HEALTH_STATUS_UNHEALTHY, "error": str(e)},
-                "status": HEALTH_STATUS_UNHEALTHY,
-            }
-
-    async def _check_redis_health() -> dict[str, Any]:
-        if not redis_manager.is_initialized:
-            return {"health": {"status": HEALTH_STATUS_NOT_INITIALIZED}, "status": None}
-
-        try:
-            redis_health = await redis_manager.health_check()
-            status = redis_health.get("status")
-            if status != HEALTH_STATUS_HEALTHY:
-                logger.warning("Redis is %s", status)
-            return {"health": redis_health, "status": status}
-        except Exception as e:
-            logger.warning("Redis health check failed: %s", e)
-            return {
-                "health": {"status": HEALTH_STATUS_UNHEALTHY, "error": str(e)},
-                "status": HEALTH_STATUS_UNHEALTHY,
-            }
-
-    @app.get("/", tags=["Root"], name="root")
-    @limiter.exempt
-    async def root(request: Request) -> dict[str, Any]:
+async def _check_database_health() -> dict[str, Any]:
+    try:
+        db_health = await db.health_check()
+        if HEALTH_STATUS_UNHEALTHY in str(db_health):
+            return {"health": db_health, "status": HEALTH_STATUS_DEGRADED}
+        return {"health": db_health, "status": HEALTH_STATUS_HEALTHY}
+    except Exception as e:
         return {
-            "message": "Welcome to FastAPI Clean Architecture",
-            "app": settings.APP_NAME,
-            "version": settings.APP_VERSION,
-            "docs": _get_docs_url(),
-            "redoc": _get_redoc_url(),
-            "health": "/health",
+            "health": {"status": HEALTH_STATUS_UNHEALTHY, "error": str(e)},
+            "status": HEALTH_STATUS_UNHEALTHY,
         }
 
+
+async def _check_redis_health() -> dict[str, Any]:
+    if not redis_manager.is_initialized:
+        return {"health": {"status": HEALTH_STATUS_NOT_INITIALIZED}, "status": None}
+
+    try:
+        redis_health = await redis_manager.health_check()
+        status = redis_health.get("status")
+        if status != HEALTH_STATUS_HEALTHY:
+            logger.warning("Redis is %s", status)
+        return {"health": redis_health, "status": status}
+    except Exception as e:
+        logger.warning("Redis health check failed: %s", e)
+        return {
+            "health": {"status": HEALTH_STATUS_UNHEALTHY, "error": str(e)},
+            "status": HEALTH_STATUS_UNHEALTHY,
+        }
+
+
+def _determine_overall_health_status(
+    db_status: str, redis_status: str | None, current_status: str
+) -> str:
+    if db_status == HEALTH_STATUS_UNHEALTHY:
+        return HEALTH_STATUS_UNHEALTHY
+
+    if db_status == HEALTH_STATUS_DEGRADED:
+        return HEALTH_STATUS_DEGRADED
+
+    if (
+        redis_status == HEALTH_STATUS_UNHEALTHY
+        and current_status == HEALTH_STATUS_HEALTHY
+    ):
+        return HEALTH_STATUS_DEGRADED
+
+    return current_status
+
+
+async def _build_health_status() -> dict[str, Any]:
+    health_status: dict[str, Any] = {
+        "status": HEALTH_STATUS_HEALTHY,
+        "app": {
+            "name": settings.APP_NAME,
+            "env": settings.APP_ENV,
+            "timezone": settings.APP_TIMEZONE,
+        },
+    }
+
+    db_result = await _check_database_health()
+    health_status["database"] = db_result["health"]
+
+    redis_result = await _check_redis_health()
+    health_status["redis"] = redis_result["health"]
+
+    health_status["status"] = _determine_overall_health_status(
+        db_status=db_result["status"],
+        redis_status=redis_result["status"],
+        current_status=health_status["status"],
+    )
+
+    return health_status
+
+
+def _register_health_endpoints(app: FastAPI) -> None:
     @app.get("/health", tags=["Health"])
     @limiter.exempt
     async def health_check() -> dict[str, Any]:
-        health_status: dict[str, Any] = {
-            "status": HEALTH_STATUS_HEALTHY,
-            "app": {
-                "name": settings.APP_NAME,
-                "env": settings.APP_ENV,
-                "timezone": settings.APP_TIMEZONE,
-            },
-        }
-
-        db_result = await _check_database_health()
-        health_status["database"] = db_result["health"]
-        if db_result["status"] == HEALTH_STATUS_UNHEALTHY:
-            health_status["status"] = HEALTH_STATUS_UNHEALTHY
-        elif db_result["status"] == HEALTH_STATUS_DEGRADED:
-            health_status["status"] = HEALTH_STATUS_DEGRADED
-
-        redis_result = await _check_redis_health()
-        health_status["redis"] = redis_result["health"]
-        if redis_result["status"] == HEALTH_STATUS_UNHEALTHY:
-            if health_status["status"] == HEALTH_STATUS_HEALTHY:
-                health_status["status"] = HEALTH_STATUS_DEGRADED
-
-        return health_status
+        return await _build_health_status()
 
     @app.get("/health/database", tags=["Health"])
     @limiter.exempt
@@ -226,24 +225,62 @@ def create_app() -> FastAPI:
             return {"status": HEALTH_STATUS_NOT_INITIALIZED}
         return await redis_manager.health_check()
 
+
+def _register_root_endpoint(app: FastAPI) -> None:
+    @app.get("/", tags=["Root"], name="root")
+    @limiter.exempt
+    async def root(request: Request) -> dict[str, Any]:
+        return {
+            "message": "Welcome to FastAPI Clean Architecture",
+            "app": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+            "docs": _get_docs_url(),
+            "redoc": _get_redoc_url(),
+            "health": "/health",
+        }
+
+
+def _register_debug_endpoints(app: FastAPI) -> None:
+    @app.get("/debug/cache/keys", tags=["Debug"])
+    async def list_cache_keys(pattern: str = "*") -> dict[str, Any]:
+        keys = await redis_manager.keys(pattern)
+        return {
+            "pattern": pattern,
+            "count": len(keys),
+            "keys": keys[:MAX_CACHE_KEYS_DISPLAY],
+        }
+
+    @app.delete("/debug/cache/flush", tags=["Debug"])
+    async def flush_cache() -> dict[str, Any]:
+        success = await redis_manager.flushdb()
+        return {
+            "success": success,
+            "message": "Cache flushed" if success else "Failed",
+        }
+
+
+def _register_endpoints(app: FastAPI) -> None:
+    _register_root_endpoint(app)
+    _register_health_endpoints(app)
+
     if is_development():
+        _register_debug_endpoints(app)
 
-        @app.get("/debug/cache/keys", tags=["Debug"])
-        async def list_cache_keys(pattern: str = "*") -> dict[str, Any]:
-            keys = await redis_manager.keys(pattern)
-            return {
-                "pattern": pattern,
-                "count": len(keys),
-                "keys": keys[:MAX_CACHE_KEYS_DISPLAY],
-            }
 
-        @app.delete("/debug/cache/flush", tags=["Debug"])
-        async def flush_cache() -> dict[str, Any]:
-            success = await redis_manager.flushdb()
-            return {
-                "success": success,
-                "message": "Cache flushed" if success else "Failed",
-            }
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title=settings.APP_NAME,
+        docs_url=_get_docs_url(),
+        redoc_url=_get_redoc_url(),
+        openapi_url=_get_openapi_url(),
+        lifespan=lifespan,
+    )
+
+    setup_middlewares(app)
+    setup_exception_handlers(app)
+    setup_static_files_handler(app)
+
+    _register_endpoints(app)
 
     auto_load_routers(
         app=app,
