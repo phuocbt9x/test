@@ -1,10 +1,14 @@
 import pytest
 from unittest.mock import patch
 from uuid import uuid4
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core import CurrentUser, JWTManager, TokenPayload, validate_and_hash_password
+from src.core import (
+    CurrentUser,
+    JWTManager,
+    TokenPayload,
+    validate_and_hash_password,
+)
 from src.modules.auth.controller import (
     login,
     logout,

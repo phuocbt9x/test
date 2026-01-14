@@ -15,6 +15,19 @@ from src.core import (
     ExternalServiceException,
 )
 
+MSG_VALIDATION_ERROR = "Validation error"
+MSG_BAD_REQUEST = "Bad request"
+MSG_RATE_LIMIT_EXCEEDED = "Rate limit exceeded"
+MSG_UNEXPECTED_ERROR = "Unexpected error occurred"
+MSG_AUTHENTICATION_FAILED = "Authentication failed"
+MSG_ACCESS_DENIED = "Access denied"
+MSG_RESOURCE_NOT_FOUND = "Resource not found"
+MSG_RESOURCE_ALREADY_EXISTS = "Resource already exists"
+MSG_UNAUTHORIZED = "Unauthorized"
+MSG_EXTERNAL_SERVICE_ERROR = "External service error"
+MSG_DUPLICATE_ENTRY = "Duplicate entry found"
+MSG_DATABASE_CONNECTION_ERROR = "Database connection error"
+
 
 class ValidationErrorResponse(BaseModel):
     success: bool = Field(False, description="Response status")
@@ -44,27 +57,27 @@ _EXCEPTION_TO_STATUS_CODE: Dict[Type[BaseAppException], int] = {
 }
 
 _EXCEPTION_TO_MESSAGE: Dict[Type[BaseAppException], str] = {
-    ValidationException: "Validation error",
-    AuthenticationException: "Authentication failed",
-    AuthorizationException: "Access denied",
-    NotFoundException: "Resource not found",
-    ConflictException: "Resource already exists",
-    BadRequestException: "Bad request",
-    UnauthorizedException: "Unauthorized",
-    BusinessRuleException: "Bad request",
-    RateLimitException: "Rate limit exceeded",
-    ExternalServiceException: "External service error",
+    ValidationException: MSG_VALIDATION_ERROR,
+    AuthenticationException: MSG_AUTHENTICATION_FAILED,
+    AuthorizationException: MSG_ACCESS_DENIED,
+    NotFoundException: MSG_RESOURCE_NOT_FOUND,
+    ConflictException: MSG_RESOURCE_ALREADY_EXISTS,
+    BadRequestException: MSG_BAD_REQUEST,
+    UnauthorizedException: MSG_UNAUTHORIZED,
+    BusinessRuleException: MSG_BAD_REQUEST,
+    RateLimitException: MSG_RATE_LIMIT_EXCEEDED,
+    ExternalServiceException: MSG_EXTERNAL_SERVICE_ERROR,
 }
 
 _STATUS_CODE_TO_MESSAGE: Dict[int, str] = {
-    status.HTTP_422_UNPROCESSABLE_ENTITY: "Validation error",
-    status.HTTP_409_CONFLICT: "Duplicate entry found",
-    status.HTTP_503_SERVICE_UNAVAILABLE: "Database connection error",
-    status.HTTP_500_INTERNAL_SERVER_ERROR: "Unexpected error occurred",
-    status.HTTP_429_TOO_MANY_REQUESTS: "Rate limit exceeded",
+    status.HTTP_422_UNPROCESSABLE_ENTITY: MSG_VALIDATION_ERROR,
+    status.HTTP_409_CONFLICT: MSG_DUPLICATE_ENTRY,
+    status.HTTP_503_SERVICE_UNAVAILABLE: MSG_DATABASE_CONNECTION_ERROR,
+    status.HTTP_500_INTERNAL_SERVER_ERROR: MSG_UNEXPECTED_ERROR,
+    status.HTTP_429_TOO_MANY_REQUESTS: MSG_RATE_LIMIT_EXCEEDED,
 }
 
-_DEFAULT_ERROR_MESSAGE = "Unexpected error occurred"
+_DEFAULT_ERROR_MESSAGE = MSG_UNEXPECTED_ERROR
 
 
 def get_status_code_for_exception(exception_type: Type[BaseAppException]) -> int:
@@ -88,15 +101,15 @@ def get_response_description(
         return _STATUS_CODE_TO_MESSAGE[status_code]
 
     fallback_descriptions = {
-        status.HTTP_400_BAD_REQUEST: "Bad request",
-        status.HTTP_401_UNAUTHORIZED: "Unauthorized",
-        status.HTTP_403_FORBIDDEN: "Access denied",
-        status.HTTP_404_NOT_FOUND: "Resource not found",
-        status.HTTP_409_CONFLICT: "Resource already exists",
-        status.HTTP_422_UNPROCESSABLE_ENTITY: "Validation error",
-        status.HTTP_429_TOO_MANY_REQUESTS: "Rate limit exceeded",
-        status.HTTP_500_INTERNAL_SERVER_ERROR: "Unexpected error occurred",
-        status.HTTP_503_SERVICE_UNAVAILABLE: "External service error",
+        status.HTTP_400_BAD_REQUEST: MSG_BAD_REQUEST,
+        status.HTTP_401_UNAUTHORIZED: MSG_UNAUTHORIZED,
+        status.HTTP_403_FORBIDDEN: MSG_ACCESS_DENIED,
+        status.HTTP_404_NOT_FOUND: MSG_RESOURCE_NOT_FOUND,
+        status.HTTP_409_CONFLICT: MSG_RESOURCE_ALREADY_EXISTS,
+        status.HTTP_422_UNPROCESSABLE_ENTITY: MSG_VALIDATION_ERROR,
+        status.HTTP_429_TOO_MANY_REQUESTS: MSG_RATE_LIMIT_EXCEEDED,
+        status.HTTP_500_INTERNAL_SERVER_ERROR: MSG_UNEXPECTED_ERROR,
+        status.HTTP_503_SERVICE_UNAVAILABLE: MSG_EXTERNAL_SERVICE_ERROR,
     }
 
     return fallback_descriptions.get(

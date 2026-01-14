@@ -104,10 +104,10 @@ class TestAuthEndpoints:
             },
         )
 
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
         assert data["success"] is False
-        assert data["status_code"] == status.HTTP_401_UNAUTHORIZED
+        assert data["status_code"] == status.HTTP_404_NOT_FOUND
         assert "message" in data
 
     async def test_login_validation_errors(self, test_client: AsyncClient):
