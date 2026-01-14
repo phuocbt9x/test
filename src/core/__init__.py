@@ -38,7 +38,10 @@ from src.core.exceptions import (
     NotFoundException,
     ConflictException,
     RateLimitException,
+    BadRequestException,
     UnauthorizedException,
+    BusinessRuleException,
+    ExternalServiceException,
     ErrorCode,
 )
 from src.core.routers import auto_load_routers, print_routes_table
@@ -127,7 +130,10 @@ __all__ = [
     "NotFoundException",
     "ConflictException",
     "RateLimitException",
+    "BadRequestException",
     "UnauthorizedException",
+    "BusinessRuleException",
+    "ExternalServiceException",
     "ErrorCode",
     "auto_load_routers",
     "print_routes_table",

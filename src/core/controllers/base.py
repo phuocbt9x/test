@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from fastapi import status
 from datetime import datetime
 from src.core.i18n import __
+from src.core.utils import utcnow
 
 T = TypeVar("T")
 
@@ -107,7 +108,7 @@ class SuccessResponse(BaseModel, Generic[T]):
     )
     data: Optional[T] = Field(default=None, description="Response data")
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Response timestamp"
+        default_factory=utcnow, description="Response timestamp"
     )
 
     model_config = ConfigDict(
@@ -121,11 +122,11 @@ class ErrorResponse(BaseModel):
     error_code: Optional[str] = Field(default=None, description="Error code")
     details: Optional[Dict[str, Any]] = Field(default=None, description="Error details")
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Response timestamp"
+        default_factory=utcnow, description="Response timestamp"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": False,
                 "message": __("messages.validation_error"),
@@ -134,6 +135,7 @@ class ErrorResponse(BaseModel):
                 "timestamp": "2024-01-15T10:30:00Z",
             }
         }
+    )
 
 
 class PaginationMeta(BaseModel):
@@ -144,8 +146,8 @@ class PaginationMeta(BaseModel):
     has_next: bool = Field(description="Has next page")
     has_prev: bool = Field(description="Has previous page")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "page": 1,
                 "per_page": 20,
@@ -155,6 +157,7 @@ class PaginationMeta(BaseModel):
                 "has_prev": False,
             }
         }
+    )
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
@@ -167,7 +170,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
     data: List[T] = Field(default_factory=list, description="Response data items")
     meta: PaginationMeta = Field(description="Pagination metadata")
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Response timestamp"
+        default_factory=utcnow, description="Response timestamp"
     )
 
     model_config = ConfigDict(
@@ -186,7 +189,7 @@ class BaseController:
             success=True,
             message=message or __("messages.operation_completed"),
             data=data,
-            timestamp=datetime.utcnow(),
+            timestamp=utcnow(),
         )
 
     @staticmethod
@@ -195,7 +198,7 @@ class BaseController:
             success=True,
             message=message or __("messages.created_successfully"),
             data=data,
-            timestamp=datetime.utcnow(),
+            timestamp=utcnow(),
         )
 
     @staticmethod
@@ -204,7 +207,7 @@ class BaseController:
             success=True,
             message=message or __("messages.updated_successfully"),
             data=data,
-            timestamp=datetime.utcnow(),
+            timestamp=utcnow(),
         )
 
     @staticmethod
@@ -213,7 +216,7 @@ class BaseController:
             success=True,
             message=message or __("messages.deleted_successfully"),
             data=None,
-            timestamp=datetime.utcnow(),
+            timestamp=utcnow(),
         )
 
     @staticmethod
@@ -240,7 +243,7 @@ class BaseController:
             message=message or __("messages.data_retrieved"),
             data=data,
             meta=meta,
-            timestamp=datetime.utcnow(),
+            timestamp=utcnow(),
         )
 
     @staticmethod
@@ -255,5 +258,5 @@ class BaseController:
             message=message,
             error_code=error_code,
             details=details,
-            timestamp=datetime.utcnow(),
+            timestamp=utcnow(),
         )

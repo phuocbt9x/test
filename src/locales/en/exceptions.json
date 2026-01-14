@@ -1,0 +1,22 @@
+{
+    "validation_error": "Validation error",
+    "authentication_failed": "Authentication failed",
+    "access_denied": "Access denied",
+    "resource_not_found": "{resource} not found",
+    "resource_not_found_with_id": "{resource} with ID '{resource_id}' not found",
+    "resource_already_exists": "Resource already exists",
+    "bad_request": "Bad request",
+    "unauthorized": "Unauthorized",
+    "external_service_error": "External service error",
+    "rate_limit_exceeded": "Rate limit exceeded",
+    "database_constraint_violation": "Database constraint violation",
+    "duplicate_entry_found": "Duplicate entry found",
+    "referenced_resource_not_exist": "Referenced resource does not exist",
+    "required_field_missing": "Required field is missing",
+    "database_connection_error": "Database connection error",
+    "database_operation_timeout": "Database operation timeout",
+    "database_operation_failed": "Database operation failed",
+    "rate_limit_exceeded_message": "Rate limit exceeded. Too many requests.",
+    "unexpected_error_occurred": "An unexpected error occurred",
+    "validation_error_default": "Validation error"
+}
