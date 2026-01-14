@@ -64,7 +64,7 @@ async def register(
         include_unauthorized=True,
     ),
 )
-@limiter.limit("1/minute")
+@limiter.limit("10/minute")
 async def login(
     request: Request,
     payload: LoginRequest,
