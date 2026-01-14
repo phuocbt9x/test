@@ -1,12 +1,57 @@
 import os
-import pytest
-import pytest_asyncio
-import asyncio
-from typing import AsyncGenerator
+import sys
 from pathlib import Path
 
+_DEFAULT_TEST_ENV = {
+    "APP_ENV": "development",
+    "APP_NAME": "TIMIMA_TEST",
+    "APP_HOST": "0.0.0.0",
+    "APP_PORT": "8000",
+    "APP_ROUTER_PREFIX": "/api/v1",
+    "APP_TIMEZONE": "Asia/Tokyo",
+    "CORS_ORIGINS": "http://localhost:3000,http://localhost:8000",
+    "CORS_CREDENTIALS": "true",
+    "CORS_METHODS": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+    "CORS_HEADERS": "Content-Type,Authorization,X-Request-ID",
+    "DB_HOST": "localhost",
+    "DB_PORT": "5432",
+    "DB_USER": "test_user",
+    "DB_PASSWORD": "test_password_min_12_chars",
+    "DB_NAME": "test_db",
+    "DB_ECHO": "false",
+    "DB_POOL_SIZE": "5",
+    "DB_MAX_OVERFLOW": "10",
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": "6379",
+    "REDIS_DB": "0",
+    "REDIS_PASSWORD": "",
+    "JWT_SECRET_KEY": "test_secret_key_for_testing_only_min_64_chars_required_for_validation_abc123",
+    "JWT_ALGORITHM": "HS256",
+    "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "60",
+    "JWT_REFRESH_TOKEN_EXPIRE_DAYS": "7",
+    "LOGGING_LEVEL": "ERROR",
+}
+
+if "--dev" in sys.argv:
+    env_example_path = Path(".env.example")
+    if env_example_path.exists():
+        from dotenv import dotenv_values
+
+        example_vars = dotenv_values(env_example_path)
+        _DEFAULT_TEST_ENV.update({k: v for k, v in example_vars.items() if v})
+
+for key, value in _DEFAULT_TEST_ENV.items():
+    if key not in os.environ:
+        os.environ[key] = str(value)
+
+# ruff: noqa: E402
+import asyncio
+from typing import AsyncGenerator
+
+import pytest
+import pytest_asyncio
 from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -28,50 +73,6 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_configure(config):
-    test_env_vars = {
-        "APP_ENV": "development",
-        "APP_NAME": "TIMIMA_TEST",
-        "APP_HOST": "0.0.0.0",
-        "APP_PORT": "8000",
-        "APP_ROUTER_PREFIX": "/api/v1",
-        "APP_TIMEZONE": "Asia/Tokyo",
-        "CORS_ORIGINS": "http://localhost:3000,http://localhost:8000",
-        "CORS_CREDENTIALS": "true",
-        "CORS_METHODS": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-        "CORS_HEADERS": "Content-Type,Authorization,X-Request-ID",
-        "DB_HOST": "localhost",
-        "DB_PORT": "5432",
-        "DB_USER": "test_user",
-        "DB_PASSWORD": "test_password_min_12_chars",
-        "DB_NAME": "test_db",
-        "DB_ECHO": "false",
-        "DB_POOL_SIZE": "5",
-        "DB_MAX_OVERFLOW": "10",
-        "REDIS_HOST": "localhost",
-        "REDIS_PORT": "6379",
-        "REDIS_DB": "0",
-        "REDIS_PASSWORD": "",
-        "JWT_SECRET_KEY": "test_secret_key_for_testing_only_min_64_chars_required_for_validation_abc123",
-        "JWT_ALGORITHM": "HS256",
-        "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "60",
-        "JWT_REFRESH_TOKEN_EXPIRE_DAYS": "7",
-        "LOGGING_LEVEL": "ERROR",
-    }
-
-    if config.getoption("--dev"):
-        env_example_path = Path(".env.example")
-        if env_example_path.exists():
-            from dotenv import dotenv_values
-
-            example_vars = dotenv_values(env_example_path)
-            test_env_vars.update({k: v for k, v in example_vars.items() if v})
-
-    for key, value in test_env_vars.items():
-        if key not in os.environ:
-            os.environ[key] = str(value)
-
-
 @pytest.fixture(scope="session")
 def event_loop():
     policy = asyncio.get_event_loop_policy()
@@ -90,7 +91,9 @@ def test_db_url() -> str:
 @pytest_asyncio.fixture(scope="session")
 async def test_engine(test_db_url: str) -> AsyncGenerator[AsyncEngine, None]:
     import os
-    from datetime import timezone as dt_timezone, datetime
+    from datetime import datetime
+    from datetime import timezone as dt_timezone
+
     from sqlalchemy import event as sa_event
 
     # Remove test database if exists
