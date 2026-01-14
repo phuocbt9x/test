@@ -47,39 +47,57 @@ class TranslationManager:
         ]
         return langs or [get_default_locale()]
 
-    def _load_language(self, lang: str) -> dict[str, Any]:
-        lang_dir = self.locales_dir / lang
-        if not lang_dir.exists():
-            lang_dir = self.locales_dir / get_default_locale()
-        translations: dict[str, Any] = {}
-        for json_file in sorted(lang_dir.rglob("*.json")):
-            try:
-                data = json.loads(json_file.read_text(encoding="utf-8"))
-                rel_path = json_file.relative_to(lang_dir)
-                parts = [*rel_path.parts[:-1], json_file.stem]
-                if len(parts) == 1:
-                    ns = parts[0]
-                    translations[ns] = (
-                        data[ns]
-                        if isinstance(data, dict)
-                        and ns in data
-                        and isinstance(data[ns], dict)
-                        else data
-                    )
-                else:
-                    translations[".".join(parts)] = data
-                    parent = translations.setdefault(parts[0], {})
-                    if isinstance(parent, dict):
-                        for p in parts[1:-1]:
-                            parent = parent.setdefault(p, {})
-                        parent[parts[-1]] = data
-            except (FileNotFoundError, json.JSONDecodeError):
-                continue
+    def _process_single_part_namespace(
+        self, parts: list[str], data: dict, translations: dict[str, Any]
+    ) -> None:
+        ns = parts[0]
+        if isinstance(data, dict) and ns in data and isinstance(data[ns], dict):
+            translations[ns] = data[ns]
+        else:
+            translations[ns] = data
+
+    def _process_multi_part_namespace(
+        self, parts: list[str], data: dict, translations: dict[str, Any]
+    ) -> None:
+        translations[".".join(parts)] = data
+        parent = translations.setdefault(parts[0], {})
+        if isinstance(parent, dict):
+            for p in parts[1:-1]:
+                parent = parent.setdefault(p, {})
+            parent[parts[-1]] = data
+
+    def _load_json_file(
+        self, json_file: Path, lang_dir: Path, translations: dict[str, Any]
+    ) -> None:
+        try:
+            data = json.loads(json_file.read_text(encoding="utf-8"))
+            rel_path = json_file.relative_to(lang_dir)
+            parts = [*rel_path.parts[:-1], json_file.stem]
+
+            if len(parts) == 1:
+                self._process_single_part_namespace(parts, data, translations)
+            else:
+                self._process_multi_part_namespace(parts, data, translations)
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+
+    def _build_flat_cache(self, translations: dict[str, Any], lang: str) -> None:
         flat: dict[str, str] = {}
         for ns_data in translations.values():
             if isinstance(ns_data, dict):
                 flat.update({k: v for k, v in ns_data.items() if isinstance(v, str)})
         self._flat_cache[lang] = flat
+
+    def _load_language(self, lang: str) -> dict[str, Any]:
+        lang_dir = self.locales_dir / lang
+        if not lang_dir.exists():
+            lang_dir = self.locales_dir / get_default_locale()
+
+        translations: dict[str, Any] = {}
+        for json_file in sorted(lang_dir.rglob("*.json")):
+            self._load_json_file(json_file, lang_dir, translations)
+
+        self._build_flat_cache(translations, lang)
         return translations
 
     def _get_translation(self, lang: str) -> dict[str, Any]:
@@ -101,23 +119,51 @@ class TranslationManager:
                 return None
         return obj if isinstance(obj, str) else None
 
-    def _get_value(self, data: dict[str, Any], key: str) -> str | None:
-        parts = key.split(".")
+    def _try_namespace_lookup(
+        self, data: dict[str, Any], parts: list[str]
+    ) -> str | None:
         for i in range(len(parts), 0, -1):
             ns_key = ".".join(parts[:i])
-            if ns_key in data:
-                remaining = parts[i:]
-                if not remaining:
-                    return data[ns_key] if isinstance(data[ns_key], str) else None
-                if result := self._traverse(data[ns_key], remaining):
-                    return result
-        if parts[0] in data and isinstance(data[parts[0]], dict):
-            if result := self._traverse(data[parts[0]], parts[1:]):
+            if ns_key not in data:
+                continue
+
+            remaining = parts[i:]
+            if not remaining:
+                return data[ns_key] if isinstance(data[ns_key], str) else None
+
+            result = self._traverse(data[ns_key], remaining)
+            if result:
                 return result
+        return None
+
+    def _try_direct_lookup(self, data: dict[str, Any], parts: list[str]) -> str | None:
+        if parts[0] not in data:
+            return None
+        if not isinstance(data[parts[0]], dict):
+            return None
+        return self._traverse(data[parts[0]], parts[1:])
+
+    def _try_root_search(self, data: dict[str, Any], parts: list[str]) -> str | None:
         for root in data.values():
-            if isinstance(root, dict) and (found := self._traverse(root, parts)):
+            if not isinstance(root, dict):
+                continue
+            found = self._traverse(root, parts)
+            if found:
                 return found
         return None
+
+    def _get_value(self, data: dict[str, Any], key: str) -> str | None:
+        parts = key.split(".")
+
+        result = self._try_namespace_lookup(data, parts)
+        if result:
+            return result
+
+        result = self._try_direct_lookup(data, parts)
+        if result:
+            return result
+
+        return self._try_root_search(data, parts)
 
     def _resolve_language(self) -> str:
         try:
@@ -148,21 +194,34 @@ class TranslationManager:
                 pass
         return text
 
+    def _get_plural_text(self, lang: str, singular: str, n: int, plural: str) -> str:
+        plural_data = self._get_value(self._get_translation(lang), singular)
+
+        if isinstance(plural_data, dict):
+            key = "one" if n == 1 else "other"
+            return plural_data.get(key, plural)
+
+        return singular if n == 1 else plural
+
+    def _format_text_with_params(self, text: str, params: dict[str, Any]) -> str:
+        has_placeholders = "{" in text and "}" in text
+        if not has_placeholders:
+            return text
+
+        try:
+            return text.format(**params)
+        except (KeyError, ValueError, IndexError):
+            return text
+
     def ntranslate(self, singular: str, plural: str, n: int, **kwargs: Any) -> str:
         lang = self._resolve_language()
-        plural_data = self._get_value(self._get_translation(lang), singular)
-        text = (
-            plural_data.get("one" if n == 1 else "other", plural)
-            if isinstance(plural_data, dict)
-            else (singular if n == 1 else plural)
-        )
-        if kwargs or n:
+        text = self._get_plural_text(lang, singular, n, plural)
+
+        should_format = kwargs or n
+        if should_format:
             params = {"count": n, **kwargs}
-            if "{" in text and "}" in text:
-                try:
-                    return text.format(**params)
-                except (KeyError, ValueError, IndexError):
-                    pass
+            return self._format_text_with_params(text, params)
+
         return text
 
     def has_key(self, key: str, lang: str | None = None) -> bool:
