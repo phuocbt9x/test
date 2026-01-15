@@ -64,6 +64,7 @@ from src.core.security import (
     get_token_from_header,
     optional_auth,
     require_auth,
+    require_superuser,
     require_active_user,
     require_roles,
     require_permissions,
@@ -77,6 +78,8 @@ from src.core.utils import (
     to_utc,
     get_timezone,
     format_datetime,
+    extract_path_from_url,
+    sanitize_filename,
 )
 from src.core.i18n import (
     __,
@@ -90,6 +93,19 @@ from src.core.controllers import (
     SuccessResponse,
     ErrorResponse,
     PaginatedResponse,
+)
+from src.core.storage import (
+    BaseStorageProvider,
+    CopyResult,
+    DeleteResult,
+    FileInfo,
+    FileMetadata,
+    UploadResult,
+    LocalStorageProvider,
+    S3StorageProvider,
+    StorageProviderFactory,
+    StorageManager,
+    storage_manager,
 )
 
 __all__ = [
@@ -154,6 +170,7 @@ __all__ = [
     "get_token_from_header",
     "optional_auth",
     "require_auth",
+    "require_superuser",
     "require_active_user",
     "CurrentUser",
     "require_roles",
@@ -175,4 +192,17 @@ __all__ = [
     "SuccessResponse",
     "ErrorResponse",
     "PaginatedResponse",
+    "BaseStorageProvider",
+    "CopyResult",
+    "DeleteResult",
+    "FileInfo",
+    "FileMetadata",
+    "UploadResult",
+    "LocalStorageProvider",
+    "S3StorageProvider",
+    "StorageProviderFactory",
+    "StorageManager",
+    "storage_manager",
+    "extract_path_from_url",
+    "sanitize_filename",
 ]

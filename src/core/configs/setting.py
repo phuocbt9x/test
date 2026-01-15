@@ -126,6 +126,18 @@ class Settings(BaseSettings):
     STORAGE_S3_ENDPOINT_URL: Optional[str] = None
     STORAGE_S3_PUBLIC_URL: Optional[str] = None
     STORAGE_S3_ACL: str = Field(default="private")
+    STORAGE_S3_COMPRESS: bool = Field(default=False)
+    STORAGE_S3_COMPRESS_MIN_SIZE: int = Field(default=1024, ge=0)
+    STORAGE_S3_COMPRESS_MAX_SIZE: int = Field(default=5 * 1024 * 1024, ge=0)
+    STORAGE_S3_COMPRESS_CONTENT_TYPES: str = Field(
+        default="text/plain,text/html,text/css,application/json,application/javascript,application/xml,text/xml"
+    )
+    STORAGE_S3_MULTIPART_THRESHOLD: int = Field(default=8 * 1024 * 1024, ge=1024)
+    STORAGE_S3_MULTIPART_CHUNK_SIZE: int = Field(default=8 * 1024 * 1024, ge=1024)
+    STORAGE_S3_MAX_POOL_CONNECTIONS: int = Field(default=20, ge=1, le=200)
+    STORAGE_S3_RETRY_MAX_ATTEMPTS: int = Field(default=5, ge=1, le=10)
+    STORAGE_S3_RETRY_BASE_DELAY: float = Field(default=0.2, ge=0)
+    STORAGE_S3_RETRY_MAX_DELAY: float = Field(default=2.0, ge=0)
 
     # ==================== VALIDATORS ====================
     # Note: APP_ENV and JWT_ALGORITHM are validated automatically by Enum types
@@ -270,6 +282,14 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> List[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+
+    @property
+    def STORAGE_S3_COMPRESS_CONTENT_TYPES_LIST(self) -> List[str]:
+        return [
+            value.strip()
+            for value in self.STORAGE_S3_COMPRESS_CONTENT_TYPES.split(",")
+            if value.strip()
+        ]
 
     @property
     def DATABASE_URL(self) -> str:

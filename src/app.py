@@ -18,6 +18,7 @@ from src.core import (
     setup_middlewares,
     redis_manager,
     db,
+    storage_manager,
 )
 
 logger = get_logger(__name__)
@@ -47,6 +48,14 @@ async def initialize_redis() -> None:
     except Exception as e:
         logger.error("Redis initialization failed: %s", e)
         logger.warning("Application will continue without Redis")
+
+
+async def initialize_storage() -> None:
+    try:
+        storage_manager.initialize()
+    except Exception as e:
+        logger.error("Storage initialization failed: %s", e)
+        logger.warning("Application will continue without storage")
 
 
 async def perform_startup_health_checks() -> None:
@@ -83,6 +92,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     await initialize_database()
     await initialize_redis()
+    await initialize_storage()
     await perform_startup_health_checks()
 
     if is_development():
