@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
-
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
+from src.core import storage_manager
 
 EXAMPLE_DATETIME = "2024-01-01T00:00:00Z"
 
@@ -13,11 +13,16 @@ class UserResponse(BaseModel):
     phone: str | None = None
     line_user_id: str | None = None
     avatar_path: str | None = None
-    avatar_url: str | None = None
     is_admin: bool
     is_active: bool
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    def avatar_url(self) -> str | None:
+        if self.avatar_path:
+            return storage_manager.get_instance().get_url(self.avatar_path)
+        return None
 
     model_config = ConfigDict(
         from_attributes=True,

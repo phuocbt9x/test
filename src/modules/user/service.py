@@ -4,7 +4,7 @@ import secrets
 
 from datetime import timedelta
 from typing import Optional
-from fastapi import UploadFile, status
+from fastapi import UploadFile, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core import (
     __,
@@ -41,9 +41,11 @@ class UserService:
         self.password_hasher = PasswordHasher()
         self.storage = storage_provider
 
-    async def create(self, data: UserCreateRequest) -> UserResponse:
+    async def create(
+        self, data: UserCreateRequest, background_tasks: BackgroundTasks
+    ) -> UserResponse:
         try:
-            await unique(data.email, User, "email", field_label=__("field.email"))
+            await unique(data.email, User, "email", field_label=__("fields.user.email"))
             if data.password:
                 data.password = self.password_hasher.hash(data.password)
 
@@ -63,19 +65,12 @@ class UserService:
                 avatar_path = await self._upload_avatar(data.avatar)
                 await self.repository.update(user.id, {"avatar_path": avatar_path})
 
-            user_response = UserResponse.model_validate(user)
-            user_response.avatar_url = (
-                self.storage.get_url(user_response.avatar_path)
-                if user_response.avatar_path
-                else None
-            )
-
-            if data.password is None:
-                token = await self._generate_reset_password_token(user)
-                await self._send_created_user_email(user, token)
-
             await self.write_session.commit()
-            return user_response
+
+            token = await self._generate_reset_password_token(user)
+            background_tasks.add_task(self._send_created_user_email, user, token)
+
+            return UserResponse.model_validate(user)
         except Exception as e:
             logger.error(f"Error creating user: {e}")
             await self.write_session.rollback()

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from starlette.requests import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core import (
@@ -41,6 +41,7 @@ controller = BaseController()
 @limiter.limit("15/minute")
 async def create(
     request: Request,
+    background_tasks: BackgroundTasks,
     payload: UserCreateRequest = Depends(UserCreateRequest.as_form),
     _: CurrentUser = Depends(require_superuser),
     read_session: AsyncSession = Depends(get_read_db),
@@ -51,8 +52,8 @@ async def create(
         read_session=read_session,
         write_session=write_session,
     )
-    user = await service.create(payload)
+    user = await service.create(payload, background_tasks)
     return controller.created(
         data=UserResponse.model_validate(user),
-        message=__("user.created"),
+        message=__("messages.Created successfully"),
     )
