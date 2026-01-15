@@ -1,10 +1,25 @@
 import asyncio
-import aiofiles  # type: ignore[import-untyped]
+import inspect
+import mimetypes
 import os
-from pathlib import Path
-from typing import Optional
+import shutil
 
-from .base import BaseStorageProvider, UploadResult, DeleteResult
+import aiofiles  # type: ignore[import-untyped]
+
+from pathlib import Path
+from typing import AsyncIterator, BinaryIO, List, Optional, Union
+from fastapi import UploadFile
+from src.core.utils import timestamp_to_datetime
+from .base import (
+    BaseStorageProvider,
+    CopyResult,
+    DeleteResult,
+    FileInfo,
+    FileMetadata,
+    UploadResult,
+)
+
+DEFAULT_CHUNK_SIZE = 1024 * 1024
 
 
 class LocalStorageProvider(BaseStorageProvider):
@@ -26,80 +41,246 @@ class LocalStorageProvider(BaseStorageProvider):
 
         return full_path
 
-    async def upload(
+    async def _iter_uploadfile_chunks(
+        self, file: UploadFile, chunk_size: int
+    ) -> AsyncIterator[bytes]:
+        while True:
+            chunk = await file.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+    async def _iter_binary_chunks(
+        self, file: BinaryIO, chunk_size: int
+    ) -> AsyncIterator[bytes]:
+        while True:
+            if inspect.iscoroutinefunction(file.read):
+                chunk = await file.read(chunk_size)
+            else:
+                chunk = await asyncio.to_thread(file.read, chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+    async def save(
         self,
         file_data: bytes,
-        file_path: str,
+        path: str,
         content_type: Optional[str] = None,
     ) -> UploadResult:
         try:
-            full_path = self._validate_path(file_path)
+            full_path = self._validate_path(path)
             full_path.parent.mkdir(parents=True, exist_ok=True)
 
             async with aiofiles.open(full_path, "wb") as f:
                 await f.write(file_data)
 
-            url = self.get_url(file_path)
+            return UploadResult(
+                success=True,
+                path=path,
+                size=len(file_data),
+            )
+        except Exception as e:
+            return UploadResult(success=False, error=str(e))
+
+    async def save_file(
+        self,
+        file: Union[UploadFile, BinaryIO],
+        path: str,
+        content_type: Optional[str] = None,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+    ) -> UploadResult:
+        try:
+            full_path = self._validate_path(path)
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+
+            total_size = 0
+            async with aiofiles.open(full_path, "wb") as f:
+                if isinstance(file, UploadFile):
+                    chunk_iter = self._iter_uploadfile_chunks(file, chunk_size)
+                else:
+                    chunk_iter = self._iter_binary_chunks(file, chunk_size)
+
+                async for chunk in chunk_iter:
+                    await f.write(chunk)
+                    total_size += len(chunk)
 
             return UploadResult(
-                success=True, url=url, path=file_path, size=len(file_data)
+                success=True,
+                path=path,
+                size=total_size,
             )
-
         except Exception as e:
-            return UploadResult(success=False, error=f"Upload failed: {str(e)}")
+            return UploadResult(success=False, error=str(e))
 
-    async def download(self, file_path: str) -> Optional[bytes]:
+    async def read(self, path: str) -> Optional[bytes]:
         try:
-            full_path = self._validate_path(file_path)
+            full_path = self._validate_path(path)
 
             if not full_path.exists():
                 return None
 
             async with aiofiles.open(full_path, "rb") as f:
                 return await f.read()
-
         except Exception:
             return None
 
-    async def delete(self, file_path: str) -> DeleteResult:
+    async def delete(self, path: str) -> DeleteResult:
         try:
-            full_path = self._validate_path(file_path)
+            full_path = self._validate_path(path)
 
             if not full_path.exists():
                 return DeleteResult(success=False, error="File not found")
 
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             await loop.run_in_executor(None, os.remove, full_path)
 
-            try:
-                full_path.parent.rmdir()
-            except OSError:
-                pass
+            self._try_remove_empty_parent(full_path)
 
             return DeleteResult(success=True)
-
         except Exception as e:
-            return DeleteResult(success=False, error=f"Delete failed: {str(e)}")
+            return DeleteResult(success=False, error=str(e))
 
-    async def exists(self, file_path: str) -> bool:
+    def _try_remove_empty_parent(self, file_path: Path) -> None:
         try:
-            full_path = self._validate_path(file_path)
+            file_path.parent.rmdir()
+        except OSError:
+            pass
+
+    async def exists(self, path: str) -> bool:
+        try:
+            full_path = self._validate_path(path)
             return full_path.exists() and full_path.is_file()
         except ValueError:
             return False
 
-    @staticmethod
-    def url_for(file_path: str, base_url: Optional[str] = None) -> str:
-        if base_url is None:
-            from src.core.configs import settings
-
-            base_url = settings.STORAGE_LOCAL_BASE_URL
-        url_path = file_path.replace(os.sep, "/")
-        base_url_clean = base_url.rstrip("/")
-        return f"{base_url_clean}/{url_path}"
-
-    def get_url(self, file_path: str) -> str:
-        return self.url_for(file_path, self.base_url)
+    def get_url(self, path: str) -> str:
+        url_path = path.replace(os.sep, "/")
+        return f"{self.base_url}/{url_path}"
 
     def get_provider_name(self) -> str:
         return "local"
+
+    async def copy(self, source: str, destination: str) -> CopyResult:
+        try:
+            source_full = self._validate_path(source)
+            dest_full = self._validate_path(destination)
+
+            if not source_full.exists():
+                return CopyResult(success=False, error="Source file not found")
+
+            dest_full.parent.mkdir(parents=True, exist_ok=True)
+
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, shutil.copy2, source_full, dest_full)
+
+            return CopyResult(
+                success=True,
+                path=destination,
+                size=dest_full.stat().st_size,
+            )
+        except Exception as e:
+            return CopyResult(success=False, error=str(e))
+
+    async def move(self, source: str, destination: str) -> CopyResult:
+        try:
+            source_full = self._validate_path(source)
+            dest_full = self._validate_path(destination)
+
+            if not source_full.exists():
+                return CopyResult(success=False, error="Source file not found")
+
+            dest_full.parent.mkdir(parents=True, exist_ok=True)
+
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, shutil.move, source_full, dest_full)
+
+            return CopyResult(
+                success=True,
+                path=destination,
+                size=dest_full.stat().st_size,
+            )
+        except Exception as e:
+            return CopyResult(success=False, error=str(e))
+
+    async def get_metadata(self, path: str) -> Optional[FileMetadata]:
+        try:
+            full_path = self._validate_path(path)
+
+            if not full_path.exists() or not full_path.is_file():
+                return None
+
+            stat = full_path.stat()
+            content_type, _ = mimetypes.guess_type(str(full_path))
+
+            return FileMetadata(
+                path=path,
+                size=stat.st_size,
+                content_type=content_type,
+                last_modified=timestamp_to_datetime(stat.st_mtime),
+            )
+        except (ValueError, OSError):
+            return None
+
+    async def list_files(
+        self,
+        prefix: str = "",
+        limit: int = 1000,
+    ) -> List[FileInfo]:
+        try:
+            search_path = self._validate_path(prefix) if prefix else self.base_dir
+
+            if not search_path.exists():
+                return []
+
+            if search_path.is_file():
+                stat = search_path.stat()
+                return [
+                    FileInfo(
+                        path=prefix,
+                        size=stat.st_size,
+                        is_directory=False,
+                        last_modified=timestamp_to_datetime(stat.st_mtime),
+                    )
+                ]
+
+            results: List[FileInfo] = []
+
+            for item in search_path.rglob("*"):
+                if len(results) >= limit:
+                    break
+
+                if item.is_file():
+                    stat = item.stat()
+                    results.append(
+                        FileInfo(
+                            path=str(item.relative_to(self.base_dir)),
+                            size=stat.st_size,
+                            is_directory=False,
+                            last_modified=timestamp_to_datetime(stat.st_mtime),
+                        )
+                    )
+
+            return results
+        except (ValueError, OSError):
+            return []
+
+    async def read_stream(
+        self,
+        path: str,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+    ) -> Optional[AsyncIterator[bytes]]:
+        try:
+            full_path = self._validate_path(path)
+
+            if not full_path.exists():
+                return None
+
+            async def _stream() -> AsyncIterator[bytes]:
+                async with aiofiles.open(full_path, "rb") as f:
+                    while chunk := await f.read(chunk_size):
+                        yield chunk
+
+            return _stream()
+        except ValueError:
+            return None

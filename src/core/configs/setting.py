@@ -119,13 +119,6 @@ class Settings(BaseSettings):
     STORAGE_PROVIDER: str = Field(default="local")
     STORAGE_LOCAL_BASE_DIR: str = Field(default="public")
     STORAGE_LOCAL_BASE_URL: str = Field(default="http://localhost:8000")
-    STORAGE_S3_BUCKET_NAME: Optional[str] = None
-    STORAGE_S3_REGION: str = Field(default="us-east-1")
-    STORAGE_S3_ACCESS_KEY_ID: Optional[str] = None
-    STORAGE_S3_SECRET_ACCESS_KEY: Optional[str] = None
-    STORAGE_S3_ENDPOINT_URL: Optional[str] = None
-    STORAGE_S3_PUBLIC_URL: Optional[str] = None
-    STORAGE_S3_ACL: str = Field(default="private")
 
     # ==================== VALIDATORS ====================
     # Note: APP_ENV and JWT_ALGORITHM are validated automatically by Enum types

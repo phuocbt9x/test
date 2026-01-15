@@ -1,28 +1,36 @@
 import re
+from datetime import datetime, timezone
 from typing import Optional
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 
-def get_file_url(file_path: Optional[str]) -> Optional[str]:
-    if not file_path:
-        return None
-    try:
-        from .manager import storage_manager
+def parse_size(size: str | int) -> int:
+    if isinstance(size, int):
+        return size
 
-        storage = storage_manager.get_instance()
-        return storage.get_url(file_path)
-    except (RuntimeError, AttributeError):
-        try:
-            from src.core.configs import settings
-            from .local_storage import LocalStorageProvider
+    size = size.strip().upper()
 
-            if settings.STORAGE_PROVIDER == "local":
-                return LocalStorageProvider.url_for(file_path)
-        except Exception:
-            pass
-        return None
-    except Exception:
-        return None
+    match = re.fullmatch(r"(\d+)\s*(B|KB|MB|GB)?", size)
+    if not match:
+        raise ValueError("Invalid file size format")
+
+    value, unit = match.groups()
+    value = int(value)
+
+    return (
+        value
+        * {
+            None: 1,
+            "B": 1,
+            "KB": 1024,
+            "MB": 1024**2,
+            "GB": 1024**3,
+        }[unit]
+    )
+
+
+def timestamp_to_datetime(timestamp: float) -> datetime:
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
 
 def extract_path_from_url(url: str, base_path: str = "/") -> Optional[str]:
@@ -60,3 +68,11 @@ def sanitize_filename(filename: str) -> str:
         filename = name[:250] + ("." + ext if ext else "")
 
     return filename
+
+
+def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
