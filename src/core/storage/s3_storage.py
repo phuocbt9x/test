@@ -3,6 +3,7 @@ import gzip
 import inspect
 import logging
 import random
+from dataclasses import dataclass
 from typing import AsyncIterator, BinaryIO, List, Optional, Union
 
 import aioboto3  # type: ignore[import-untyped]
@@ -31,6 +32,20 @@ DEFAULT_MULTIPART_THRESHOLD = 8 * 1024 * 1024
 DEFAULT_MULTIPART_CHUNK_SIZE = 8 * 1024 * 1024
 
 
+@dataclass(frozen=True)
+class S3PerformanceConfig:
+    compress: bool = False
+    compress_min_size: int = 1024
+    compress_max_size: int = 5 * 1024 * 1024
+    compress_content_types: Optional[tuple[str, ...]] = None
+    multipart_threshold: int = DEFAULT_MULTIPART_THRESHOLD
+    multipart_chunk_size: int = DEFAULT_MULTIPART_CHUNK_SIZE
+    max_pool_connections: int = 20
+    retry_max_attempts: int = 5
+    retry_base_delay: float = 0.2
+    retry_max_delay: float = 2.0
+
+
 class S3StorageProvider(BaseStorageProvider):
     def __init__(
         self,
@@ -41,16 +56,7 @@ class S3StorageProvider(BaseStorageProvider):
         endpoint_url: Optional[str] = None,
         public_url: Optional[str] = None,
         acl: str = "private",
-        compress: bool = False,
-        compress_min_size: int = 1024,
-        compress_max_size: int = 5 * 1024 * 1024,
-        compress_content_types: Optional[tuple[str, ...]] = None,
-        multipart_threshold: int = DEFAULT_MULTIPART_THRESHOLD,
-        multipart_chunk_size: int = DEFAULT_MULTIPART_CHUNK_SIZE,
-        max_pool_connections: int = 20,
-        retry_max_attempts: int = 5,
-        retry_base_delay: float = 0.2,
-        retry_max_delay: float = 2.0,
+        performance: Optional[S3PerformanceConfig] = None,
     ):
         self.bucket_name = bucket_name
         self.region_name = region_name
@@ -58,11 +64,12 @@ class S3StorageProvider(BaseStorageProvider):
         self.secret_access_key = secret_access_key
         self.endpoint_url = endpoint_url
         self.public_url = public_url
+        perf = performance or S3PerformanceConfig()
         self.acl = acl if acl in VALID_ACLS else "private"
-        self.compress = compress
-        self.compress_min_size = compress_min_size
-        self.compress_max_size = compress_max_size
-        self.compress_content_types = compress_content_types or (
+        self.compress = perf.compress
+        self.compress_min_size = perf.compress_min_size
+        self.compress_max_size = perf.compress_max_size
+        self.compress_content_types = perf.compress_content_types or (
             "text/plain",
             "text/html",
             "text/css",
@@ -71,12 +78,12 @@ class S3StorageProvider(BaseStorageProvider):
             "application/xml",
             "text/xml",
         )
-        self.multipart_threshold = multipart_threshold
-        self.multipart_chunk_size = multipart_chunk_size
-        self.max_pool_connections = max_pool_connections
-        self.retry_max_attempts = retry_max_attempts
-        self.retry_base_delay = retry_base_delay
-        self.retry_max_delay = retry_max_delay
+        self.multipart_threshold = perf.multipart_threshold
+        self.multipart_chunk_size = perf.multipart_chunk_size
+        self.max_pool_connections = perf.max_pool_connections
+        self.retry_max_attempts = perf.retry_max_attempts
+        self.retry_base_delay = perf.retry_base_delay
+        self.retry_max_delay = perf.retry_max_delay
         self._client: Optional[aioboto3.client] = None
         self._client_lock = asyncio.Lock()
 
@@ -86,13 +93,13 @@ class S3StorageProvider(BaseStorageProvider):
             region_name=region_name,
         )
         self._client_config = Config(
-            retries={"max_attempts": retry_max_attempts, "mode": "adaptive"},
-            max_pool_connections=max_pool_connections,
+            retries={"max_attempts": self.retry_max_attempts, "mode": "adaptive"},
+            max_pool_connections=self.max_pool_connections,
         )
         self._transfer_config = TransferConfig(
             multipart_threshold=self.multipart_threshold,
             multipart_chunksize=self.multipart_chunk_size,
-            max_concurrency=max(1, min(10, max_pool_connections)),
+            max_concurrency=max(1, min(10, self.max_pool_connections)),
             use_threads=True,
         )
 

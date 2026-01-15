@@ -107,6 +107,7 @@ class BaseStorageProvider(ABC):
         return result
 
     async def get_metadata(self, path: str) -> Optional[FileMetadata]:
+        _ = path
         return None
 
     async def list_files(
@@ -114,6 +115,8 @@ class BaseStorageProvider(ABC):
         prefix: str = "",
         limit: int = 1000,
     ) -> List[FileInfo]:
+        _ = prefix
+        _ = limit
         return []
 
     async def read_stream(
@@ -121,6 +124,8 @@ class BaseStorageProvider(ABC):
         path: str,
         chunk_size: int = 1024 * 1024,
     ) -> Optional[AsyncIterator[bytes]]:
+        _ = path
+        _ = chunk_size
         return None
 
     def generate_signed_url(
@@ -129,4 +134,7 @@ class BaseStorageProvider(ABC):
         expires_in: int = 3600,
         method: str = "GET",
     ) -> Optional[str]:
+        _ = path
+        _ = expires_in
+        _ = method
         return None

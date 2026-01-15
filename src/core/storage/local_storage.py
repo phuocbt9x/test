@@ -41,6 +41,27 @@ class LocalStorageProvider(BaseStorageProvider):
 
         return full_path
 
+    async def _iter_uploadfile_chunks(
+        self, file: UploadFile, chunk_size: int
+    ) -> AsyncIterator[bytes]:
+        while True:
+            chunk = await file.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+    async def _iter_binary_chunks(
+        self, file: BinaryIO, chunk_size: int
+    ) -> AsyncIterator[bytes]:
+        while True:
+            if inspect.iscoroutinefunction(file.read):
+                chunk = await file.read(chunk_size)
+            else:
+                chunk = await asyncio.to_thread(file.read, chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
     async def save(
         self,
         file_data: bytes,
@@ -76,22 +97,13 @@ class LocalStorageProvider(BaseStorageProvider):
             total_size = 0
             async with aiofiles.open(full_path, "wb") as f:
                 if isinstance(file, UploadFile):
-                    while True:
-                        chunk = await file.read(chunk_size)
-                        if not chunk:
-                            break
-                        await f.write(chunk)
-                        total_size += len(chunk)
+                    chunk_iter = self._iter_uploadfile_chunks(file, chunk_size)
                 else:
-                    while True:
-                        if inspect.iscoroutinefunction(file.read):
-                            chunk = await file.read(chunk_size)
-                        else:
-                            chunk = await asyncio.to_thread(file.read, chunk_size)
-                        if not chunk:
-                            break
-                        await f.write(chunk)
-                        total_size += len(chunk)
+                    chunk_iter = self._iter_binary_chunks(file, chunk_size)
+
+                async for chunk in chunk_iter:
+                    await f.write(chunk)
+                    total_size += len(chunk)
 
             return UploadResult(
                 success=True,

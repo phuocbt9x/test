@@ -1,7 +1,7 @@
 from typing import Optional
 from .base import BaseStorageProvider
 from .local_storage import LocalStorageProvider
-from .s3_storage import S3StorageProvider
+from .s3_storage import S3PerformanceConfig, S3StorageProvider
 
 
 class StorageProviderFactory:
@@ -32,18 +32,22 @@ class StorageProviderFactory:
                 endpoint_url=kwargs.get("endpoint_url"),
                 public_url=kwargs.get("public_url"),
                 acl=kwargs.get("acl", "private"),
-                compress=kwargs.get("compress", False),
-                compress_min_size=kwargs.get("compress_min_size", 1024),
-                compress_max_size=kwargs.get("compress_max_size", 5 * 1024 * 1024),
-                compress_content_types=kwargs.get("compress_content_types"),
-                multipart_threshold=kwargs.get("multipart_threshold", 8 * 1024 * 1024),
-                multipart_chunk_size=kwargs.get(
-                    "multipart_chunk_size", 8 * 1024 * 1024
+                performance=S3PerformanceConfig(
+                    compress=kwargs.get("compress", False),
+                    compress_min_size=kwargs.get("compress_min_size", 1024),
+                    compress_max_size=kwargs.get("compress_max_size", 5 * 1024 * 1024),
+                    compress_content_types=kwargs.get("compress_content_types"),
+                    multipart_threshold=kwargs.get(
+                        "multipart_threshold", 8 * 1024 * 1024
+                    ),
+                    multipart_chunk_size=kwargs.get(
+                        "multipart_chunk_size", 8 * 1024 * 1024
+                    ),
+                    max_pool_connections=kwargs.get("max_pool_connections", 20),
+                    retry_max_attempts=kwargs.get("retry_max_attempts", 5),
+                    retry_base_delay=kwargs.get("retry_base_delay", 0.2),
+                    retry_max_delay=kwargs.get("retry_max_delay", 2.0),
                 ),
-                max_pool_connections=kwargs.get("max_pool_connections", 20),
-                retry_max_attempts=kwargs.get("retry_max_attempts", 5),
-                retry_base_delay=kwargs.get("retry_base_delay", 0.2),
-                retry_max_delay=kwargs.get("retry_max_delay", 2.0),
             )
         else:
             raise ValueError(
