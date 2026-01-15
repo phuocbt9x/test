@@ -1,12 +1,14 @@
 import logging
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 
-from sqlalchemy import Select, delete, func, select, update
+from sqlalchemy import Select, delete, func, select, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from .base_model import BaseModel
 
 logger = logging.getLogger(__name__)
+
+QUERY_NOT_INITIALIZED_ERROR = "Query not initialized"
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
@@ -53,18 +55,84 @@ class BaseRepository(Generic[ModelType]):
         self._relationships.extend(relationships)
         return self
 
-    def where(self, **filters) -> "BaseRepository[ModelType]":
+    def _build_condition(
+        self, column_name: str, value: Any, operator: str = "eq"
+    ) -> Any:
+        if not self._validate_column_name(column_name):
+            raise ValueError(
+                f"Invalid column name: '{column_name}' on {self.model.__name__}"
+            )
+
+        column = getattr(self.model, column_name)
+
+        if operator == "eq":
+            return column == value
+        elif operator == "ilike":
+            return column.ilike(value)
+        elif operator == "like":
+            return column.like(value)
+        elif operator == "gt":
+            return column > value
+        elif operator == "lt":
+            return column < value
+        elif operator == "gte":
+            return column >= value
+        elif operator == "lte":
+            return column <= value
+        elif operator == "ne":
+            return column != value
+        elif operator == "in":
+            return column.in_(value)
+        else:
+            raise ValueError(
+                f"Unsupported operator: '{operator}'. "
+                f"Supported: eq, ilike, like, gt, lt, gte, lte, ne, in"
+            )
+
+    def _parse_filter_key(self, key: str) -> tuple[str, str]:
+        if "__" in key:
+            column_name, operator = key.rsplit("__", 1)
+        else:
+            column_name, operator = key, "eq"
+        return column_name, operator
+
+    def where(self, *expressions, **filters) -> "BaseRepository[ModelType]":
         if self._query is None:
             self.query()
-        if self._query is not None:
-            for key, value in filters.items():
-                if not self._validate_column_name(key):
-                    raise ValueError(
-                        f"Invalid column name: '{key}' on {self.model.__name__}"
-                    )
 
-                column = getattr(self.model, key)
-                self._query = self._query.where(column == value)
+        if expressions:
+            if self._query is not None:
+                for expr in expressions:
+                    self._query = self._query.where(expr)
+
+        if filters:
+            if self._query is not None:
+                for key, value in filters.items():
+                    column_name, operator = self._parse_filter_key(key)
+                    condition = self._build_condition(column_name, value, operator)
+                    self._query = self._query.where(condition)
+
+        return self
+
+    def where_or(self, *expressions, **filters) -> "BaseRepository[ModelType]":
+        if self._query is None:
+            self.query()
+
+        conditions: list[Any] = []
+
+        if expressions:
+            conditions.extend(expressions)
+
+        if filters:
+            for key, value in filters.items():
+                column_name, operator = self._parse_filter_key(key)
+                condition = self._build_condition(column_name, value, operator)
+                conditions.append(condition)
+
+        if conditions and self._query is not None:
+            combined_expr = or_(*conditions)
+            self._query = self._query.where(combined_expr)
+
         return self
 
     def _validate_column_name(self, column_name: str) -> bool:
@@ -164,7 +232,7 @@ class BaseRepository(Generic[ModelType]):
         if self._query is None:
             self.query()
         if self._query is None:
-            raise RuntimeError("Query not initialized")
+            raise RuntimeError(QUERY_NOT_INITIALIZED_ERROR)
         query = self._apply_relationships(self._query)
         result = await self.read_session.execute(query)
         data = list(result.scalars().all())
@@ -175,7 +243,7 @@ class BaseRepository(Generic[ModelType]):
         if self._query is None:
             self.query()
         if self._query is None:
-            raise RuntimeError("Query not initialized")
+            raise RuntimeError(QUERY_NOT_INITIALIZED_ERROR)
         query = self._apply_relationships(self._query.limit(1))
         result = await self.read_session.execute(query)
         data = result.scalars().first()
@@ -216,7 +284,7 @@ class BaseRepository(Generic[ModelType]):
         if self._query is None:
             self.query()
         if self._query is None:
-            raise RuntimeError("Query not initialized")
+            raise RuntimeError(QUERY_NOT_INITIALIZED_ERROR)
         count_query = select(func.count()).select_from(self._query.subquery())
         result = await self.read_session.execute(count_query)
         count = result.scalar_one()
@@ -227,7 +295,7 @@ class BaseRepository(Generic[ModelType]):
         if self._query is None:
             self.query()
         if self._query is None:
-            raise RuntimeError("Query not initialized")
+            raise RuntimeError(QUERY_NOT_INITIALIZED_ERROR)
 
         try:
             query = self._apply_relationships(self._query.limit(1))
@@ -243,7 +311,7 @@ class BaseRepository(Generic[ModelType]):
         if self._query is None:
             self.query()
         if self._query is None:
-            raise RuntimeError("Query not initialized")
+            raise RuntimeError(QUERY_NOT_INITIALIZED_ERROR)
 
         count_query = select(func.count()).select_from(self._query.subquery())
         count_result = await self.read_session.execute(count_query)

@@ -1,6 +1,6 @@
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, field_validator, ValidationError
-from fastapi import Form, File, UploadFile
+from fastapi import Form, File, UploadFile, Query
 from typing import Annotated
 
 from src.core import (
@@ -14,6 +14,37 @@ from src.core import (
     file,
     half_width,
 )
+
+
+class UserListRequest(BaseModel):
+    search: str | None = None
+    type: int | None = None
+    status: int | None = None
+    sort_by: str = "id"
+    sort_order: str = "desc"
+    page: int = 1
+    per_page: int = 20
+
+    @classmethod
+    def as_query(
+        cls,
+        search: str | None = Query(None),
+        type: int | None = Query(None, description="1 for admin, 0 for regular user"),
+        status: int | None = Query(None, description="1 for active, 0 for inactive"),
+        sort_by: str = Query("id"),
+        sort_order: str = Query("desc"),
+        page: int = Query(1, ge=1, description="Page number must be >= 1"),
+        per_page: int = Query(20, ge=1, description="Items per page"),
+    ) -> "UserListRequest":
+        return cls(
+            search=search,
+            type=type,
+            status=status,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            page=page,
+            per_page=per_page,
+        )
 
 
 class UserCreateRequest(BaseModel):

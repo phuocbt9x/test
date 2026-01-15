@@ -3,7 +3,7 @@ import uuid
 import secrets
 
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, Dict, Any
 from fastapi import UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core import (
@@ -21,6 +21,7 @@ from src.core import (
 from .models import User
 from .repository import UserRepository, PasswordResetTokenRepository
 from .schemas import (
+    UserListRequest,
     UserCreateRequest,
     UserResponse,
 )
@@ -40,6 +41,13 @@ class UserService:
         self.repository = UserRepository(read_session, write_session)
         self.password_hasher = PasswordHasher()
         self.storage = storage_provider
+
+    async def list(self, payload: UserListRequest) -> Dict[str, Any]:
+        try:
+            return await self.repository.list_with_filters(payload)
+        except Exception as e:
+            logger.error(f"Error listing users: {e}")
+            raise
 
     async def create(self, data: UserCreateRequest) -> UserResponse:
         try:
