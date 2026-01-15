@@ -4,7 +4,7 @@ import secrets
 
 from datetime import timedelta
 from typing import Optional
-from fastapi import UploadFile
+from fastapi import UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core import (
     __,
@@ -15,6 +15,8 @@ from src.core import (
     MailMessage,
     mail_manager,
     settings,
+    BaseAppException,
+    ErrorCode,
 )
 from .models import User
 from .repository import UserRepository, PasswordResetTokenRepository
@@ -120,7 +122,11 @@ class UserService:
             )
 
             if not result.success or not result.path:
-                raise Exception(result.error or "Upload failed")
+                raise BaseAppException(
+                    message="Failed to upload avatar",
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    error_code=ErrorCode.USER_NOT_FOUND,
+                )
 
             return result.path
         except Exception as e:

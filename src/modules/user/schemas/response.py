@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+EXAMPLE_DATETIME = "2024-01-01T00:00:00Z"
+
 
 class UserResponse(BaseModel):
     id: UUID
@@ -30,8 +32,8 @@ class UserResponse(BaseModel):
                 "avatar_url": "https://example.com/avatar.jpg",
                 "is_admin": False,
                 "is_active": True,
-                "created_at": "2024-01-01T00:00:00Z",
-                "updated_at": "2024-01-01T00:00:00Z",
+                "created_at": EXAMPLE_DATETIME,
+                "updated_at": EXAMPLE_DATETIME,
             }
         },
     )
@@ -52,8 +54,8 @@ class UserDetailResponse(UserResponse):
                 "avatar_url": "https://example.com/avatar.jpg",
                 "is_admin": False,
                 "is_active": True,
-                "created_at": "2024-01-01T00:00:00Z",
-                "updated_at": "2024-01-01T00:00:00Z",
+                "created_at": EXAMPLE_DATETIME,
+                "updated_at": EXAMPLE_DATETIME,
                 "deleted_at": None,
             }
         },

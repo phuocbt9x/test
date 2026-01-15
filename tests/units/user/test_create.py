@@ -307,7 +307,11 @@ class TestUserCreation:
 
     @pytest.mark.asyncio
     async def test_create_user_with_all_fields(
-        self, test_client: AsyncClient, override_auth, fake: Faker, create_test_image
+        self,
+        test_client: AsyncClient,
+        override_auth,
+        fake: Faker,
+        create_test_image,
     ):
         files = {"avatar": create_test_image(f"{fake.word()}.jpg")}
         response = await test_client.post(
@@ -316,10 +320,7 @@ class TestUserCreation:
                 "name": fake.name(),
                 "email": fake.email(),
                 "password": fake.password(length=12, special_chars=True),
-                "phone": "+81" + fake.numerify(text="#########"),
-                "line_user_id": f"U{fake.bothify(text='????-????-????-????')}",
-                "is_admin": "false",
-                "is_active": "true",
+                "line_user_id": fake.lexify(text="U?????????????????????"),
             },
             files=files,
         )
