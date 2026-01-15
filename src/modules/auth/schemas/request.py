@@ -49,7 +49,10 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_confirm_password(cls, v: str, info) -> str:
         field = __("field.confirm_password")
-        return confirmed(v, info.data["password"], field)
+        password = info.data.get("password")
+        if password is None:
+            return v
+        return confirmed(v, password, field)
 
     @field_validator("phone")
     @classmethod
@@ -161,7 +164,10 @@ class UpdateCurrentUserRequest(BaseModel):
     def validate_confirm_password(cls, v: str | None, info) -> str | None:
         if v is None:
             return None
-        return confirmed(v, info.data["password"], __("field.confirm_password"))
+        password = info.data.get("password")
+        if password is None:
+            return v
+        return confirmed(v, password, __("field.confirm_password"))
 
     @field_validator("phone")
     @classmethod

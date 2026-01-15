@@ -1,326 +1,206 @@
-"""
-Pytest configuration and shared fixtures for testing.
+import os
+import sys
+from pathlib import Path
 
-This module provides:
-- Database test fixtures with transaction rollback
-- Redis test fixtures with cleanup
-- FastAPI test client
-- Authentication fixtures
-- Mock factories
-"""
+_DEFAULT_TEST_ENV = {
+    "APP_ENV": "development",
+    "APP_NAME": "TIMIMA_TEST",
+    "APP_HOST": "0.0.0.0",
+    "APP_PORT": "8000",
+    "APP_ROUTER_PREFIX": "/api/v1",
+    "APP_TIMEZONE": "Asia/Tokyo",
+    "CORS_ORIGINS": "http://localhost:3000,http://localhost:8000",
+    "CORS_CREDENTIALS": "true",
+    "CORS_METHODS": "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+    "CORS_HEADERS": "Content-Type,Authorization,X-Request-ID",
+    "DB_HOST": "localhost",
+    "DB_PORT": "5432",
+    "DB_USER": "test_user",
+    "DB_PASSWORD": "test_password_min_12_chars",
+    "DB_NAME": "test_db",
+    "DB_ECHO": "false",
+    "DB_POOL_SIZE": "5",
+    "DB_MAX_OVERFLOW": "10",
+    "REDIS_HOST": "localhost",
+    "REDIS_PORT": "6379",
+    "REDIS_DB": "0",
+    "REDIS_PASSWORD": "",
+    "JWT_SECRET_KEY": "test_secret_key_for_testing_only_min_64_chars_required_for_validation_abc123",
+    "JWT_ALGORITHM": "HS256",
+    "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "60",
+    "JWT_REFRESH_TOKEN_EXPIRE_DAYS": "7",
+    "LOGGING_LEVEL": "ERROR",
+}
 
+if "--dev" in sys.argv:
+    env_example_path = Path(".env.example")
+    if env_example_path.exists():
+        from dotenv import dotenv_values
+
+        example_vars = dotenv_values(env_example_path)
+        _DEFAULT_TEST_ENV.update({k: v for k, v in example_vars.items() if v})
+
+for key, value in _DEFAULT_TEST_ENV.items():
+    if key not in os.environ:
+        os.environ[key] = str(value)
+
+# ruff: noqa: E402
 import asyncio
+from typing import AsyncGenerator
+
 import pytest
 import pytest_asyncio
-from typing import AsyncGenerator, Generator
-from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
-
 from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from redis.asyncio import Redis
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
-from src.core.configs.database import Base
+from src import create_app
+from src.core.configs.database import Base, db
 from src.core.configs.redis import redis_manager
-from src.modules.user.models import User
-from src.core.security.jwt import JWTManager
-from src.core.security.password import PasswordHasher
 
 
-# ==================== Event Loop Configuration ====================
+def pytest_addoption(parser):
+    parser.addoption(
+        "--dev",
+        action="store_true",
+        default=False,
+        help="Load .env.example for test environment",
+    )
 
 
 @pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create an instance of the default event loop for the session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+def event_loop():
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    asyncio.set_event_loop(loop)
     yield loop
     loop.close()
+    asyncio.set_event_loop(None)
 
 
-# ==================== Database Fixtures ====================
+@pytest.fixture(scope="session")
+def test_db_url() -> str:
+    return "sqlite+aiosqlite:///./test.db"
 
 
-@pytest_asyncio.fixture(scope="function")
-async def test_db_engine():
-    """
-    Create a test database engine.
-    Uses SQLite in-memory database for fast testing.
-    """
-    # Use SQLite for testing (faster and isolated)
-    test_database_url = "sqlite+aiosqlite:///:memory:"
+@pytest_asyncio.fixture(scope="session")
+async def test_engine(test_db_url: str) -> AsyncGenerator[AsyncEngine, None]:
+    import os
+    from datetime import datetime
+    from datetime import timezone as dt_timezone
+
+    from sqlalchemy import event as sa_event
+
+    # Remove test database if exists
+    if test_db_url.startswith("sqlite"):
+        db_path = test_db_url.replace("sqlite+aiosqlite:///", "")
+        if os.path.exists(db_path):
+            os.remove(db_path)
 
     engine = create_async_engine(
-        test_database_url,
+        test_db_url,
         echo=False,
-        future=True,
+        connect_args={"check_same_thread": False},
+        pool_pre_ping=False,
     )
 
-    # Create all tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    def make_tz_aware(target, context):
+        for attr_name in dir(target):
+            if not attr_name.startswith("_"):
+                try:
+                    attr_value = getattr(target, attr_name)
+                    if isinstance(attr_value, datetime) and attr_value.tzinfo is None:
+                        setattr(
+                            target,
+                            attr_name,
+                            attr_value.replace(tzinfo=dt_timezone.utc),
+                        )
+                except Exception:
+                    pass
 
-    yield engine
+    for mapper in Base.registry.mappers:
+        sa_event.listen(mapper.class_, "load", make_tz_aware, propagate=True)
 
-    # Cleanup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+
     await engine.dispose()
 
+    if test_db_url.startswith("sqlite"):
+        db_path = test_db_url.replace("sqlite+aiosqlite:///", "")
+        if os.path.exists(db_path):
+            os.remove(db_path)
 
-@pytest_asyncio.fixture(scope="function")
-async def db_session(test_db_engine) -> AsyncGenerator[AsyncSession, None]:
-    """
-    Create a test database session with transaction rollback.
-    Each test gets a fresh session with automatic rollback.
-    """
-    session_factory = async_sessionmaker(
-        bind=test_db_engine,
+
+@pytest_asyncio.fixture(scope="session")
+async def setup_test_db(test_engine: AsyncEngine) -> None:
+    pass
+
+
+@pytest.fixture
+async def test_session(
+    test_engine: AsyncEngine, setup_test_db: None
+) -> AsyncGenerator[AsyncSession, None]:
+    async_session_maker = async_sessionmaker(
+        bind=test_engine,
         class_=AsyncSession,
         expire_on_commit=False,
-        autoflush=False,
         autocommit=False,
+        autoflush=False,
     )
 
-    async with session_factory() as session:
-        # Begin transaction
-        await session.begin()
-
+    async with async_session_maker() as session:
         yield session
-
-        # Rollback transaction (ensures test isolation)
         await session.rollback()
 
 
-# ==================== Redis Fixtures ====================
-
-
-@pytest_asyncio.fixture(scope="function")
-async def mock_redis() -> AsyncGenerator[AsyncMock, None]:
-    """
-    Mock Redis client for testing without actual Redis connection.
-    """
-    mock = AsyncMock(spec=Redis)
-
-    # Setup in-memory storage for mock Redis
-    storage = {}
-
-    async def mock_get(key: str):
-        return storage.get(key)
-
-    async def mock_set(key: str, value, ex=None, nx=False, xx=False):
-        if nx and key in storage:
-            return False
-        if xx and key not in storage:
-            return False
-        storage[key] = value
-        return True
-
-    async def mock_delete(key: str):
-        if key in storage:
-            del storage[key]
-            return 1
-        return 0
-
-    async def mock_exists(key: str):
-        return 1 if key in storage else 0
-
-    async def mock_ping():
-        return True
-
-    mock.get.side_effect = mock_get
-    mock.set.side_effect = mock_set
-    mock.delete.side_effect = mock_delete
-    mock.exists.side_effect = mock_exists
-    mock.ping.side_effect = mock_ping
-
-    yield mock
-
-
-@pytest_asyncio.fixture(scope="function")
-async def redis_client(mock_redis) -> AsyncGenerator[AsyncMock, None]:
-    """
-    Provide a mocked Redis client for testing.
-    Automatically patches redis_manager._client.
-    """
-    original_client = redis_manager._client
-    original_initialized = redis_manager._initialized
-
-    redis_manager._client = mock_redis
-    redis_manager._initialized = True
-
-    yield mock_redis
-
-    # Restore original state
-    redis_manager._client = original_client
-    redis_manager._initialized = original_initialized
-
-
-# ==================== FastAPI Test Client ====================
-
-
-@pytest_asyncio.fixture(scope="function")
-async def test_app() -> FastAPI:
-    """
-    Create a FastAPI test application.
-    """
-    from src.app import app
-
-    return app
-
-
-@pytest_asyncio.fixture(scope="function")
-async def client(test_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
-    """
-    Create an async HTTP test client.
-    """
-    transport = ASGITransport(app=test_app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
-
-
-# ==================== User Fixtures ====================
-
-
-@pytest_asyncio.fixture
-async def test_user(db_session: AsyncSession) -> User:
-    """
-    Create a test user in the database.
-    """
-    user = User(
-        id=uuid4(),
-        email="testuser@example.com",
-        username="testuser",
-        password_hash=PasswordHasher.hash("Test@1234"),
-        full_name="Test User",
-        is_active=True,
-        is_verified=True,
-        is_superuser=False,
+@pytest.fixture
+async def test_app(
+    test_engine: AsyncEngine,
+) -> AsyncGenerator[FastAPI, None]:
+    db._initialized = True
+    db._write_engine = test_engine
+    db._read_engine = test_engine
+    db._write_session_factory = async_sessionmaker(
+        bind=test_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autocommit=False,
+        autoflush=False,
     )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
+    db._read_session_factory = db._write_session_factory
 
+    redis_manager._initialized = False
 
-@pytest_asyncio.fixture
-async def admin_user(db_session: AsyncSession) -> User:
-    """
-    Create an admin test user.
-    """
-    user = User(
-        id=uuid4(),
-        email="admin@example.com",
-        username="admin",
-        password_hash=PasswordHasher.hash("Admin@1234"),
-        full_name="Admin User",
-        is_active=True,
-        is_verified=True,
-        is_superuser=True,
-    )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
+    app = create_app()
 
+    yield app
 
-@pytest_asyncio.fixture
-async def inactive_user(db_session: AsyncSession) -> User:
-    """
-    Create an inactive test user.
-    """
-    user = User(
-        id=uuid4(),
-        email="inactive@example.com",
-        username="inactive",
-        password_hash=PasswordHasher.hash("Inactive@1234"),
-        is_active=False,
-        is_verified=False,
-    )
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    return user
-
-
-# ==================== Authentication Fixtures ====================
+    db._initialized = False
+    db._write_engine = None
+    db._read_engine = None
+    db._write_session_factory = None
+    db._read_session_factory = None
 
 
 @pytest.fixture
-def test_tokens(test_user: User) -> dict:
-    """
-    Generate access and refresh tokens for test user.
-    """
-    token_pair = JWTManager.create_token_pair(
-        user_id=str(test_user.id),
-        email=test_user.email,
-        username=test_user.username,
-        roles=["user"],
-        permissions=[],
-    )
-    return {
-        "access_token": token_pair.access_token,
-        "refresh_token": token_pair.refresh_token,
-        "token_type": token_pair.token_type,
-    }
+async def test_client(
+    test_app: FastAPI, test_engine: AsyncEngine
+) -> AsyncGenerator[AsyncClient, None]:
+    async with AsyncClient(
+        transport=ASGITransport(app=test_app),
+        base_url="http://test",
+        follow_redirects=True,
+    ) as client:
+        yield client
 
-
-@pytest.fixture
-def admin_tokens(admin_user: User) -> dict:
-    """
-    Generate tokens for admin user.
-    """
-    token_pair = JWTManager.create_token_pair(
-        user_id=str(admin_user.id),
-        email=admin_user.email,
-        username=admin_user.username,
-        roles=["admin", "user"],
-        permissions=["users:read", "users:write", "users:delete"],
-    )
-    return {
-        "access_token": token_pair.access_token,
-        "refresh_token": token_pair.refresh_token,
-        "token_type": token_pair.token_type,
-    }
-
-
-@pytest.fixture
-def auth_headers(test_tokens: dict) -> dict:
-    """
-    Create authorization headers for API requests.
-    """
-    return {"Authorization": f"Bearer {test_tokens['access_token']}"}
-
-
-@pytest.fixture
-def admin_auth_headers(admin_tokens: dict) -> dict:
-    """
-    Create admin authorization headers.
-    """
-    return {"Authorization": f"Bearer {admin_tokens['access_token']}"}
-
-
-# ==================== Mock Factories ====================
-
-
-@pytest.fixture
-def mock_password_manager():
-    """Mock password manager."""
-    mock = MagicMock()
-    mock.hash_password.return_value = "$2b$12$mockedhashvalue"
-    mock.verify_password.return_value = True
-    return mock
-
-
-@pytest.fixture
-def mock_jwt_manager():
-    """Mock JWT manager."""
-    mock = MagicMock()
-    mock.create_token_pair.return_value = {
-        "access_token": "mock_access_token",
-        "refresh_token": "mock_refresh_token",
-        "token_type": "bearer",
-        "expires_in": 900,
-    }
-    return mock
+    async with test_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())

@@ -223,7 +223,7 @@ def email_format(
         value = value.strip().lower()
     try:
         validated = validate_email(value, check_deliverability=check_deliverability)
-        return validated.email
+        return validated.normalized
     except EmailNotValidError as e:
         raise ValueError(__("validation.email", attribute=field)) from e
 
@@ -492,7 +492,7 @@ async def unique(
         result = await read_session.execute(stmt.limit(1))
         if result.scalar_one_or_none() is not None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=[
                     {
                         "field": field,
@@ -525,7 +525,7 @@ async def exists(
         result = await read_session.execute(stmt.limit(1))
         if result.scalar_one_or_none() is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=[
                     {
                         "field": field,

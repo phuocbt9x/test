@@ -26,7 +26,6 @@ __all__ = [
     "setup_cors",
     "setup_rate_limit",
     "setup_security_headers",
-    "setup_locale_middleware",
     "limiter",
     "setup_middlewares",
 ]

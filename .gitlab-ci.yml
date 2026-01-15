@@ -17,39 +17,6 @@ stages:
 test-build:
   stage: test
   image: python:3.13-slim
-  variables:
-    # Test environment configuration
-    APP_ENV: development
-    APP_NAME: TIMIMA_TEST
-    APP_VERSION: 1.0.0
-    APP_HOST: 0.0.0.0
-    APP_PORT: 8000
-    APP_ROUTER_PREFIX: /api/v1
-    APP_TIMEZONE: Asia/Tokyo
-    # CORS
-    CORS_ORIGINS: http://localhost:3000,http://localhost:8000
-    CORS_CREDENTIALS: "true"
-    CORS_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
-    CORS_HEADERS: Content-Type,Authorization,X-Request-ID
-    # Database (test uses SQLite, but these are required for settings validation)
-    DB_HOST: localhost
-    DB_PORT: "5432"
-    DB_USER: test_user
-    DB_PASSWORD: test_password
-    DB_NAME: test_db
-    DB_ECHO: "false"
-    # Redis
-    REDIS_HOST: localhost
-    REDIS_PORT: "6379"
-    REDIS_DB: "0"
-    REDIS_PASSWORD: ""
-    # JWT
-    JWT_SECRET_KEY: test_secret_key_for_ci_only_do_not_use_in_production
-    JWT_ALGORITHM: HS256
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "60"
-    JWT_REFRESH_TOKEN_EXPIRE_DAYS: "7"
-    # Logging
-    LOGGING_LEVEL: ERROR
   before_script:
     - echo "Installing system dependencies"
     - apt-get update && apt-get install -y --no-install-recommends gcc g++ libpq-dev
@@ -62,12 +29,15 @@ test-build:
     - uv run ruff format --check .
     - echo "Type checking"
     - uv run mypy src/
-    # - echo "Running tests"
-    # - uv run pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml
+    - echo "Running tests"
+    - uv run pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml --dev
   coverage: '/TOTAL.*\s+(\d+%)$/'
-  # artifacts:
-  #   reports:
-  #     cobertura: coverage.xml
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+    paths:
+      - coverage.xml
+    expire_in: 1 week
   only:
     - merge_requests
   tags:
@@ -81,6 +51,8 @@ sonarqube-check:
   image:
     name: sonarsource/sonar-scanner-cli:11.1.1.1661_6.2.1
     entrypoint: [""]
+  dependencies:
+    - test-build
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
     GIT_DEPTH: "0"
