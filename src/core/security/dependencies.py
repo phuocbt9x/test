@@ -59,7 +59,9 @@ class CurrentUser:
         return any(perm in self.permissions for perm in permissions)
 
     def __repr__(self) -> str:
-        return f"<CurrentUser(id={self.user_id}, email={self.email})>"
+        return (
+            f"<CurrentUser(id={self.user_id}, email={self.email}, roles={self.roles})>"
+        )
 
 
 async def get_token_payload(
@@ -200,29 +202,12 @@ async def optional_auth(
 
 
 def require_roles(*roles: str):
-    """
-    Dependency factory for role-based access control.
-
-    Usage:
-        @app.get("/admin")
-        async def admin_endpoint(
-            user: CurrentUser = Depends(require_roles("admin"))
-        ):
-            return {"message": "Admin access"}
-
-    Args:
-        *roles: Required roles (user must have at least one)
-
-    Returns:
-        Dependency function
-    """
-
     async def check_roles(
         current_user: CurrentUser = Depends(get_current_active_user),
     ) -> CurrentUser:
         if not current_user.has_any_role(list(roles)):
             raise AuthorizationException(
-                message=f"Required roles: {', '.join(roles)}",
+                message=__("messages.Forbidden"),
                 error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
             )
         return current_user

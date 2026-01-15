@@ -107,6 +107,14 @@ from src.core.storage import (
     StorageManager,
     storage_manager,
 )
+from src.core.mail import (
+    BaseMailProvider,
+    MailMessage,
+    MailProviderFactory,
+    MailManager,
+    mail_manager,
+    FastApiMailProvider,
+)
 
 __all__ = [
     "settings",
@@ -205,4 +213,10 @@ __all__ = [
     "storage_manager",
     "extract_path_from_url",
     "sanitize_filename",
+    "BaseMailProvider",
+    "MailMessage",
+    "MailProviderFactory",
+    "MailManager",
+    "mail_manager",
+    "FastApiMailProvider",
 ]
