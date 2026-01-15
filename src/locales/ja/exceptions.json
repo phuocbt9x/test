@@ -1,0 +1,22 @@
+{
+    "validation_error": "入力内容に誤りがあります。",
+    "authentication_failed": "認証に失敗しました。",
+    "access_denied": "アクセスが拒否されました。",
+    "resource_not_found": "{resource}が見つかりません。",
+    "resource_not_found_with_id": "ID「{resource_id}」の{resource}が見つかりません。",
+    "resource_already_exists": "リソースは既に存在します。",
+    "bad_request": "不正なリクエストです。",
+    "unauthorized": "認証が必要です。",
+    "external_service_error": "外部サービスエラーが発生しました。",
+    "rate_limit_exceeded": "リクエスト制限を超えました。",
+    "database_constraint_violation": "データベース制約違反が発生しました。",
+    "duplicate_entry_found": "重複するデータが見つかりました。",
+    "referenced_resource_not_exist": "参照先のリソースが存在しません。",
+    "required_field_missing": "必須項目が入力されていません。",
+    "database_connection_error": "データベース接続エラーが発生しました。",
+    "database_operation_timeout": "データベース操作がタイムアウトしました。",
+    "database_operation_failed": "データベース操作に失敗しました。",
+    "rate_limit_exceeded_message": "リクエスト制限を超えました。しばらくしてから再度お試しください。",
+    "unexpected_error_occurred": "予期しないエラーが発生しました。",
+    "validation_error_default": "入力内容に誤りがあります。"
+}
