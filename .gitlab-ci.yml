@@ -35,6 +35,9 @@ test-build:
   artifacts:
     reports:
       cobertura: coverage.xml
+    paths:
+      - coverage.xml
+    expire_in: 1 week
   only:
     - merge_requests
   tags:
@@ -48,6 +51,8 @@ sonarqube-check:
   image:
     name: sonarsource/sonar-scanner-cli:11.1.1.1661_6.2.1
     entrypoint: [""]
+  dependencies:
+    - test-build
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
     GIT_DEPTH: "0"
