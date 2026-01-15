@@ -29,7 +29,7 @@ class UserCreateRequest(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        field = __("user.fields.name")
+        field = __("fields.user.name")
         v = required(v, field)
         v = string(v, field)
         v = half_width(v, field)
@@ -38,7 +38,7 @@ class UserCreateRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("user.fields.email")
+        field = __("fields.user.email")
         v = required(v, field)
         v = max_length(v, 254, field, trim=False)
         v = half_width(v, field)
@@ -47,7 +47,7 @@ class UserCreateRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("user.fields.password")
+        field = __("fields.user.password")
         if not v:
             return v
         return password_strength(v, field)
@@ -57,7 +57,7 @@ class UserCreateRequest(BaseModel):
     def validate_avatar(cls, v: UploadFile | None) -> UploadFile | None:
         if v is None:
             return None
-        field = __("user.fields.avatar")
+        field = __("fields.user.avatar")
         return file(
             v,
             field,
@@ -74,7 +74,7 @@ class UserCreateRequest(BaseModel):
     def validate_phone(cls, v: str | None) -> str | None:
         if v is None:
             return None
-        field = __("user.fields.phone")
+        field = __("fields.user.phone")
         v = v.strip()
         if not v:
             return None
@@ -86,7 +86,7 @@ class UserCreateRequest(BaseModel):
     def validate_line_user_id(cls, v: str | None) -> str | None:
         if v is None:
             return None
-        field = __("user.fields.line_user_id")
+        field = __("fields.user.line_user_id")
         v = string(v, field)
         return max_length(v, 100, field)
 
