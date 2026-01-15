@@ -1,14 +1,11 @@
-"""
-User Module
-
-This module handles user management functionality including:
-- User CRUD operations
-- User profile management
-- User search and filtering
-"""
-
-from .models import User
-from .repository import UserRepository
+from .models import User, PasswordResetToken
+from .repository import UserRepository, PasswordResetTokenRepository
 from .service import UserService
 
-__all__ = ["User", "UserRepository", "UserService"]
+__all__ = [
+    "User",
+    "PasswordResetToken",
+    "UserRepository",
+    "PasswordResetTokenRepository",
+    "UserService",
+]

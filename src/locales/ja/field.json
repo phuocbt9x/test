@@ -1,8 +1,0 @@
-{
-    "name": "名前",
-    "email": "メールアドレス",
-    "password": "パスワード",
-    "confirm_password": "パスワード確認",
-    "phone": "電話番号",
-    "line_user_id": "LINEユーザーID"
-}
