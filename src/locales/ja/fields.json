@@ -1,16 +1,16 @@
 {
-    "user": {
-        "name": "名前",
-        "email": "メールアドレス",
-        "phone": "電話番号",
-        "password": "パスワード",
-        "avatar": "アバター",
-        "line_user_id": "LINE ユーザーID",
-        "is_admin": "役割",
-        "is_active": "アクティブ",
-        "admin": "管理者",
-        "user": "一般ユーザー",
-        "active": "アクティブ",
-        "inactive": "非アクティブ"
-    }
+	"user": {
+		"name": "名前",
+		"email": "メールアドレス",
+		"phone": "電話番号",
+		"password": "パスワード",
+		"avatar": "アバター",
+		"line_user_id": "LINE ユーザーID",
+		"is_admin": "役割",
+		"is_active": "アクティブ",
+		"admin": "管理者",
+		"user": "一般ユーザー",
+		"active": "アクティブ",
+		"inactive": "非アクティブ"
+	}
 }

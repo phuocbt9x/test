@@ -9,7 +9,7 @@ from src.core import (
     string,
     max_length,
     email_format,
-    phone_number,
+    regex,
     password_strength,
     file,
     half_width,
@@ -109,7 +109,8 @@ class UserCreateRequest(BaseModel):
         v = v.strip()
         if not v:
             return None
-        v = phone_number(v, field, "JP")
+        v = regex(v, r"^\+?\d{10,14}$", field)
+
         return max_length(v, 20, field, trim=False)
 
     @field_validator("line_user_id")

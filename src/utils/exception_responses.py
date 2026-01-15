@@ -44,7 +44,7 @@ class GeneralErrorResponse(BaseModel):
 
 
 _EXCEPTION_TO_STATUS_CODE: Dict[Type[BaseAppException], int] = {
-    ValidationException: status.HTTP_422_UNPROCESSABLE_ENTITY,
+    ValidationException: status.HTTP_422_UNPROCESSABLE_CONTENT,
     AuthenticationException: status.HTTP_401_UNAUTHORIZED,
     AuthorizationException: status.HTTP_403_FORBIDDEN,
     NotFoundException: status.HTTP_404_NOT_FOUND,
@@ -70,7 +70,7 @@ _EXCEPTION_TO_MESSAGE: Dict[Type[BaseAppException], str] = {
 }
 
 _STATUS_CODE_TO_MESSAGE: Dict[int, str] = {
-    status.HTTP_422_UNPROCESSABLE_ENTITY: MSG_VALIDATION_ERROR,
+    status.HTTP_422_UNPROCESSABLE_CONTENT: MSG_VALIDATION_ERROR,
     status.HTTP_409_CONFLICT: MSG_DUPLICATE_ENTRY,
     status.HTTP_503_SERVICE_UNAVAILABLE: MSG_DATABASE_CONNECTION_ERROR,
     status.HTTP_500_INTERNAL_SERVER_ERROR: MSG_UNEXPECTED_ERROR,
@@ -106,7 +106,7 @@ def get_response_description(
         status.HTTP_403_FORBIDDEN: MSG_ACCESS_DENIED,
         status.HTTP_404_NOT_FOUND: MSG_RESOURCE_NOT_FOUND,
         status.HTTP_409_CONFLICT: MSG_RESOURCE_ALREADY_EXISTS,
-        status.HTTP_422_UNPROCESSABLE_ENTITY: MSG_VALIDATION_ERROR,
+        status.HTTP_422_UNPROCESSABLE_CONTENT: MSG_VALIDATION_ERROR,
         status.HTTP_429_TOO_MANY_REQUESTS: MSG_RATE_LIMIT_EXCEEDED,
         status.HTTP_500_INTERNAL_SERVER_ERROR: MSG_UNEXPECTED_ERROR,
         status.HTTP_503_SERVICE_UNAVAILABLE: MSG_EXTERNAL_SERVICE_ERROR,
@@ -145,7 +145,7 @@ def create_exception_responses(
 
         model: Type[BaseModel]
 
-        if status_code == status.HTTP_422_UNPROCESSABLE_ENTITY:
+        if status_code == status.HTTP_422_UNPROCESSABLE_CONTENT:
             model = ValidationErrorResponse
         else:
             model = GeneralErrorResponse

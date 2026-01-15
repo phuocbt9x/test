@@ -100,17 +100,15 @@ class BaseRepository(Generic[ModelType]):
         if self._query is None:
             self.query()
 
-        if expressions:
-            if self._query is not None:
-                for expr in expressions:
-                    self._query = self._query.where(expr)
+        if expressions and self._query is not None:
+            for expr in expressions:
+                self._query = self._query.where(expr)
 
-        if filters:
-            if self._query is not None:
-                for key, value in filters.items():
-                    column_name, operator = self._parse_filter_key(key)
-                    condition = self._build_condition(column_name, value, operator)
-                    self._query = self._query.where(condition)
+        if filters and self._query is not None:
+            for key, value in filters.items():
+                column_name, operator = self._parse_filter_key(key)
+                condition = self._build_condition(column_name, value, operator)
+                self._query = self._query.where(condition)
 
         return self
 
