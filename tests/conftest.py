@@ -21,6 +21,8 @@ for key, value in _DEFAULT_TEST_ENV.items():
 # ruff: noqa: E402
 import asyncio
 from typing import AsyncGenerator
+from unittest.mock import Mock, MagicMock
+from io import BytesIO
 
 import pytest
 import pytest_asyncio
@@ -32,12 +34,10 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
-from src import create_app
-from src.core.configs.database import Base, db
-from src.core.configs.redis import redis_manager
-from unittest.mock import Mock
 from starlette.requests import Request
+from faker import Faker
+from src import create_app
+from src.core import Base, db, redis_manager, storage_manager, settings
 
 
 def pytest_addoption(parser):
@@ -72,7 +72,6 @@ async def test_engine(test_db_url: str) -> AsyncGenerator[AsyncEngine, None]:
 
     from sqlalchemy import event as sa_event
 
-    # Remove test database if exists
     if test_db_url.startswith("sqlite"):
         db_path = test_db_url.replace("sqlite+aiosqlite:///", "")
         if os.path.exists(db_path):
@@ -137,7 +136,7 @@ async def test_session(
         await session.rollback()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def test_app(
     test_engine: AsyncEngine,
 ) -> AsyncGenerator[FastAPI, None]:
@@ -152,8 +151,8 @@ async def test_app(
         autoflush=False,
     )
     db._read_session_factory = db._write_session_factory
-
     redis_manager._initialized = False
+    storage_manager.initialize(provider_name="local")
 
     app = create_app()
 
@@ -165,14 +164,22 @@ async def test_app(
     db._write_session_factory = None
     db._read_session_factory = None
 
+    storage_manager.reset()
+
 
 @pytest.fixture
 async def test_client(
     test_app: FastAPI, test_engine: AsyncEngine
 ) -> AsyncGenerator[AsyncClient, None]:
+    app_router_prefix = settings.APP_ROUTER_PREFIX.strip("/")
+
+    base_url = (
+        f"http://test/{app_router_prefix}" if app_router_prefix else "http://test"
+    )
+
     async with AsyncClient(
         transport=ASGITransport(app=test_app),
-        base_url="http://test",
+        base_url=base_url,
         follow_redirects=True,
     ) as client:
         yield client
@@ -182,6 +189,83 @@ async def test_client(
             await conn.execute(table.delete())
 
 
+@pytest.fixture(autouse=True)
+async def clear_database(test_engine: AsyncEngine):
+    async with test_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
+        await conn.commit()
+
+    yield
+
+    async with test_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
+        await conn.commit()
+
+
+@pytest.fixture(scope="function")
+def fake() -> Faker:
+    faker = Faker()
+    faker.unique.clear()
+    return faker
+
+
+@pytest.fixture
+def mock_admin_user() -> MagicMock:
+    mock_user = MagicMock()
+    mock_user.id = "admin-user-id"
+    mock_user.is_admin = True
+    mock_user.is_active = True
+    mock_user.email = "admin@example.com"
+    mock_user.name = "Admin User"
+    return mock_user
+
+
+@pytest.fixture
+def mock_regular_user(fake: Faker) -> MagicMock:
+    mock_user = MagicMock()
+    mock_user.id = fake.uuid4()
+    mock_user.is_admin = False
+    mock_user.is_active = True
+    mock_user.email = fake.email()
+    mock_user.name = fake.name()
+    return mock_user
+
+
+@pytest.fixture
+def override_auth(test_app, mock_admin_user):
+    from src.core import require_superuser
+
+    async def mock_require_superuser():
+        return mock_admin_user
+
+    test_app.dependency_overrides[require_superuser] = mock_require_superuser
+    yield mock_admin_user
+    test_app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def override_auth_regular_user(test_app, mock_regular_user):
+    from src.core import require_user
+
+    async def mock_require_user():
+        return mock_regular_user
+
+    test_app.dependency_overrides[require_user] = mock_require_user
+    yield mock_regular_user
+    test_app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def create_test_image():
+    def _create_image(filename: str = "test.jpg") -> tuple[str, BytesIO, str]:
+        image_data = b"fake image content"
+        return (filename, BytesIO(image_data), "image/jpeg")
+
+    return _create_image
+
+
 @pytest.fixture
 def mock_request():
     mock_req = Mock(spec=Request)
@@ -189,5 +273,4 @@ def mock_request():
     mock_req.url.path = "/test"
     mock_req.method = "POST"
     mock_req.state = Mock()
-
     return mock_req

@@ -7,7 +7,7 @@ from fastapi import status
 class TestAuthEndpoints:
     async def test_register_success(self, test_client: AsyncClient):
         response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Test User",
                 "email": "test@example.com",
@@ -27,7 +27,7 @@ class TestAuthEndpoints:
 
     async def test_register_validation_errors(self, test_client: AsyncClient):
         response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "",
                 "email": "invalid-email",
@@ -45,7 +45,7 @@ class TestAuthEndpoints:
 
     async def test_register_duplicate_email(self, test_client: AsyncClient):
         await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "First User",
                 "email": "duplicate@example.com",
@@ -55,7 +55,7 @@ class TestAuthEndpoints:
         )
 
         response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Second User",
                 "email": "duplicate@example.com",
@@ -72,7 +72,7 @@ class TestAuthEndpoints:
 
     async def test_login_success(self, test_client: AsyncClient):
         await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Login User",
                 "email": "login@example.com",
@@ -82,7 +82,7 @@ class TestAuthEndpoints:
         )
 
         response = await test_client.post(
-            "/api/v1/auth/login",
+            "/auth/login",
             json={
                 "email": "login@example.com",
                 "password": "SecurePass123!",
@@ -97,7 +97,7 @@ class TestAuthEndpoints:
 
     async def test_login_invalid_credentials(self, test_client: AsyncClient):
         response = await test_client.post(
-            "/api/v1/auth/login",
+            "/auth/login",
             json={
                 "email": "nonexistent@example.com",
                 "password": "WrongPassword123!",
@@ -112,7 +112,7 @@ class TestAuthEndpoints:
 
     async def test_login_validation_errors(self, test_client: AsyncClient):
         response = await test_client.post(
-            "/api/v1/auth/login",
+            "/auth/login",
             json={
                 "email": "invalid-email",
                 "password": "123",
@@ -125,7 +125,7 @@ class TestAuthEndpoints:
         assert "errors" in data
 
     async def test_get_me_requires_authentication(self, test_client: AsyncClient):
-        response = await test_client.get("/api/v1/auth/me")
+        response = await test_client.get("/auth/me")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         data = response.json()
@@ -134,7 +134,7 @@ class TestAuthEndpoints:
 
     async def test_get_me_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Me User",
                 "email": "me@example.com",
@@ -147,7 +147,7 @@ class TestAuthEndpoints:
         access_token = token_data["access_token"]
 
         response = await test_client.get(
-            "/api/v1/auth/me",
+            "/auth/me",
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -158,7 +158,7 @@ class TestAuthEndpoints:
 
     async def test_logout_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Logout User",
                 "email": "logout@example.com",
@@ -171,7 +171,7 @@ class TestAuthEndpoints:
         access_token = token_data["access_token"]
 
         response = await test_client.post(
-            "/api/v1/auth/logout",
+            "/auth/logout",
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -181,7 +181,7 @@ class TestAuthEndpoints:
 
     async def test_refresh_token_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Refresh User",
                 "email": "refresh@example.com",
@@ -194,7 +194,7 @@ class TestAuthEndpoints:
         refresh_token = token_data["refresh_token"]
 
         response = await test_client.post(
-            "/api/v1/auth/refresh",
+            "/auth/refresh",
             json={"refresh_token": refresh_token},
         )
 
@@ -205,7 +205,7 @@ class TestAuthEndpoints:
 
     async def test_update_profile_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Original Name",
                 "email": "profile@example.com",
@@ -218,7 +218,7 @@ class TestAuthEndpoints:
         access_token = token_data["access_token"]
 
         response = await test_client.patch(
-            "/api/v1/auth/me",
+            "/auth/me",
             json={"name": "Updated Name"},
             headers={"Authorization": f"Bearer {access_token}"},
         )
@@ -230,7 +230,7 @@ class TestAuthEndpoints:
 
     async def test_register_with_optional_fields(self, test_client: AsyncClient):
         response = await test_client.post(
-            "/api/v1/auth/register",
+            "/auth/register",
             json={
                 "name": "Optional User",
                 "email": "optional@example.com",

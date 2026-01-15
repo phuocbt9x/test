@@ -1,5 +1,6 @@
 from src.core.validations import *  # noqa: F403
 from src.core.configs import (
+    Base,
     settings,
     logging_settings,
     Environment,
@@ -116,6 +117,7 @@ from src.core.mail import (
 )
 
 __all__ = [
+    "Base",
     "settings",
     "logging_settings",
     "Environment",
