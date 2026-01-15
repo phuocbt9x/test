@@ -12,10 +12,10 @@ from src.core import (
     ErrorCode,
     JWTManager,
     NotFoundException,
-    UnauthorizedException,
     validate_and_hash_password,
     verify_password,
     utcnow,
+    BaseAppException,
 )
 from src.core.configs.setting import settings
 from src.modules.auth.repository import AccessTokenRepository
@@ -32,13 +32,13 @@ class TestAuthService:
     async def test_login_with_invalid_credentials(self, test_session: AsyncSession):
         service = AuthService(test_session, test_session)
 
-        with pytest.raises(UnauthorizedException) as exc_info:
+        with pytest.raises(BaseAppException) as exc_info:
             await service.login(
                 LoginRequest(email="wrong@test.com", password="WrongPassword123!")
             )
 
-        assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-        assert exc_info.value.error_code == ErrorCode.AUTHENTICATION_FAILED
+        assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+        assert exc_info.value.error_code == ErrorCode.USER_NOT_FOUND
 
     async def test_login_success(self, test_session: AsyncSession):
         user_repo = UserRepository(test_session, test_session)
@@ -76,7 +76,7 @@ class TestAuthService:
 
         service = AuthService(test_session, test_session)
 
-        with pytest.raises(UnauthorizedException) as exc_info:
+        with pytest.raises(BaseAppException) as exc_info:
             await service.login(
                 LoginRequest(email="inactive@test.com", password="TestPassword123!")
             )

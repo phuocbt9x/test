@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+from starlette.requests import Request
 from src.core import (
     BaseController,
     ErrorResponse,
@@ -11,8 +12,10 @@ from src.core import (
     get_token_from_header,
     CurrentUser,
     __,
+    limiter,
 )
-from src.modules.auth.schemas.request import UpdateCurrentUserRequest
+from src.utils import create_common_responses
+from src.modules.auth.schemas import UpdateCurrentUserRequest
 
 from .schemas import (
     LoginRequest,
@@ -53,14 +56,23 @@ async def register(
     summary="User login",
     description="Authenticate user with username/email and password to receive access token",
     response_description="Returns access token, refresh token and user information",
+    responses=create_common_responses(
+        include_validation=True,
+        include_rate_limit=True,
+        include_internal_error=True,
+        include_not_found=True,
+        include_unauthorized=True,
+    ),
 )
+@limiter.limit("10/minute")
 async def login(
-    request: LoginRequest,
+    request: Request,
+    payload: LoginRequest,
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
-) -> SuccessResponse[RegisterResponse] | ErrorResponse:
+) -> SuccessResponse[RegisterResponse]:
     service = AuthService(read_session, write_session)
-    result = await service.login(request)
+    result = await service.login(payload)
     return controller.success(data=result, message=__("auth.login.success"))
 
 

@@ -9,6 +9,7 @@ from src.core import (
     phone_number,
     password_strength,
     confirmed,
+    half_width,
 )
 
 
@@ -96,14 +97,18 @@ class LoginRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("field.email")
+        field = __("auth.fields.email")
+        v = required(v, field)
+        v = max_length(v, 254, field, trim=False)
+        v = half_width(v, field)
         return email_format(v, field)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("field.password")
-        return between_length(v, 8, 255, field)
+        field = __("auth.fields.password")
+        v = required(v, field)
+        return password_strength(v, field)
 
     model_config = ConfigDict(
         json_schema_extra={

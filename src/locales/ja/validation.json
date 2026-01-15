@@ -27,7 +27,7 @@
 	"digits_between": "{attribute}は{min}から{max}桁の間である必要があります。",
 	"dimensions": "{attribute}の画像サイズが無効です。",
 	"distinct": "{attribute}に重複した値があります。",
-	"email": "{attribute}は有効なメールアドレスである必要があります。",
+	"email": "{attribute}は正しい形式で入力してください。",
 	"ends_with": "{attribute}は次のいずれかで終わる必要があります：{values}。",
 	"enum": "選択された{attribute}は無効です。",
 	"exists": "選択された{attribute}は無効です。",
@@ -94,7 +94,7 @@
 	"prohibited_unless": "{other}が{values}に含まれていない限り、{attribute}は禁止されています。",
 	"prohibits": "{attribute}が存在する場合、{other}は存在できません。",
 	"regex": "{attribute}の形式が無効です。",
-	"required": "{attribute}は必須です。",
+	"required": "{attribute}を入力してください。",
 	"required_array_keys": "{attribute}には次のエントリが必要です：{values}。",
 	"required_if": "{other}が{value}の場合、{attribute}は必須です。",
 	"required_if_accepted": "{other}が受け入れられた場合、{attribute}は必須です。",
@@ -131,5 +131,6 @@
 	"no_whitespace": "{attribute}に空白を含めることはできません。",
 	"phone": "{attribute}は有効な電話番号である必要があります。",
 	"failed": "入力検証に失敗しました。",
-	"password_strength": "{attribute}はセキュリティ要件を満たしていません（最低{min}文字、大文字・小文字・数字を含む）。"
+	"password_strength": "{attribute}は英字・数字・記号を含む8～64文字で入力してください。",
+	"half_width": "{attribute}は半角文字で入力してください。"
 }
