@@ -1,280 +1,144 @@
-"""
-User Service
+import logging
+import uuid
+import secrets
 
-Business logic layer for user operations following Service Pattern.
-Implements SOLID principles and handles all user-related business rules.
-"""
-
+from datetime import timedelta
 from typing import Optional
-from uuid import UUID
-
+from fastapi import UploadFile, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.core.exceptions import (
-    BadRequestException,
-    ConflictException,
-    NotFoundException,
-    UnauthorizedException,
+from src.core import (
+    __,
+    PasswordHasher,
+    unique,
+    now,
+    BaseStorageProvider,
+    MailMessage,
+    mail_manager,
+    settings,
+    BaseAppException,
+    ErrorCode,
 )
-from src.core.security.password import PasswordHasher
-
 from .models import User
-from .repository import UserRepository
-from .schemas import UserCreateRequest, UserPasswordChangeRequest, UserUpdateRequest
+from .repository import UserRepository, PasswordResetTokenRepository
+from .schemas import (
+    UserCreateRequest,
+    UserResponse,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class UserService:
-    """
-    User Service
-
-    Handles business logic for user operations:
-    - User creation with validation
-    - User updates
-    - Password management
-    - Account lockout logic
-
-    Design Patterns:
-    - Service Layer Pattern
-    - Dependency Injection
-    - Single Responsibility Principle
-    """
-
-    def __init__(self, read_session: AsyncSession, write_session: AsyncSession):
+    def __init__(
+        self,
+        storage_provider: BaseStorageProvider,
+        read_session: AsyncSession,
+        write_session: AsyncSession,
+    ):
         self.read_session = read_session
         self.write_session = write_session
         self.repository = UserRepository(read_session, write_session)
         self.password_hasher = PasswordHasher()
+        self.storage = storage_provider
 
-    async def create_user(self, data: UserCreateRequest) -> User:
-        """
-        Create a new user.
+    async def create(
+        self, data: UserCreateRequest, background_tasks: BackgroundTasks
+    ) -> UserResponse:
+        try:
+            await unique(data.email, User, "email", field_label=__("fields.user.email"))
+            if data.password:
+                data.password = self.password_hasher.hash(data.password)
 
-        Business Rules:
-        - Email must be unique
-        - Password is hashed before storage
-        - New users are active by default
+            user_data = {
+                "email": data.email.lower(),
+                "name": data.name,
+                "password": data.password,
+                "phone": data.phone,
+                "line_user_id": data.line_user_id,
+                "is_admin": data.is_admin,
+                "is_active": data.is_active,
+            }
 
-        Args:
-            data: User creation data
+            user = await self.repository.create(user_data)
 
-        Returns:
-            Created user
+            if data.avatar:
+                avatar_path = await self._upload_avatar(data.avatar)
+                await self.repository.update(user.id, {"avatar_path": avatar_path})
 
-        Raises:
-            ConflictException: If email already exists
-        """
-        # Check email uniqueness
-        if await self.repository.exists_by_email(data.email):
-            raise ConflictException(
-                message=f"Email '{data.email}' is already registered"
+            await self.write_session.commit()
+
+            token = await self._generate_reset_password_token(user)
+            background_tasks.add_task(self._send_created_user_email, user, token)
+
+            return UserResponse.model_validate(user)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+            await self.write_session.rollback()
+            raise
+
+    async def _send_created_user_email(self, user: User, token: str) -> None:
+        try:
+            message = MailMessage(
+                subject=__("mails.reset_password.subject"),
+                recipients=[user.email],
+                template_body={
+                    "name": user.name or user.email,
+                    "action_url": f"{settings.APP_URL_FRONTEND}/reset-password?token={token}",
+                },
+                subtype="html",
+            )
+            message.template_name = "reset-password.html"
+            await mail_manager.send(message)
+        except Exception as e:
+            logger.error(f"Failed to send user creation email: {e}")
+
+    async def _upload_avatar(
+        self,
+        avatar_file: UploadFile,
+        old_avatar_path: Optional[str] = None,
+    ) -> str:
+        try:
+            if old_avatar_path:
+                await self.storage.delete(old_avatar_path)
+
+            ext = (
+                avatar_file.filename.rsplit(".", 1)[-1]
+                if avatar_file.filename
+                else "jpg"
+            )
+            timestamp = now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{timestamp}_{uuid.uuid4().hex[:8]}.{ext}"
+            file_path = f"avatars/{filename}"
+
+            result = await self.storage.save_file(
+                file=avatar_file,
+                path=file_path,
+                content_type=avatar_file.content_type,
             )
 
-        # Hash password
-        password_hash = self.password_hasher.hash(data.password)
+            if not result.success or not result.path:
+                raise BaseAppException(
+                    message="Failed to upload avatar",
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    error_code=ErrorCode.USER_NOT_FOUND,
+                )
 
-        # Create user
-        user_data = {
-            "email": data.email.lower(),
-            "name": data.full_name or data.email.split("@")[0],
-            "password": password_hash,
-            "phone": data.phone,
-            "is_active": True,
+            return result.path
+        except Exception as e:
+            logger.error(f"Failed to upload avatar: {e}")
+            raise
+
+    async def _generate_reset_password_token(self, user: User) -> str:
+        token = secrets.token_urlsafe(64)
+        expires_at = now() + timedelta(seconds=settings.APP_TOKEN_TTL)
+
+        token_data = {
+            "user_id": user.id,
+            "token": token,
+            "expires_at": expires_at,
         }
 
-        user = await self.repository.create(user_data)
-        await self.write_session.commit()
+        token_repo = PasswordResetTokenRepository(self.read_session, self.write_session)
+        await token_repo.create(token_data)
 
-        return user
-
-    async def get_user_by_id(self, user_id: UUID) -> User:
-        """
-        Get user by ID.
-
-        Args:
-            user_id: User UUID
-
-        Returns:
-            User
-
-        Raises:
-            NotFoundException: If user not found
-        """
-        user = await self.repository.get(user_id)
-        if not user:
-            raise NotFoundException(resource="User", resource_id=str(user_id))
-        return user
-
-    async def get_user_by_email(self, email: str) -> Optional[User]:
-        """Get user by email (returns None if not found)"""
-        return await self.repository.find_by_email(email)
-
-    async def update_user(self, user_id: UUID, data: UserUpdateRequest) -> User:
-        """
-        Update user profile.
-
-        Business Rules:
-        - Only allowed fields can be updated
-        - Email changes require separate validation (not in this method)
-
-        Args:
-            user_id: User UUID
-            data: Update data
-
-        Returns:
-            Updated user
-
-        Raises:
-            NotFoundException: If user not found
-            BadRequestException: If validation fails
-        """
-        user = await self.get_user_by_id(user_id)
-
-        update_data = data.model_dump(exclude_unset=True)
-
-        # Map full_name to name (User model uses 'name' not 'full_name')
-        if "full_name" in update_data:
-            update_data["name"] = update_data.pop("full_name")
-
-        # Remove avatar_url if present (not in User model)
-        update_data.pop("avatar_url", None)
-
-        # Validate update data if needed
-        # For example, phone number format validation
-        if "phone" in update_data and update_data["phone"]:
-            # Basic phone validation (can be extended)
-            phone = update_data["phone"].strip()
-            if phone and (len(phone) < 10 or len(phone) > 20):
-                raise BadRequestException(
-                    message="Phone number must be between 10 and 20 characters"
-                )
-            update_data["phone"] = phone
-
-        if update_data:
-            updated_user = await self.repository.update(user_id, update_data)
-            await self.write_session.commit()
-            return updated_user or user
-
-        return user
-
-    async def change_password(
-        self, user_id: UUID, data: UserPasswordChangeRequest
-    ) -> User:
-        """
-        Change user password.
-
-        Business Rules:
-        - Current password must be correct
-        - New password must be different from current
-        - All user tokens should be revoked after password change
-
-        Args:
-            user_id: User UUID
-            data: Password change data
-
-        Returns:
-            Updated user
-
-        Raises:
-            NotFoundException: If user not found
-            UnauthorizedException: If current password is incorrect
-            BadRequestException: If new password is same as current
-        """
-        user = await self.get_user_by_id(user_id)
-
-        # Verify current password
-        if not self.password_hasher.verify(data.current_password, user.password):
-            raise UnauthorizedException(message="Current password is incorrect")
-
-        # Check new password is different
-        if data.current_password == data.new_password:
-            raise BadRequestException(
-                message="New password must be different from current password"
-            )
-
-        # Validate new password strength
-        is_valid, error = self.password_hasher.validate_password_strength(
-            data.new_password
-        )
-        if not is_valid:
-            from src.core.exceptions import ValidationException
-
-            raise ValidationException(
-                message=error or "New password does not meet security requirements"
-            )
-
-        # Hash new password
-        from src.core.security.password import validate_and_hash_password
-
-        new_password_hash = validate_and_hash_password(data.new_password)
-
-        # Update password
-        await self.repository.update(
-            user_id,
-            {
-                "password": new_password_hash,
-            },
-        )
-        await self.write_session.commit()
-
-        # Revoke all user tokens after password change (security best practice)
-        # Note: This requires AuthService - consider event-based architecture for better decoupling
-        try:
-            from src.modules.auth.repository import RefreshTokenRepository
-
-            refresh_token_repo = RefreshTokenRepository(
-                self.read_session, self.write_session
-            )
-            await refresh_token_repo.revoke_all_user_tokens(user_id)
-            await self.write_session.commit()
-        except Exception:
-            # Log but don't fail password change if token revocation fails
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.warning(
-                f"Failed to revoke tokens for user {user_id} after password change",
-                exc_info=True,
-            )
-
-        return user
-
-    async def deactivate_user(self, user_id: UUID) -> User:
-        """Deactivate user account"""
-        user = await self.get_user_by_id(user_id)
-        await self.repository.update(user_id, {"is_active": False})
-        await self.write_session.commit()
-        return user
-
-    async def activate_user(self, user_id: UUID) -> User:
-        """Activate user account"""
-        user = await self.get_user_by_id(user_id)
-        await self.repository.update(
-            user_id,
-            {
-                "is_active": True,
-            },
-        )
-        await self.write_session.commit()
-        return user
-
-    async def list_users(self, page: int = 1, per_page: int = 20) -> dict:
-        """Get paginated list of users"""
-        return await self.repository.get_active_users(page, per_page)
-
-    async def delete_user(self, user_id: UUID) -> bool:
-        """
-        Delete user (soft delete recommended in production).
-
-        Args:
-            user_id: User UUID
-
-        Returns:
-            True if deleted successfully
-
-        Raises:
-            NotFoundException: If user not found
-        """
-        await self.get_user_by_id(user_id)
-        success = await self.repository.delete(user_id)
-        await self.write_session.commit()
-        return success
+        return token

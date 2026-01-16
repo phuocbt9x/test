@@ -4,5 +4,9 @@
     "password": "Password",
     "confirm_password": "Confirm Password",
     "phone": "Phone",
-    "line_user_id": "Line User ID"
+    "line_user_id": "Line User ID",
+    "avatar": "Avatar",
+    "avatar_url": "Avatar URL",
+    "current_password": "Current Password",
+    "new_password": "New Password"
 }

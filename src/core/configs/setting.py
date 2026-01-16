@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     APP_ROUTER_PREFIX: str = Field(default="/api/v1")
     APP_VERSION: str = Field(default="1.0.0")
     APP_LOCALE: str = Field(default="en")
+    APP_TOKEN_TTL: int = Field(default=3600, ge=300)
     APP_URL_FRONTEND: str = Field(default="http://localhost:3000")
 
     # ==================== CORS SETTINGS ====================
