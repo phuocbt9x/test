@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from uuid import UUID
 from src.core import BaseRepository, now
 from .models import User, PasswordResetToken
+from .schemas import UserListRequest
 
 
 class UserRepository(BaseRepository[User]):
@@ -9,6 +10,28 @@ class UserRepository(BaseRepository[User]):
 
     async def find_by_email(self, email: str) -> Optional[User]:
         return await self.query().where(email=email.lower()).first()
+
+    async def list_with_filters(self, payload: UserListRequest) -> Dict[str, Any]:
+        query = self.query()
+
+        if payload.search is not None:
+            search_pattern = f"%{payload.search}%"
+            query = query.where_or(
+                name__ilike=search_pattern,
+                email__ilike=search_pattern,
+                phone__ilike=search_pattern,
+                line_user_id__ilike=search_pattern,
+            )
+
+        if payload.type is not None:
+            query = query.where(is_admin=bool(payload.type))
+
+        if payload.status is not None:
+            query = query.where(is_active=bool(payload.status))
+
+        query = query.order_by(payload.sort_by, payload.sort_order)
+
+        return await query.paginate(page=payload.page, per_page=payload.per_page)
 
 
 class PasswordResetTokenRepository(BaseRepository[PasswordResetToken]):

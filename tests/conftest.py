@@ -247,12 +247,19 @@ def override_auth(test_app, mock_admin_user):
 
 @pytest.fixture
 def override_auth_regular_user(test_app, mock_regular_user):
-    from src.core import require_user
+    from src.core import require_superuser
+    from src.core.exceptions import BaseAppException
+    from fastapi import status
 
-    async def mock_require_user():
-        return mock_regular_user
+    async def mock_require_superuser():
+        # Simulate the behavior when a non-admin user tries to access admin endpoint
+        raise BaseAppException(
+            message="Permission denied",
+            status_code=status.HTTP_403_FORBIDDEN,
+            error_code="PERMISSION_DENIED",
+        )
 
-    test_app.dependency_overrides[require_user] = mock_require_user
+    test_app.dependency_overrides[require_superuser] = mock_require_superuser
     yield mock_regular_user
     test_app.dependency_overrides.clear()
 

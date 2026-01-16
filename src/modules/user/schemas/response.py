@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, computed_field
-from src.core import storage_manager
+from src.core import storage_manager, __
 
 EXAMPLE_DATETIME = "2024-01-01T00:00:00Z"
 
@@ -24,6 +24,16 @@ class UserResponse(BaseModel):
             return storage_manager.get_instance().get_url(self.avatar_path)
         return None
 
+    @computed_field
+    def type(self) -> str:
+        return __("fields.user.admin") if self.is_admin else __("fields.user.user")
+
+    @computed_field
+    def status(self) -> str:
+        return (
+            __("fields.user.active") if self.is_active else __("fields.user.inactive")
+        )
+
     model_config = ConfigDict(
         from_attributes=True,
         json_schema_extra={
@@ -36,7 +46,9 @@ class UserResponse(BaseModel):
                 "avatar_path": "users/123e4567-e89b-12d3-a456-426614174000.jpg",
                 "avatar_url": "https://example.com/avatar.jpg",
                 "is_admin": False,
+                "type": "User",
                 "is_active": True,
+                "status": "Active",
                 "created_at": EXAMPLE_DATETIME,
                 "updated_at": EXAMPLE_DATETIME,
             }
