@@ -1,8 +1,0 @@
-{
-    "name": "Name",
-    "email": "Email",
-    "password": "Password",
-    "confirm_password": "Confirm Password",
-    "phone": "Phone",
-    "line_user_id": "Line User ID"
-}

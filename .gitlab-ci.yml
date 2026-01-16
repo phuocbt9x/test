@@ -62,7 +62,6 @@ sonarqube-check:
       - .sonar/cache
   script:
     - sonar-scanner
-  allow_failure: true
   tags:
     - jmu-timima01-be
   only:

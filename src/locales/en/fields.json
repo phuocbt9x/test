@@ -1,0 +1,16 @@
+{
+	"user": {
+		"name": "Name",
+		"email": "Email Address",
+		"phone": "Phone Number",
+		"password": "Password",
+		"avatar": "Avatar",
+		"line_user_id": "LINE User ID",
+		"is_admin": "Role",
+		"is_active": "Active",
+		"admin": "Administrator",
+		"user": "User",
+		"active": "Active",
+		"inactive": "Inactive"
+	}
+}

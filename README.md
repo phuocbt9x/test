@@ -20,7 +20,7 @@ TIMIMA is a modular, enterprise-grade web API service following clean architectu
 
 ### Core Framework
 - **FastAPI 0.124.2+**: Modern async web framework
-- **Python 3.14**: Latest Python with type hints
+- **Python 3.13**: Latest Python with type hints
 - **Uvicorn with uvloop**: High-performance ASGI server
 - **Pydantic 2.12.5+**: Data validation and settings management
 
@@ -106,7 +106,7 @@ timima/
 
 ### Prerequisites
 
-- Python 3.14+
+- Python 3.13+
 - PostgreSQL 16+ (with pgvector extension)
 - Redis 7.1+
 - UV package manager (recommended) or pip

@@ -102,7 +102,11 @@ class AuthService:
                     error_code=ErrorCode.USER_NOT_FOUND,
                 )
 
-            if not user.is_active or not verify_password(data.password, user.password):
+            if (
+                not user.is_active
+                or not user.password
+                or not verify_password(data.password, user.password)
+            ):
                 raise AuthenticationException(
                     message=__("auth.messages.login.failed"),
                 )

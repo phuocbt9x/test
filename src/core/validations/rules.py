@@ -12,6 +12,7 @@ from sqlalchemy import select
 from src.core.i18n import __
 from src.core.configs.database import get_read_db
 from phonenumbers import NumberParseException
+from src.core.utils.helper import parse_size
 
 
 _COMPILED_PATTERNS = {
@@ -552,14 +553,15 @@ async def exists(
 def file(
     value: Any,
     field: str,
-    max_size: Optional[int] = None,
+    max_size: Optional[int | str] = None,
     allowed_extensions: Optional[Sequence[str]] = None,
     allowed_mime_types: Optional[Sequence[str]] = None,
 ) -> Any:
     if value is None:
         raise ValueError(__("validation.file", attribute=field))
     if hasattr(value, "filename") and hasattr(value, "file"):
-        if max_size and hasattr(value, "size") and value.size > max_size:
+        max_bytes = parse_size(max_size) if max_size else None
+        if max_size and hasattr(value, "size") and value.size > max_bytes:
             raise ValueError(__("validation.max.file", attribute=field, max=max_size))
         if allowed_extensions:
             filename = getattr(value, "filename", "")

@@ -37,9 +37,15 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         break
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
-        warning "Health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying in 2 seconds..."
+        echo "Health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying in 1 seconds..."
+        sleep 1
     fi
 done
+
+if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    echo "Health check failed after $MAX_RETRIES attempts."
+    exit 1
+fi
 
 # =============================================================================
 # Deployment Complete

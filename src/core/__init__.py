@@ -1,5 +1,6 @@
 from src.core.validations import *  # noqa: F403
 from src.core.configs import (
+    Base,
     settings,
     logging_settings,
     Environment,
@@ -106,8 +107,17 @@ from src.core.storage import (
     StorageManager,
     storage_manager,
 )
+from src.core.mail import (
+    BaseMailProvider,
+    MailMessage,
+    MailProviderFactory,
+    MailManager,
+    mail_manager,
+    FastApiMailProvider,
+)
 
 __all__ = [
+    "Base",
     "settings",
     "logging_settings",
     "Environment",
@@ -203,4 +213,10 @@ __all__ = [
     "storage_manager",
     "extract_path_from_url",
     "sanitize_filename",
+    "BaseMailProvider",
+    "MailMessage",
+    "MailProviderFactory",
+    "MailManager",
+    "mail_manager",
+    "FastApiMailProvider",
 ]
