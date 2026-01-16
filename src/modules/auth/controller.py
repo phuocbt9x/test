@@ -48,7 +48,7 @@ controller = BaseController()
 @limiter.limit("20/minute")
 async def register(
     request: Request,
-    payload: RegisterRequest,
+    payload: RegisterRequest = Depends(RegisterRequest.as_form),
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[RegisterResponse]:

@@ -33,12 +33,17 @@ from .schemas import (
     LogoutResponse,
 )
 from src.modules.user import UserResponse
+from src.utils import upload_avatar
 
 logger = get_logger(__name__)
 
 
 class AuthService:
-    def __init__(self, read_session: AsyncSession, write_session: AsyncSession):
+    def __init__(
+        self,
+        read_session: AsyncSession,
+        write_session: AsyncSession,
+    ):
         self.read_session = read_session
         self.write_session = write_session
         self.user_repo = UserRepository(read_session, write_session)
@@ -69,21 +74,28 @@ class AuthService:
 
     async def register(self, data: RegisterRequest) -> RegisterResponse:
         try:
-            await unique(data.email, User, "email", field_label=__("field.email"))
+            await unique(data.email, User, "email", field_label=__("fields.user.email"))
+            if data.password:
+                data.password = self.password_hasher.hash(data.password)
 
             user_data = {
-                "name": data.name,
                 "email": data.email.lower(),
-                "password": validate_and_hash_password(data.password),
+                "name": data.name,
+                "password": data.password,
                 "phone": data.phone,
                 "line_user_id": data.line_user_id,
-                "is_active": data.is_active if data.is_active else True,
                 "is_admin": False,
+                "is_active": data.is_active,
             }
 
             user = await self.user_repo.create(user_data)
+
+            if data.avatar:
+                avatar_path = await upload_avatar(data.avatar)
+                await self.user_repo.update(user.id, {"avatar_path": avatar_path})
+
             tokens = await self._create_token_pair(user)
-            await self.session.commit()
+            await self.write_session.commit()
 
             return RegisterResponse(
                 access_token=tokens.access_token,
@@ -93,8 +105,8 @@ class AuthService:
                 user_info=UserResponse.model_validate(user),
             )
         except Exception as e:
-            logger.error("Registration failed: %s", e)
-            await self.session.rollback()
+            logger.error(f"Error creating user: {e}")
+            await self.write_session.rollback()
             raise
 
     async def login(self, data: LoginRequest) -> RegisterResponse:

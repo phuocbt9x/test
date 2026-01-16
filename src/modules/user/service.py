@@ -1,22 +1,18 @@
-import logging
-import uuid
 import secrets
 
 from datetime import timedelta
-from typing import Optional, Dict, Any
-from fastapi import UploadFile, status, BackgroundTasks
+from typing import Dict, Any
+from fastapi import BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.core import (
     __,
     PasswordHasher,
     unique,
     now,
-    BaseStorageProvider,
     MailMessage,
     mail_manager,
     settings,
-    BaseAppException,
-    ErrorCode,
+    get_logger,
 )
 from .models import User
 from .repository import UserRepository, PasswordResetTokenRepository
@@ -25,14 +21,14 @@ from .schemas import (
     UserCreateRequest,
     UserResponse,
 )
+from src.utils import upload_avatar
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class UserService:
     def __init__(
         self,
-        storage_provider: BaseStorageProvider,
         read_session: AsyncSession,
         write_session: AsyncSession,
     ):
@@ -40,7 +36,6 @@ class UserService:
         self.write_session = write_session
         self.repository = UserRepository(read_session, write_session)
         self.password_hasher = PasswordHasher()
-        self.storage = storage_provider
 
     async def list(self, payload: UserListRequest) -> Dict[str, Any]:
         try:
@@ -70,7 +65,7 @@ class UserService:
             user = await self.repository.create(user_data)
 
             if data.avatar:
-                avatar_path = await self._upload_avatar(data.avatar)
+                avatar_path = await upload_avatar(data.avatar)
                 await self.repository.update(user.id, {"avatar_path": avatar_path})
 
             await self.write_session.commit()
@@ -99,42 +94,6 @@ class UserService:
             await mail_manager.send(message)
         except Exception as e:
             logger.error(f"Failed to send user creation email: {e}")
-
-    async def _upload_avatar(
-        self,
-        avatar_file: UploadFile,
-        old_avatar_path: Optional[str] = None,
-    ) -> str:
-        try:
-            if old_avatar_path:
-                await self.storage.delete(old_avatar_path)
-
-            ext = (
-                avatar_file.filename.rsplit(".", 1)[-1]
-                if avatar_file.filename
-                else "jpg"
-            )
-            timestamp = now().strftime("%Y%m%d_%H%M%S")
-            filename = f"{timestamp}_{uuid.uuid4().hex[:8]}.{ext}"
-            file_path = f"avatars/{filename}"
-
-            result = await self.storage.save_file(
-                file=avatar_file,
-                path=file_path,
-                content_type=avatar_file.content_type,
-            )
-
-            if not result.success or not result.path:
-                raise BaseAppException(
-                    message="Failed to upload avatar",
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    error_code=ErrorCode.USER_NOT_FOUND,
-                )
-
-            return result.path
-        except Exception as e:
-            logger.error(f"Failed to upload avatar: {e}")
-            raise
 
     async def _generate_reset_password_token(self, user: User) -> str:
         token = secrets.token_urlsafe(64)
