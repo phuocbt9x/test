@@ -10,15 +10,12 @@ git checkout $BRANCH
 git pull origin $BRANCH
 
 # Stop and remove old containers to fix docker-compose compatibility
-docker compose down 2>/dev/null || docker-compose down 2>/dev/null || warning "No containers to stop"
+docker compose down
 
 # Build and start containers (this will automatically install new dependencies)
 echo "Building and starting Docker containers..."
-if command -v docker &> /dev/null && docker compose version &> /dev/null; then
-    docker compose up -d --build || { error "Failed to start containers"; exit 1; }
-else
-    docker-compose up -d --build || { error "Failed to start containers"; exit 1; }
-fi
+docker network rm "${APP_NAME}_network"
+docker-compose up -d --build 
 echo "Containers started successfully"
 
 # Run database migrations
@@ -36,7 +33,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Health check passed ✓"
         break
     else
-        RETRY_COUNT=$((RETRY_COUNT + 1))
+        RETRY_COUNT=$(($RETRY_COUNT + 1))
         echo "Health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying in 1 seconds..."
         sleep 1
     fi
