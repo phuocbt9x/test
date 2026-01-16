@@ -26,4 +26,4 @@ echo "Containers started successfully"
 echo "Running database migrations..."
 docker compose exec -T app alembic upgrade head 2>/dev/null || docker-compose exec -T app alembic upgrade head || warning "Migration failed or no migrations to run"
 
-exit 0
+echo "Deploy completed!"
