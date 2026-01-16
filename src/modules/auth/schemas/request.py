@@ -18,6 +18,10 @@ from src.core import (
 )
 
 
+def _get_example_password() -> str:
+    return "SecurePass123!"
+
+
 class RegisterRequest(BaseModel):
     name: str
     email: str
@@ -151,11 +155,11 @@ class RegisterRequest(BaseModel):
                                 },
                                 "password": {
                                     "type": "string",
-                                    "example": "StrongP@ss123",
+                                    "example": _get_example_password(),
                                 },
                                 "confirm_password": {
                                     "type": "string",
-                                    "example": "StrongP@ss123",
+                                    "example": _get_example_password(),
                                 },
                                 "avatar": {
                                     "type": "string",
@@ -203,7 +207,10 @@ class LoginRequest(BaseModel):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {"email": "john@example.com", "password": "SecurePass123!"}
+            "example": {
+                "email": "john@example.com",
+                "password": _get_example_password(),
+            }
         }
     )
 
@@ -290,8 +297,8 @@ class UpdateCurrentUserRequest(BaseModel):
         json_schema_extra={
             "example": {
                 "name": "John Doe",
-                "password": "SecurePass123!",
-                "confirm_password": "SecurePass123!",
+                "password": _get_example_password(),
+                "confirm_password": _get_example_password(),
                 "phone": "1234567890",
                 "line_user_id": "line_user_123",
             }

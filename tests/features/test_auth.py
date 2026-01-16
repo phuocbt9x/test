@@ -8,7 +8,7 @@ class TestAuthEndpoints:
     async def test_register_success(self, test_client: AsyncClient):
         response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Test User",
                 "email": "test@example.com",
                 "password": "SecurePass123!",
@@ -28,7 +28,7 @@ class TestAuthEndpoints:
     async def test_register_validation_errors(self, test_client: AsyncClient):
         response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "",
                 "email": "invalid-email",
                 "password": "123",
@@ -46,7 +46,7 @@ class TestAuthEndpoints:
     async def test_register_duplicate_email(self, test_client: AsyncClient):
         await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "First User",
                 "email": "duplicate@example.com",
                 "password": "SecurePass123!",
@@ -56,7 +56,7 @@ class TestAuthEndpoints:
 
         response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Second User",
                 "email": "duplicate@example.com",
                 "password": "SecurePass123!",
@@ -73,7 +73,7 @@ class TestAuthEndpoints:
     async def test_login_success(self, test_client: AsyncClient):
         await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Login User",
                 "email": "login@example.com",
                 "password": "SecurePass123!",
@@ -135,7 +135,7 @@ class TestAuthEndpoints:
     async def test_get_me_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Me User",
                 "email": "me@example.com",
                 "password": "SecurePass123!",
@@ -159,7 +159,7 @@ class TestAuthEndpoints:
     async def test_logout_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Logout User",
                 "email": "logout@example.com",
                 "password": "SecurePass123!",
@@ -182,7 +182,7 @@ class TestAuthEndpoints:
     async def test_refresh_token_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Refresh User",
                 "email": "refresh@example.com",
                 "password": "SecurePass123!",
@@ -206,7 +206,7 @@ class TestAuthEndpoints:
     async def test_update_profile_success(self, test_client: AsyncClient):
         register_response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Original Name",
                 "email": "profile@example.com",
                 "password": "SecurePass123!",
@@ -231,7 +231,7 @@ class TestAuthEndpoints:
     async def test_register_with_optional_fields(self, test_client: AsyncClient):
         response = await test_client.post(
             "/auth/register",
-            json={
+            data={
                 "name": "Optional User",
                 "email": "optional@example.com",
                 "password": "SecurePass123!",
