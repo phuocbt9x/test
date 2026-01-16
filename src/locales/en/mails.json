@@ -1,0 +1,10 @@
+{
+    "reset_password": {
+        "subject": "Password Reset Request",
+        "greeting": "Hello {{ name }},",
+        "body": "Please click the link below to reset your password:",
+        "action_text": "Reset Password",
+        "footer": "If you did not request this, please ignore this email.",
+        "support": "If you need support, please contact us at {{ support_url }}."
+    }
+}
