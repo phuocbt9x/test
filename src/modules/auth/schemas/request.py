@@ -4,7 +4,6 @@ from fastapi.exceptions import RequestValidationError
 from typing import Annotated
 from src.core import (
     __,
-    required,
     string,
     max_length,
     between_length,
@@ -12,9 +11,15 @@ from src.core import (
     phone_number,
     password_strength,
     confirmed,
-    half_width,
-    regex,
-    file,
+)
+from src.modules.shared import (
+    validate_user_name,
+    validate_user_email,
+    validate_user_password,
+    validate_user_confirm_password,
+    validate_user_avatar,
+    validate_user_phone_regex,
+    validate_user_line_id,
 )
 
 
@@ -35,74 +40,38 @@ class RegisterRequest(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        field = __("fields.user.name")
-        v = required(v, field)
-        v = string(v, field)
-        v = half_width(v, field)
-        return max_length(v, 100, field)
+        return validate_user_name(v)
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("fields.user.email")
-        v = required(v, field)
-        v = max_length(v, 254, field, trim=False)
-        v = half_width(v, field)
-        return email_format(v, field)
+        return validate_user_email(v, trim=False)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("fields.user.password")
-        v = required(v, field)
-        return password_strength(v, field)
+        return validate_user_password(v)
 
     @field_validator("confirm_password")
     @classmethod
     def validate_confirm_password(cls, v: str, info) -> str:
         password = info.data.get("password")
-        field = __("fields.user.confirm_password")
-        v = required(v, field)
-        return confirmed(v, password, __("fields.user.confirm_password"))
+        return validate_user_confirm_password(v, password)
 
     @field_validator("avatar")
     @classmethod
     def validate_avatar(cls, v: UploadFile | None) -> UploadFile | None:
-        if v is None:
-            return None
-        field = __("fields.user.avatar")
-        return file(
-            v,
-            field,
-            max_size="10Mb",
-            allowed_extensions=["jpg", "jpeg", "png"],
-            allowed_mime_types=[
-                "image/jpeg",
-                "image/png",
-            ],
-        )
+        return validate_user_avatar(v)
 
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v: str | None) -> str | None:
-        if v is None:
-            return None
-        field = __("fields.user.phone")
-        v = v.strip()
-        if not v:
-            return None
-        v = regex(v, r"^\+?\d{10,14}$", field)
-
-        return max_length(v, 20, field, trim=False)
+        return validate_user_phone_regex(v)
 
     @field_validator("line_user_id")
     @classmethod
     def validate_line_user_id(cls, v: str | None) -> str | None:
-        if v is None:
-            return None
-        field = __("fields.user.line_user_id")
-        v = string(v, field)
-        return max_length(v, 100, field)
+        return validate_user_line_id(v)
 
     @classmethod
     def as_form(
@@ -192,18 +161,12 @@ class LoginRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("fields.user.email")
-        v = required(v, field)
-        v = max_length(v, 254, field, trim=False)
-        v = half_width(v, field)
-        return email_format(v, field)
+        return validate_user_email(v, trim=False)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("fields.user.password")
-        v = required(v, field)
-        return password_strength(v, field)
+        return validate_user_password(v)
 
     model_config = ConfigDict(
         json_schema_extra={
