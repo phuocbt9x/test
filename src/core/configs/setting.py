@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     APP_ROUTER_PREFIX: str = Field(default="/api/v1")
     APP_VERSION: str = Field(default="1.0.0")
     APP_LOCALE: str = Field(default="en")
+    APP_URL_FRONTEND: str = Field(default="http://localhost:3000")
 
     # ==================== CORS SETTINGS ====================
     CORS_ORIGINS: str = Field(...)
@@ -119,6 +120,20 @@ class Settings(BaseSettings):
     STORAGE_PROVIDER: str = Field(default="local")
     STORAGE_LOCAL_BASE_DIR: str = Field(default="public")
     STORAGE_LOCAL_BASE_URL: str = Field(default="http://localhost:8000")
+
+    # ==================== MAIL SETTINGS ====================
+    MAIL_PROVIDER: str = Field(default="fastapi-mail")
+    MAIL_USERNAME: Optional[str] = None
+    MAIL_PASSWORD: Optional[str] = None
+    MAIL_FROM: Optional[str] = None
+    MAIL_FROM_NAME: Optional[str] = None
+    MAIL_SERVER: Optional[str] = None
+    MAIL_PORT: Optional[int] = Field(default=None, ge=1, le=65535)
+    MAIL_STARTTLS: bool = Field(default=True)
+    MAIL_SSL_TLS: bool = Field(default=False)
+    MAIL_USE_CREDENTIALS: bool = Field(default=True)
+    MAIL_VALIDATE_CERTS: bool = Field(default=True)
+    MAIL_TEMPLATE_FOLDER: str = Field(default="src/templates")
 
     # ==================== VALIDATORS ====================
     # Note: APP_ENV and JWT_ALGORITHM are validated automatically by Enum types

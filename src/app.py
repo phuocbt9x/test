@@ -19,6 +19,7 @@ from src.core import (
     redis_manager,
     db,
     storage_manager,
+    mail_manager,
 )
 
 logger = get_logger(__name__)
@@ -47,7 +48,7 @@ async def initialize_redis() -> None:
         await redis_manager.init()
     except Exception as e:
         logger.error("Redis initialization failed: %s", e)
-        logger.warning("Application will continue without Redis")
+        raise RuntimeError("Redis initialization failed") from e
 
 
 async def initialize_storage() -> None:
@@ -55,7 +56,15 @@ async def initialize_storage() -> None:
         storage_manager.initialize()
     except Exception as e:
         logger.error("Storage initialization failed: %s", e)
-        logger.warning("Application will continue without storage")
+        raise RuntimeError("Storage initialization failed") from e
+
+
+async def initialize_mail() -> None:
+    try:
+        mail_manager.initialize()
+    except Exception as e:
+        logger.error("Mail initialization failed: %s", e)
+        raise RuntimeError("Mail initialization failed") from e
 
 
 async def perform_startup_health_checks() -> None:
@@ -93,6 +102,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await initialize_database()
     await initialize_redis()
     await initialize_storage()
+    await initialize_mail()
     await perform_startup_health_checks()
 
     if is_development():
