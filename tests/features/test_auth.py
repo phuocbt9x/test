@@ -244,5 +244,5 @@ class TestAuthEndpoints:
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
         assert data["success"] is True
-        assert data["data"]["user_info"]["phone"] == "+81312345678"
+        assert data["data"]["user_info"]["phone"] == "0312345678"
         assert data["data"]["user_info"]["line_user_id"] == "line123"

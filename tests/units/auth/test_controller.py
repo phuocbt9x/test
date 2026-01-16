@@ -1,7 +1,9 @@
+from faker import Faker
 import pytest
-from unittest.mock import patch
 from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
+from httpx import AsyncClient
+from fastapi import status
 
 from src.core import (
     CurrentUser,
@@ -14,13 +16,11 @@ from src.modules.auth.controller import (
     logout,
     me,
     refresh_token,
-    register,
     update_current_user_profile,
 )
 from src.modules.auth.schemas.request import (
     LoginRequest,
     RefreshTokenRequest,
-    RegisterRequest,
     UpdateCurrentUserRequest,
 )
 from src.modules.auth.service import AuthService
@@ -29,28 +29,29 @@ from src.modules.user import UserRepository
 
 @pytest.mark.units
 class TestAuthController:
-    async def test_register_controller(self, test_session: AsyncSession):
-        request = RegisterRequest(
-            name="New Controller Test",
-            email=f"newcontroller{uuid4().hex[:8]}@test.com",
-            password="SecurePass123!",
-            confirm_password="SecurePass123!",
+    async def test_register_controller(
+        self,
+        test_client: AsyncClient,
+        override_auth,
+        fake: Faker,
+        create_test_image,
+    ):
+        files = {"avatar": create_test_image(f"{fake.word()}.jpg")}
+        response = await test_client.post(
+            "/users",
+            data={
+                "name": fake.name(),
+                "email": fake.email(),
+                "password": fake.password(length=12, special_chars=True),
+                "line_user_id": fake.lexify(text="U?????????????????????"),
+            },
+            files=files,
         )
 
-        with patch("src.modules.auth.service.unique") as mock_unique:
-
-            async def mock_unique_func(*args, **kwargs):
-                return None
-
-            mock_unique.side_effect = mock_unique_func
-
-            result = await register(
-                request, read_session=test_session, write_session=test_session
-            )
-
-            assert result.success is True
-            assert result.data is not None
-            assert result.data.access_token is not None
+        assert response.status_code == status.HTTP_201_CREATED
+        result = response.json()
+        assert result["data"]["name"]
+        assert result["data"]["email"]
 
     async def test_login_controller(self, test_session: AsyncSession, mock_request):
         email = f"logincontroller{uuid4().hex[:8]}@test.com"
