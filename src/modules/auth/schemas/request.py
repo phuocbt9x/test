@@ -10,6 +10,7 @@ from src.core import (
     password_strength,
     confirmed,
     half_width,
+    regex,
 )
 
 
@@ -20,13 +21,12 @@ class RegisterRequest(BaseModel):
     confirm_password: str
     phone: str | None = None
     line_user_id: str | None = None
-    is_admin: bool = False
     is_active: bool = False
 
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        field = __("field.name")
+        field = __("fields.user.name")
         v = required(v, field)
         v = string(v, field)
         return max_length(v, 100, field)
@@ -34,7 +34,7 @@ class RegisterRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("field.email")
+        field = __("fields.user.email")
         v = required(v, field)
         v = max_length(v, 255, field, trim=False)
         return email_format(v, field)
@@ -42,14 +42,14 @@ class RegisterRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("field.password")
+        field = __("fields.user.password")
         v = password_strength(v, field)
         return between_length(v, 8, 255, field)
 
     @field_validator("confirm_password")
     @classmethod
     def validate_confirm_password(cls, v: str, info) -> str:
-        field = __("field.confirm_password")
+        field = __("fields.user.confirm_password")
         password = info.data.get("password")
         if password is None:
             return v
@@ -60,17 +60,18 @@ class RegisterRequest(BaseModel):
     def validate_phone(cls, v: str | None) -> str | None:
         if v is None:
             return None
-        field = __("field.phone")
+        field = __("fields.user.phone")
         v = v.strip()
         if not v:
             return None
-        v = phone_number(v, field, "JP")
+        v = regex(v, r"^\+?\d{10,14}$", field)
+
         return max_length(v, 20, field, trim=False)
 
     @field_validator("line_user_id")
     @classmethod
     def validate_line_user_id(cls, v: str | None) -> str | None:
-        field = __("field.line_user_id")
+        field = __("fields.user.line_user_id")
         if v is None:
             return v
         v = string(v, field)
@@ -83,8 +84,9 @@ class RegisterRequest(BaseModel):
                 "email": "john@example.com",
                 "password": "SecurePass123!",
                 "confirm_password": "SecurePass123!",
-                "phone": "1234567890",
+                "phone": "0123456789",
                 "line_user_id": "line_user_123",
+                "is_active": True,
             }
         }
     )
@@ -97,7 +99,7 @@ class LoginRequest(BaseModel):
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("auth.fields.email")
+        field = __("fields.user.email")
         v = required(v, field)
         v = max_length(v, 254, field, trim=False)
         v = half_width(v, field)
@@ -106,7 +108,7 @@ class LoginRequest(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("auth.fields.password")
+        field = __("fields.user.password")
         v = required(v, field)
         return password_strength(v, field)
 
