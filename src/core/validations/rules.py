@@ -2,7 +2,7 @@ import re
 import json
 import uuid as uuidlib
 import phonenumbers
-from fastapi import UploadFile
+from starlette.datastructures import UploadFile
 from datetime import datetime
 from typing import Any, Sequence, Optional, Union, Type, Dict
 from urllib.parse import urlparse
@@ -38,6 +38,7 @@ _IMAGE_FORMAT_TO_MIME = {
     "gif": "image/gif",
     "webp": "image/webp",
 }
+_VALIDATION_FILE_MESSAGE = "validation.file"
 
 
 def _validate_string(value: Any, field: str) -> str:
@@ -568,20 +569,20 @@ def file(
     allowed_mime_types: Optional[Sequence[str]] = None,
 ) -> Any:
     if value is None:
-        raise ValueError(__("validation.file", attribute=field))
+        raise ValueError(__(_VALIDATION_FILE_MESSAGE, attribute=field))
 
     if not isinstance(value, UploadFile):
-        raise ValueError(__("validation.file", attribute=field))
+        raise ValueError(__(_VALIDATION_FILE_MESSAGE, attribute=field))
 
     if not (
         hasattr(value, "filename")
         and (hasattr(value, "file") or hasattr(value, "read"))
     ):
-        raise ValueError(__("validation.file", attribute=field))
+        raise ValueError(__(_VALIDATION_FILE_MESSAGE, attribute=field))
 
     filename = getattr(value, "filename", "")
     if not filename:
-        raise ValueError(__("validation.file", attribute=field))
+        raise ValueError(__(_VALIDATION_FILE_MESSAGE, attribute=field))
 
     if max_size:
         max_bytes = parse_size(max_size) if isinstance(max_size, str) else max_size
@@ -606,7 +607,7 @@ def file(
 
     if allowed_mime_types:
         if not hasattr(value, "content_type") or not value.content_type:
-            raise ValueError(__("validation.file", attribute=field))
+            raise ValueError(__(_VALIDATION_FILE_MESSAGE, attribute=field))
 
         if value.content_type not in allowed_mime_types:
             raise ValueError(
