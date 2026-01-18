@@ -2,6 +2,7 @@ import re
 import json
 import uuid as uuidlib
 import phonenumbers
+from fastapi import UploadFile
 from datetime import datetime
 from typing import Any, Sequence, Optional, Union, Type, Dict
 from urllib.parse import urlparse
@@ -27,6 +28,15 @@ _COMPILED_PATTERNS = {
     "password_digits": re.compile(r"\d"),
     "password_special": re.compile(r"[!@#$%^&*(),.?\":{}|<>]"),
     "half_width": re.compile(r"^[\x00-\x7F]+$"),
+}
+
+_DEFAULT_IMAGE_FORMATS = ["jpg", "jpeg", "png", "gif", "webp"]
+_IMAGE_FORMAT_TO_MIME = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "gif": "image/gif",
+    "webp": "image/webp",
 }
 
 
@@ -559,50 +569,116 @@ def file(
 ) -> Any:
     if value is None:
         raise ValueError(__("validation.file", attribute=field))
-    if hasattr(value, "filename") and hasattr(value, "file"):
-        max_bytes = parse_size(max_size) if max_size else None
-        if max_size and hasattr(value, "size") and value.size > max_bytes:
-            raise ValueError(__("validation.max.file", attribute=field, max=max_size))
-        if allowed_extensions:
-            filename = getattr(value, "filename", "")
-            ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-            if ext not in [e.lower().lstrip(".") for e in allowed_extensions]:
+
+    if not isinstance(value, UploadFile):
+        raise ValueError(__("validation.file", attribute=field))
+
+    if not (
+        hasattr(value, "filename")
+        and (hasattr(value, "file") or hasattr(value, "read"))
+    ):
+        raise ValueError(__("validation.file", attribute=field))
+
+    filename = getattr(value, "filename", "")
+    if not filename:
+        raise ValueError(__("validation.file", attribute=field))
+
+    if max_size:
+        max_bytes = parse_size(max_size) if isinstance(max_size, str) else max_size
+        if hasattr(value, "size") and value.size is not None:
+            if value.size > max_bytes:
                 raise ValueError(
-                    __("validation.mimes", attribute=field, values=allowed_extensions)
+                    __("validation.max.file", attribute=field, max=max_size)
                 )
-        if allowed_mime_types and hasattr(value, "content_type"):
-            if value.content_type not in allowed_mime_types:
-                raise ValueError(
-                    __(
-                        "validation.mimetypes",
-                        attribute=field,
-                        values=allowed_mime_types,
-                    )
+
+    if allowed_extensions:
+        ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+        allowed_exts = [e.lower().lstrip(".") for e in allowed_extensions]
+
+        if ext not in allowed_exts:
+            raise ValueError(
+                __(
+                    "validation.mimes",
+                    attribute=field,
+                    values=", ".join(allowed_extensions),
                 )
+            )
+
+    if allowed_mime_types:
+        if not hasattr(value, "content_type") or not value.content_type:
+            raise ValueError(__("validation.file", attribute=field))
+
+        if value.content_type not in allowed_mime_types:
+            raise ValueError(
+                __(
+                    "validation.mimetypes",
+                    attribute=field,
+                    values=", ".join(allowed_mime_types),
+                )
+            )
+
     return value
 
 
 def image(
     value: Any,
     field: str,
-    max_size: Optional[int] = None,
-    allowed_formats: Optional[Sequence[str]] = None,
+    max_size: Optional[int | str] = None,
+    allowed_extensions: Optional[Sequence[str]] = None,
+    allowed_mime_types: Optional[Sequence[str]] = None,
 ) -> Any:
     if value is None:
         raise ValueError(__("validation.image", attribute=field))
-    if hasattr(value, "filename") and hasattr(value, "file"):
-        if max_size and hasattr(value, "size") and value.size > max_size:
-            raise ValueError(__("validation.max.file", attribute=field, max=max_size))
-        if allowed_formats is None:
-            allowed_formats = ["jpg", "jpeg", "png", "gif", "webp"]
-        filename = getattr(value, "filename", "")
-        ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-        if ext not in [f.lower().lstrip(".") for f in allowed_formats]:
-            raise ValueError(__("validation.image", attribute=field))
-        if hasattr(value, "content_type"):
-            image_mimes = ["image/jpeg", "image/png", "image/gif", "image/webp"]
-            if value.content_type not in image_mimes:
+
+    if not isinstance(value, UploadFile):
+        raise ValueError(__("validation.image", attribute=field))
+
+    if not (
+        hasattr(value, "filename")
+        and (hasattr(value, "file") or hasattr(value, "read"))
+    ):
+        raise ValueError(__("validation.image", attribute=field))
+
+    filename = getattr(value, "filename", "")
+    if not filename:
+        raise ValueError(__("validation.image", attribute=field))
+
+    if max_size:
+        max_bytes = parse_size(max_size) if isinstance(max_size, str) else max_size
+        if hasattr(value, "size") and value.size is not None:
+            if value.size > max_bytes:
+                raise ValueError(
+                    __("validation.max.file", attribute=field, max=max_size)
+                )
+
+    if allowed_extensions is None:
+        allowed_extensions = _DEFAULT_IMAGE_FORMATS
+
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    allowed_exts = [f.lower().lstrip(".") for f in allowed_extensions]
+
+    if ext not in allowed_exts:
+        raise ValueError(__("validation.image", attribute=field))
+
+    if hasattr(value, "content_type") and value.content_type:
+        if allowed_mime_types is not None:
+            if value.content_type not in allowed_mime_types:
+                raise ValueError(
+                    __(
+                        "validation.mimetypes",
+                        attribute=field,
+                        values=", ".join(allowed_mime_types),
+                    )
+                )
+        else:
+            allowed_mimes = set()
+            for fmt in allowed_exts:
+                if fmt in _IMAGE_FORMAT_TO_MIME:
+                    allowed_mimes.add(_IMAGE_FORMAT_TO_MIME[fmt])
+
+            if allowed_mimes and value.content_type not in allowed_mimes:
                 raise ValueError(__("validation.image", attribute=field))
+
     return value
 
 
