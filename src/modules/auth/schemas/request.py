@@ -1,17 +1,50 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict
-from src.core import (
-    __,
-    required,
-    string,
-    max_length,
-    between_length,
-    email_format,
-    phone_number,
-    password_strength,
-    confirmed,
-    half_width,
-    regex,
+from pydantic import BaseModel, Field, field_validator, ValidationError
+from fastapi import UploadFile, Form, File
+from fastapi.exceptions import RequestValidationError
+from typing import Annotated
+from src.utils import (
+    validate_user_name,
+    validate_user_email,
+    validate_user_password,
+    validate_user_confirm_password,
+    validate_user_avatar,
+    validate_user_phone_regex,
+    validate_user_line_id,
+    get_example_password,
+    get_example_name,
+    get_example_email,
+    get_example_phone,
+    get_example_line_id,
+    get_example_authentication_token,
 )
+
+
+class LoginRequest(BaseModel):
+    email: Annotated[
+        str, Field(description="Email address", examples=[get_example_email()])
+    ]
+    password: Annotated[
+        str, Field(description="Password", examples=[get_example_password()])
+    ]
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        return validate_user_email(v, trim=False)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        return validate_user_password(v)
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: Annotated[
+        str,
+        Field(
+            description="Refresh token", examples=[get_example_authentication_token()]
+        ),
+    ]
 
 
 class RegisterRequest(BaseModel):
@@ -19,192 +52,188 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     confirm_password: str
+    avatar: UploadFile | None = None
     phone: str | None = None
     line_user_id: str | None = None
-    is_active: bool = False
 
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        field = __("fields.user.name")
-        v = required(v, field)
-        v = string(v, field)
-        return max_length(v, 100, field)
+        return validate_user_name(v)
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        field = __("fields.user.email")
-        v = required(v, field)
-        v = max_length(v, 255, field, trim=False)
-        return email_format(v, field)
+        return validate_user_email(v, trim=False)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        field = __("fields.user.password")
-        v = password_strength(v, field)
-        return between_length(v, 8, 255, field)
+        return validate_user_password(v)
 
     @field_validator("confirm_password")
     @classmethod
     def validate_confirm_password(cls, v: str, info) -> str:
-        field = __("fields.user.confirm_password")
         password = info.data.get("password")
-        if password is None:
-            return v
-        return confirmed(v, password, field)
+        return validate_user_confirm_password(v, password)
+
+    @field_validator("avatar")
+    @classmethod
+    def validate_avatar(cls, v: UploadFile | None) -> UploadFile | None:
+        return validate_user_avatar(v)
 
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v: str | None) -> str | None:
-        if v is None:
-            return None
-        field = __("fields.user.phone")
-        v = v.strip()
-        if not v:
-            return None
-        v = regex(v, r"^\+?\d{10,14}$", field)
-
-        return max_length(v, 20, field, trim=False)
+        return validate_user_phone_regex(v)
 
     @field_validator("line_user_id")
     @classmethod
     def validate_line_user_id(cls, v: str | None) -> str | None:
-        field = __("fields.user.line_user_id")
-        if v is None:
-            return v
-        v = string(v, field)
-        return max_length(v, 100, field)
+        return validate_user_line_id(v)
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "name": "John Doe",
-                "email": "john@example.com",
-                "password": "SecurePass123!",
-                "confirm_password": "SecurePass123!",
-                "phone": "0123456789",
-                "line_user_id": "line_user_123",
-                "is_active": True,
-            }
-        }
-    )
-
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-    @field_validator("email")
     @classmethod
-    def validate_email(cls, v: str) -> str:
-        field = __("fields.user.email")
-        v = required(v, field)
-        v = max_length(v, 254, field, trim=False)
-        v = half_width(v, field)
-        return email_format(v, field)
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, v: str) -> str:
-        field = __("fields.user.password")
-        v = required(v, field)
-        return password_strength(v, field)
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {"email": "john@example.com", "password": "SecurePass123!"}
-        }
-    )
-
-
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str = Field(..., min_length=10, description="Refresh token")
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
-        }
-    )
+    def as_form(
+        cls,
+        name: Annotated[
+            str,
+            Form(description="Full name of the user", examples=[get_example_name()]),
+        ],
+        email: Annotated[
+            str, Form(description="Email address", examples=[get_example_email()])
+        ],
+        password: Annotated[
+            str, Form(description="Password", examples=[get_example_password()])
+        ],
+        confirm_password: Annotated[
+            str,
+            Form(description="Confirm password", examples=[get_example_password()]),
+        ],
+        avatar: Annotated[
+            UploadFile | None, File(description="User avatar image file")
+        ] = None,
+        phone: Annotated[
+            str | None, Form(description="Phone number", examples=[get_example_phone()])
+        ] = None,
+        line_user_id: Annotated[
+            str | None,
+            Form(description="Line user ID", examples=[get_example_line_id()]),
+        ] = None,
+    ) -> "RegisterRequest":
+        try:
+            return cls(
+                name=name,
+                email=email,
+                password=password,
+                confirm_password=confirm_password,
+                avatar=avatar,
+                phone=phone,
+                line_user_id=line_user_id,
+            )
+        except ValidationError as e:
+            raise RequestValidationError(e.errors())
 
 
 class UpdateCurrentUserRequest(BaseModel):
     name: str | None = None
     email: str | None = None
     password: str | None = None
-    confirm_password: str | None = None
+    avatar: UploadFile | None = None
     phone: str | None = None
     line_user_id: str | None = None
-    is_admin: bool | None = None
-    is_active: bool | None = None
 
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str | None) -> str | None:
         if v is None:
-            return None
-        field = __("field.name")
-        v = string(v, field)
-        return max_length(v, 100, field)
+            return v
+        return validate_user_name(v)
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str | None) -> str | None:
         if v is None:
-            return None
-        field = __("field.email")
-        v = max_length(v, 255, field, trim=False)
-        return email_format(v, field)
+            return v
+        return validate_user_email(v, trim=False)
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str | None) -> str | None:
         if v is None:
-            return None
-        field = __("field.password")
-        v = password_strength(v, field)
-        return between_length(v, 8, 255, field)
-
-    @field_validator("confirm_password")
-    @classmethod
-    def validate_confirm_password(cls, v: str | None, info) -> str | None:
-        if v is None:
-            return None
-        password = info.data.get("password")
-        if password is None:
             return v
-        return confirmed(v, password, __("field.confirm_password"))
+        return validate_user_password(v)
+
+    @field_validator("avatar")
+    @classmethod
+    def validate_avatar(cls, v: UploadFile | None) -> UploadFile | None:
+        if v is None:
+            return v
+        return validate_user_avatar(v)
 
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v: str | None) -> str | None:
         if v is None:
-            return None
-        field = __("field.phone")
-        v = v.strip()
-        if not v:
-            return None
-        v = phone_number(v, field, "JP")
-        return max_length(v, 20, field, trim=False)
+            return v
+        return validate_user_phone_regex(v)
 
     @field_validator("line_user_id")
     @classmethod
     def validate_line_user_id(cls, v: str | None) -> str | None:
         if v is None:
-            return None
-        field = __("field.line_user_id")
-        v = string(v, field)
-        return max_length(v, 100, field)
+            return v
+        return validate_user_line_id(v)
 
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "name": "John Doe",
-                "password": "SecurePass123!",
-                "confirm_password": "SecurePass123!",
-                "phone": "1234567890",
-                "line_user_id": "line_user_123",
-            }
-        }
-    )
+    @classmethod
+    def as_form(
+        cls,
+        name: Annotated[
+            str | None,
+            Form(
+                description="Full name of the user",
+                json_schema_extra={"example": get_example_name()},
+            ),
+        ] = None,
+        email: Annotated[
+            str | None,
+            Form(
+                description="Email address",
+                json_schema_extra={"example": get_example_email()},
+            ),
+        ] = None,
+        password: Annotated[
+            str | None,
+            Form(
+                description="Password (leave empty to keep current)",
+                json_schema_extra={"example": get_example_password()},
+            ),
+        ] = None,
+        avatar: Annotated[
+            UploadFile | None, File(description="Profile avatar image")
+        ] = None,
+        phone: Annotated[
+            str | None,
+            Form(
+                description="Phone number",
+                json_schema_extra={"example": get_example_phone()},
+            ),
+        ] = None,
+        line_user_id: Annotated[
+            str | None,
+            Form(
+                description="Line user ID",
+                json_schema_extra={"example": get_example_line_id()},
+            ),
+        ] = None,
+    ) -> "UpdateCurrentUserRequest":
+        try:
+            return cls(
+                name=name,
+                email=email,
+                password=password,
+                avatar=avatar,
+                phone=phone,
+                line_user_id=line_user_id,
+            )
+        except ValidationError as e:
+            raise RequestValidationError(e.errors())

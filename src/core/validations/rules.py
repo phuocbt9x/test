@@ -2,7 +2,7 @@ import re
 import json
 import uuid as uuidlib
 import phonenumbers
-from fastapi import UploadFile
+from starlette.datastructures import UploadFile
 from datetime import datetime
 from typing import Any, Sequence, Optional, Union, Type, Dict
 from urllib.parse import urlparse
