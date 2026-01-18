@@ -19,6 +19,7 @@ from src.core import (
     unique,
     verify_password,
     get_logger,
+    storage_manager,
 )
 from src.modules.auth.schemas.request import UpdateCurrentUserRequest
 from src.modules.user import User, UserRepository
@@ -31,8 +32,8 @@ from .schemas import (
     RegisterResponse,
     TokenResponse,
     LogoutResponse,
+    UserInfo,
 )
-from src.modules.user import UserResponse
 from src.utils import upload_avatar
 
 logger = get_logger(__name__)
@@ -50,7 +51,6 @@ class AuthService:
         self.access_token_repo = AccessTokenRepository(read_session, write_session)
         self.refresh_token_repo = RefreshTokenRepository(read_session, write_session)
         self.password_hasher = PasswordHasher()
-        self.session = write_session
 
     async def verify_token_in_db(
         self, jti: str, token_type: str = "access"
@@ -73,28 +73,29 @@ class AuthService:
         return True, token
 
     async def register(self, data: RegisterRequest) -> RegisterResponse:
+        avatar_path = None
+
         try:
             await unique(data.email, User, "email", field_label=__("fields.user.email"))
-            if data.password:
-                data.password = self.password_hasher.hash(data.password)
 
             user_data = {
                 "email": data.email.lower(),
                 "name": data.name,
-                "password": data.password,
+                "password": self.password_hasher.hash(data.password),
                 "phone": data.phone,
                 "line_user_id": data.line_user_id,
                 "is_admin": False,
-                "is_active": data.is_active,
+                "is_active": True,
             }
-
-            user = await self.user_repo.create(user_data)
 
             if data.avatar:
                 avatar_path = await upload_avatar(data.avatar)
-                await self.user_repo.update(user.id, {"avatar_path": avatar_path})
+                user_data["avatar_path"] = avatar_path
 
+            user = await self.user_repo.create(user_data)
             tokens = await self._create_token_pair(user)
+            user_info = UserInfo.model_validate(user)
+
             await self.write_session.commit()
 
             return RegisterResponse(
@@ -102,10 +103,12 @@ class AuthService:
                 refresh_token=tokens.refresh_token,
                 token_type=tokens.token_type,
                 expires_in=tokens.expires_in,
-                user_info=UserResponse.model_validate(user),
+                user_info=user_info,
             )
         except Exception as e:
             logger.error(f"Error creating user: {e}")
+            if avatar_path:
+                await storage_manager.get_instance().delete(avatar_path)
             await self.write_session.rollback()
             raise
 
@@ -130,17 +133,20 @@ class AuthService:
                 )
 
             tokens = await self._create_token_pair(user)
-            await self.session.commit()
+            user_info = UserInfo.model_validate(user)
+
+            await self.write_session.commit()
 
             return RegisterResponse(
                 access_token=tokens.access_token,
                 refresh_token=tokens.refresh_token,
                 token_type=tokens.token_type,
                 expires_in=tokens.expires_in,
-                user_info=UserResponse.model_validate(user),
+                user_info=user_info,
             )
         except Exception as e:
             logger.error("Login failed: %s", e)
+            await self.write_session.rollback()
             raise
 
     async def logout(
@@ -161,11 +167,11 @@ class AuthService:
             await self.access_token_repo.revoke_all_user_tokens(user_id)
             await self.refresh_token_repo.revoke_all_user_tokens(user_id)
 
-            await self.session.commit()
+            await self.write_session.commit()
             return LogoutResponse(message=__("auth.logout.success"))
         except Exception as e:
             logger.error("Logout failed: %s", e)
-            await self.session.rollback()
+            await self.write_session.rollback()
             return LogoutResponse(message=__("auth.logout.failed"))
 
     async def refresh_access_token(self, refresh_token: str) -> TokenResponse:
@@ -207,12 +213,12 @@ class AuthService:
             await self.access_token_repo.revoke_all_user_tokens(user_id_uuid)
 
             tokens = await self._create_token_pair(user)
-            await self.session.commit()
+            await self.write_session.commit()
 
             return tokens
         except Exception as e:
             logger.error("Refresh token failed: %s", e)
-            await self.session.rollback()
+            await self.write_session.rollback()
             raise
 
     async def refresh_token(self, refresh_token: str) -> TokenResponse:
@@ -243,46 +249,48 @@ class AuthService:
         return TokenPayload(**payload)
 
     async def update_current_user(
-        self, user_id: UUID, data: dict | UpdateCurrentUserRequest
-    ) -> User:
+        self, user_id: UUID, data: UpdateCurrentUserRequest
+    ) -> UserInfo:
+        avatar_path = None
         try:
-            if isinstance(data, UpdateCurrentUserRequest):
-                data = data.model_dump(exclude_none=True)
-            update_data = {k: v for k, v in data.items() if v is not None}
-            update_data.pop("email", None)
-            password = update_data.pop("password", None)
+            update_data = data.model_dump(exclude_none=True)
+            user = await self.user_repo.get(user_id)
 
-            password_changed = False
-            if password:
-                update_data["password"] = validate_and_hash_password(password)
-                password_changed = True
-
-            if not update_data:
-                user = await self.user_repo.get(user_id)
-                if not user:
-                    raise NotFoundException(resource="User", resource_id=str(user_id))
-                return user
+            if "password" in update_data:
+                update_data["password"] = validate_and_hash_password(
+                    update_data["password"]
+                )
+            if "avatar" in update_data:
+                avatar_file = update_data.get("avatar")
+                if avatar_file:
+                    avatar_path = await upload_avatar(avatar_file)
+                    if avatar_path and user and user.avatar_path is not None:
+                        await storage_manager.get_instance().delete(user.avatar_path)
+                        update_data["avatar_path"] = avatar_path
 
             user = await self.user_repo.update(user_id, update_data)
-            if not user:
-                raise NotFoundException(resource="User", resource_id=str(user_id))
 
-            if password_changed:
+            if "email" in update_data or "password" in update_data:
                 await self.access_token_repo.revoke_all_user_tokens(user_id)
                 await self.refresh_token_repo.revoke_all_user_tokens(user_id)
 
-            await self.session.commit()
-            return user
+            await self.write_session.commit()
+
+            return UserInfo.model_validate(user)
         except Exception as e:
             logger.error(f"Error updating user {user_id}: {e}")
-            await self.session.rollback()
+            if avatar_path:
+                await storage_manager.get_instance().delete(avatar_path)
+            await self.write_session.rollback()
             raise
 
-    async def get_current_user(self, user_id: str) -> UserResponse:
+    async def get_current_user(self, user_id: str) -> UserInfo:
         user = await self.user_repo.get(UUID(user_id))
+
         if not user:
             raise NotFoundException(resource="User", resource_id=user_id)
-        return UserResponse.model_validate(user)
+
+        return UserInfo.model_validate(user)
 
     async def _create_token_pair(self, user: User) -> TokenResponse:
         token_pair = JWTManager.create_token_pair(
@@ -324,8 +332,6 @@ class AuthService:
                     "is_revoked": False,
                 }
             )
-
-        await self.session.commit()
 
         return TokenResponse(
             access_token=token_pair.access_token,

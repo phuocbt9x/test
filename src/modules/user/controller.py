@@ -10,6 +10,7 @@ from src.core import (
     CurrentUser,
     require_superuser,
     limiter,
+    storage_manager,
     PaginatedResponse,
 )
 from src.utils import create_common_responses
@@ -43,6 +44,7 @@ async def index(
     write_session: AsyncSession = Depends(get_write_db),
 ) -> PaginatedResponse[UserResponse]:
     service = UserService(
+        storage_provider=storage_manager.get_instance(),
         read_session=read_session,
         write_session=write_session,
     )
@@ -82,6 +84,7 @@ async def create(
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[UserResponse]:
     service = UserService(
+        storage_provider=storage_manager.get_instance(),
         read_session=read_session,
         write_session=write_session,
     )

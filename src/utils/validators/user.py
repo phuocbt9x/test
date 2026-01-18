@@ -9,7 +9,7 @@ from src.core import (
     confirmed,
     half_width,
     regex,
-    file,
+    image,
     phone_number,
 )
 
@@ -45,10 +45,13 @@ def validate_user_confirm_password(v: str, password: str | None) -> str:
 
 
 def validate_user_avatar(v: UploadFile | None) -> UploadFile | None:
+    print("Validating avatar:", v)
     if v is None:
         return None
+
     field = __("fields.user.avatar")
-    return file(
+
+    return image(
         v,
         field,
         max_size="10Mb",
@@ -56,6 +59,7 @@ def validate_user_avatar(v: UploadFile | None) -> UploadFile | None:
         allowed_mime_types=[
             "image/jpeg",
             "image/png",
+            "image/jpg",
         ],
     )
 
@@ -88,15 +92,3 @@ def validate_user_line_id(v: str | None) -> str | None:
     field = __("fields.user.line_user_id")
     v = string(v, field)
     return max_length(v, 100, field)
-
-
-__all__ = [
-    "validate_user_name",
-    "validate_user_email",
-    "validate_user_password",
-    "validate_user_confirm_password",
-    "validate_user_avatar",
-    "validate_user_phone",
-    "validate_user_phone_regex",
-    "validate_user_line_id",
-]

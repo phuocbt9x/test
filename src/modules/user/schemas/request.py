@@ -2,13 +2,17 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, field_validator, ValidationError
 from fastapi import Form, File, UploadFile, Query
 from typing import Annotated
-from src.modules.shared import (
-    validate_user_name,
-    validate_user_email,
-    validate_user_password,
-    validate_user_avatar,
-    validate_user_phone_regex,
-    validate_user_line_id,
+
+from src.core import (
+    __,
+    required,
+    string,
+    max_length,
+    email_format,
+    regex,
+    password_strength,
+    file,
+    half_width,
 )
 
 
@@ -56,34 +60,67 @@ class UserCreateRequest(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        return validate_user_name(v)
+        field = __("fields.user.name")
+        v = required(v, field)
+        v = string(v, field)
+        v = half_width(v, field)
+        return max_length(v, 100, field)
 
     @field_validator("email")
     @classmethod
     def validate_email(cls, v: str) -> str:
-        return validate_user_email(v, trim=False)
+        field = __("fields.user.email")
+        v = required(v, field)
+        v = max_length(v, 254, field, trim=False)
+        v = half_width(v, field)
+        return email_format(v, field)
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, v: str | None) -> str | None:
+    def validate_password(cls, v: str) -> str:
+        field = __("fields.user.password")
         if not v:
             return v
-        return validate_user_password(v)
+        return password_strength(v, field)
 
     @field_validator("avatar")
     @classmethod
     def validate_avatar(cls, v: UploadFile | None) -> UploadFile | None:
-        return validate_user_avatar(v)
+        if v is None:
+            return None
+        field = __("fields.user.avatar")
+        return file(
+            v,
+            field,
+            max_size="10Mb",
+            allowed_extensions=["jpg", "jpeg", "png"],
+            allowed_mime_types=[
+                "image/jpeg",
+                "image/png",
+            ],
+        )
 
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v: str | None) -> str | None:
-        return validate_user_phone_regex(v)
+        if v is None:
+            return None
+        field = __("fields.user.phone")
+        v = v.strip()
+        if not v:
+            return None
+        v = regex(v, r"^\+?\d{10,14}$", field)
+
+        return max_length(v, 20, field, trim=False)
 
     @field_validator("line_user_id")
     @classmethod
     def validate_line_user_id(cls, v: str | None) -> str | None:
-        return validate_user_line_id(v)
+        if v is None:
+            return None
+        field = __("fields.user.line_user_id")
+        v = string(v, field)
+        return max_length(v, 100, field)
 
     @classmethod
     def as_form(
@@ -131,7 +168,7 @@ class UserCreateRequest(BaseModel):
                                 },
                                 "password": {
                                     "type": "string",
-                                    "example": "StrongP@ss123!",
+                                    "example": "StrongP@ss123",
                                 },
                                 "avatar": {
                                     "type": "string",
