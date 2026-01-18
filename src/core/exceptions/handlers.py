@@ -48,25 +48,30 @@ def format_field_errors(details: list[Dict[str, Any]]) -> Dict[str, list[str]]:
 
 
 def format_pydantic_error(error: Dict[str, Any]) -> tuple[Optional[str], str]:
-    loc_start_index = 1 if error["loc"] and error["loc"][0] == "body" else 0
+    loc_start_index = 1 if error.get("loc") and error["loc"][0] == "body" else 0
     field_path = (
-        ".".join(str(loc) for loc in error["loc"][loc_start_index:])
+        ".".join(str(loc) for loc in error.get("loc", [])[loc_start_index:])
         if error.get("loc")
         else None
     )
 
-    error_type = error["type"]
-    msg = error["msg"]
+    error_type = error.get("type", "")
+    msg = error.get("msg", "")
+
+    field_name = field_path or "field"
+    field_key = f"field.{field_name}"
+    field_label = __(field_key)
+    if field_label == field_key:
+        field_label = field_name.replace("_", " ").title()
 
     if error_type == "missing":
-        field_name = field_path or "field"
-        field_key = f"field.{field_name}"
-        field_label = __(field_key)
-        if field_label == field_key:
-            field_label = field_name.replace("_", " ").title()
         msg = __("validation.required", attribute=field_label)
-    elif msg.startswith("Value error, "):
-        msg = msg.replace("Value error, ", "", 1)
+    else:
+        if msg.startswith("Value error, "):
+            if "UploadFile" in msg:
+                msg = __("validation.file", attribute=field_label)
+            else:
+                msg = msg.replace("Value error, ", "", 1)
 
     return (field_path, msg)
 
