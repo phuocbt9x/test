@@ -23,9 +23,7 @@ class StorageManager:
             cls._instance = StorageProviderFactory.create_provider(
                 provider_name=provider,
                 base_dir=kwargs.get("base_dir", settings.STORAGE_LOCAL_BASE_DIR),
-                base_url=kwargs.get(
-                    "base_url", f"{settings.APP_HOST}:{settings.APP_PORT}"
-                ),
+                base_url=kwargs.get("base_url", f"{settings.APP_BASE_URL}"),
             )
         else:
             raise ValueError(f"Unknown storage provider: {provider}")

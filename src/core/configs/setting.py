@@ -29,6 +29,8 @@ class JWTAlgorithm(str, Enum):
 
 
 class Settings(BaseSettings):
+    # ...existing code...
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -40,8 +42,9 @@ class Settings(BaseSettings):
     APP_NAME: str = Field(default="FastAPI Base")
     APP_ENV: Environment = Field(default=Environment.DEVELOPMENT)
     APP_TIMEZONE: str = Field(default="Asia/Tokyo")
-    APP_HOST: str = Field(default="0.0.0.0")
+    APP_HOST: str = Field(default="127.0.0.1")
     APP_PORT: int = Field(default=8000, ge=1, le=65535)
+    APP_BASE_URL: str = Field(default="http://127.0.0.1:8000")
     APP_ROUTER_PREFIX: str = Field(default="/api/v1")
     APP_VERSION: str = Field(default="1.0.0")
     APP_LOCALE: str = Field(default="en")
