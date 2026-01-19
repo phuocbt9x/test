@@ -30,8 +30,10 @@ services:
     ports:
       - "${APP_PORT:-8000}:8000"
     volumes:
-      - ./${APP_NAME}/logs:/app/logs
-      - ./${APP_NAME}/uploads:/app/uploads
+    - ./${APP_NAME}/logs:/app/logs
+    - ./${APP_NAME}/uploads:/app/uploads
+    - ./${APP_NAME}/static:/app/static
+    - ./public:/app/public
     networks:
       - app_network
     depends_on:
