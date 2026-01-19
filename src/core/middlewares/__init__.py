@@ -9,15 +9,15 @@ from src.core.configs import settings, Environment
 
 
 def setup_middlewares(app: FastAPI) -> None:
-    app.add_middleware(LanguageMiddleware)
-    app.add_middleware(LoggingMiddleware)
-    app.add_middleware(RequestIDMiddleware)
     setup_cors(app)
     setup_rate_limit(app)
     if getattr(settings, "ENABLE_SECURITY_HEADERS", True):
         setup_security_headers(
             app, enable_hsts=(settings.APP_ENV == Environment.PRODUCTION)
         )
+    app.add_middleware(RequestIDMiddleware)
+    app.add_middleware(LoggingMiddleware)
+    app.add_middleware(LanguageMiddleware)
 
 
 __all__ = [

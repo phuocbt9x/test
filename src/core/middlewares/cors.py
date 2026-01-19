@@ -5,14 +5,12 @@ from src.core import settings
 
 
 def setup_cors(app: FastAPI) -> None:
-    """Setup CORS middleware."""
-
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=settings.CORS_ORIGINS.split(","),
         allow_credentials=settings.CORS_CREDENTIALS,
-        allow_methods=settings.CORS_METHODS,
-        allow_headers=settings.CORS_HEADERS,
+        allow_methods=settings.CORS_METHODS.split(","),
+        allow_headers=settings.CORS_HEADERS.split(","),
         expose_headers=["X-Request-ID", "X-Response-Time"],
         max_age=600,
     )
