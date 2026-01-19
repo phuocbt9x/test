@@ -1,91 +1,52 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, Field, computed_field, ConfigDict
 from datetime import datetime
 from uuid import UUID
+from typing import Annotated
+from src.core import storage_manager
+from src.utils import (
+    get_example_authentication_token,
+    get_example_uuid,
+    get_example_name,
+    get_example_email,
+    get_example_phone,
+    get_example_path,
+    get_example_avatar_url,
+    get_example_line_id,
+    get_example_timestamp,
+)
 
 
 class TokenResponse(BaseModel):
-    access_token: str
+    access_token: Annotated[str, Field(examples=[get_example_authentication_token()])]
     token_type: str = "bearer"
-    refresh_token: str
-    expires_in: int | None = None
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                "token_type": "bearer",
-                "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                "expires_in": 3600,
-            }
-        }
-    )
+    refresh_token: Annotated[str, Field(examples=[get_example_authentication_token()])]
+    expires_in: Annotated[int, Field(examples=[3600])]
 
 
-class UserResponse(BaseModel):
-    id: UUID
-    name: str
-    email: str
-    phone: str | None = None
-    line_user_id: str | None = None
-    is_admin: bool
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime
-    deleted_at: datetime | None = None
+class UserInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_schema_extra={
-            "example": {
-                "id": "123e4567-e89b-12d3-a456-426614174000",
-                "name": "John Doe",
-                "email": "john@example.com",
-                "phone": "+1234567890",
-                "line_user_id": "U1234567890abcdef",
-                "is_admin": False,
-                "is_active": True,
-                "created_at": "2024-01-01T00:00:00Z",
-                "updated_at": "2024-01-01T00:00:00Z",
-                "deleted_at": None,
-            }
-        },
-    )
+    id: Annotated[UUID, Field(examples=[get_example_uuid()])]
+    name: Annotated[str, Field(examples=[get_example_name()])]
+    email: Annotated[str, Field(examples=[get_example_email()])]
+    phone: Annotated[str | None, Field(examples=[get_example_phone()])]
+    line_user_id: Annotated[str | None, Field(examples=[get_example_line_id()])]
+    is_admin: Annotated[bool, Field(examples=[False])]
+    is_active: Annotated[bool, Field(examples=[True])]
+    avatar_path: Annotated[str | None, Field(examples=[get_example_path()])]
+    created_at: Annotated[datetime, Field(examples=[get_example_timestamp()])]
+    updated_at: Annotated[datetime, Field(examples=[get_example_timestamp()])]
+
+    @computed_field(examples=[get_example_avatar_url()])
+    def avatar_url(self) -> str | None:
+        if self.avatar_path:
+            return storage_manager.get_instance().get_url(self.avatar_path)
+        return None
 
 
-class RegisterResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    refresh_token: str
-    expires_in: int | None = None
-    user_info: UserResponse
-
-    model_config = ConfigDict(
-        json_schema_extra={
-            "example": {
-                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                "token_type": "bearer",
-                "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                "expires_in": 3600,
-                "user_info": {
-                    "id": "123e4567-e89b-12d3-a456-426614174000",
-                    "name": "John Doe",
-                    "email": "john@example.com",
-                    "phone": "+1234567890",
-                    "line_user_id": "U1234567890abcdef",
-                    "is_admin": False,
-                    "is_active": True,
-                    "created_at": "2024-01-01T00:00:00Z",
-                    "updated_at": "2024-01-01T00:00:00Z",
-                    "deleted_at": None,
-                },
-            }
-        }
-    )
+class RegisterResponse(TokenResponse):
+    user_info: UserInfo
 
 
 class LogoutResponse(BaseModel):
-    message: str
-
-    model_config = ConfigDict(
-        json_schema_extra={"example": {"message": "Successfully logged out"}}
-    )
+    message: Annotated[str, Field(examples=["Successfully logged out"])]

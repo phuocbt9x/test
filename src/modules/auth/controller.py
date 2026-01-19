@@ -21,14 +21,15 @@ from .schemas import (
     LoginRequest,
     RegisterRequest,
     RefreshTokenRequest,
-    UserResponse,
     LogoutResponse,
     RegisterResponse,
     TokenResponse,
+    UserInfo,
 )
 from .service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+router_auth = APIRouter(dependencies=[Depends(get_current_user)])
 controller = BaseController()
 
 
@@ -39,14 +40,21 @@ controller = BaseController()
     summary="Register new user",
     description="Create a new user account with username, email and password",
     response_description="Returns access token, refresh token and user information",
+    responses=create_common_responses(
+        include_validation=True,
+        include_rate_limit=True,
+        include_internal_error=True,
+    ),
 )
+@limiter.limit("20/minute")
 async def register(
-    request: RegisterRequest,
+    request: Request,
+    payload: RegisterRequest = Depends(RegisterRequest.as_form),
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
 ) -> SuccessResponse[RegisterResponse]:
     service = AuthService(read_session, write_session)
-    result = await service.register(request)
+    result = await service.register(payload)
     return controller.created(data=result, message=__("auth.register.success"))
 
 
@@ -76,18 +84,22 @@ async def login(
     return controller.success(data=result, message=__("auth.login.success"))
 
 
-@router.post(
+@router_auth.post(
     "/logout",
     response_model=SuccessResponse[LogoutResponse],
     summary="User logout",
     description="Logout current user and revoke all tokens",
     response_description="Returns success message",
+    responses=create_common_responses(
+        include_unauthorized=True,
+        include_internal_error=True,
+    ),
 )
 async def logout(
     access_token: str = Depends(get_token_from_header),
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
-) -> SuccessResponse[LogoutResponse] | ErrorResponse:
+) -> SuccessResponse[LogoutResponse]:
     service = AuthService(read_session, write_session)
     result = await service.logout(access_token)
     return controller.success(data=result, message=__("auth.logout.success"))
@@ -99,6 +111,10 @@ async def logout(
     summary="Refresh access token",
     description="Generate new access token using refresh token",
     response_description="Returns new access token",
+    responses=create_common_responses(
+        include_validation=True,
+        include_internal_error=True,
+    ),
 )
 async def refresh_token(
     request: RefreshTokenRequest,
@@ -110,39 +126,55 @@ async def refresh_token(
     return controller.success(data=result, message=__("auth.refresh.success"))
 
 
-@router.get(
+@router_auth.get(
     "/me",
-    response_model=SuccessResponse[UserResponse],
+    response_model=SuccessResponse[UserInfo],
     summary="Get current user",
     description="Get authenticated user information from access token",
     response_description="Returns current user profile",
+    responses=create_common_responses(
+        include_unauthorized=True,
+        include_internal_error=True,
+        include_not_found=True,
+    ),
 )
 async def me(
     current_user: CurrentUser = Depends(get_current_user),
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
-) -> SuccessResponse[UserResponse] | ErrorResponse:
+) -> SuccessResponse[UserInfo]:
     service = AuthService(read_session, write_session)
     result = await service.get_current_user(current_user.user_id)
     return controller.success(data=result, message=__("auth.me.success"))
 
 
-@router.patch(
+@router_auth.patch(
     "/me",
-    response_model=SuccessResponse[UserResponse],
+    response_model=SuccessResponse[UserInfo],
     summary="Update current user profile",
     description="Update the profile of the currently authenticated user",
     response_description="Returns updated user profile",
+    responses=create_common_responses(
+        include_validation=True,
+        include_unauthorized=True,
+        include_rate_limit=True,
+        include_internal_error=True,
+    ),
 )
+@limiter.limit("10/minute")
 async def update_current_user_profile(
-    request: UpdateCurrentUserRequest,
+    request: Request,
+    payload: UpdateCurrentUserRequest = Depends(UpdateCurrentUserRequest.as_form),
     current_user: CurrentUser = Depends(get_current_user),
     read_session: AsyncSession = Depends(get_read_db),
     write_session: AsyncSession = Depends(get_write_db),
-) -> SuccessResponse[UserResponse] | ErrorResponse:
+) -> SuccessResponse[UserInfo]:
     service = AuthService(read_session, write_session)
-    result = await service.update_current_user(UUID(current_user.user_id), request)
+    data = await service.update_current_user(UUID(current_user.user_id), payload)
     return controller.success(
-        data=UserResponse.model_validate(result),
+        data=data,
         message=__("auth.update_me.success"),
     )
+
+
+router.include_router(router_auth)

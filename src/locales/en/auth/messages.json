@@ -1,0 +1,8 @@
+{
+    "account": {
+        "not_found": "{field} is not registered."
+    },
+    "login": {
+        "failed": "Email address or password does not match"
+    }
+}
