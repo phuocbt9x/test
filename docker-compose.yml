@@ -32,7 +32,6 @@ services:
     volumes:
     - ./${APP_NAME}/logs:/app/logs
     - ./${APP_NAME}/uploads:/app/uploads
-    - ./${APP_NAME}/static:/app/static
     - ./public:/app/public
     networks:
       - app_network
