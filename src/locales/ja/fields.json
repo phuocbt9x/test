@@ -4,6 +4,7 @@
 		"email": "メールアドレス",
 		"phone": "電話番号",
 		"password": "パスワード",
+		"confirm_password": "パスワード確認",
 		"avatar": "アバター",
 		"line_user_id": "LINE ユーザーID",
 		"is_admin": "役割",
