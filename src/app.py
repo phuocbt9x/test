@@ -20,6 +20,7 @@ from src.core import (
     db,
     storage_manager,
     mail_manager,
+    event_manager,
 )
 
 logger = get_logger(__name__)
@@ -67,6 +68,14 @@ async def initialize_mail() -> None:
         raise RuntimeError("Mail initialization failed") from e
 
 
+async def initialize_events() -> None:
+    try:
+        event_manager.initialize()
+    except Exception as e:
+        logger.error("Event Manager initialization failed: %s", e)
+        raise RuntimeError("Event Manager initialization failed") from e
+
+
 async def perform_startup_health_checks() -> None:
     try:
         await db.health_check()
@@ -103,6 +112,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await initialize_redis()
     await initialize_storage()
     await initialize_mail()
+    await initialize_events()
     await perform_startup_health_checks()
 
     if is_development():

@@ -115,6 +115,22 @@ from src.core.mail import (
     mail_manager,
     FastApiMailProvider,
 )
+from src.core.events import (
+    Event,
+    Listener,
+    SyncListener,
+    QueuedListener,
+    EventDispatcher,
+    EventManager,
+    event_listener,
+    subscribe,
+    ListensTo,
+    handles,
+    event_manager,
+    dispatch,
+    listen,
+    forget,
+)
 
 __all__ = [
     "Base",
@@ -219,4 +235,19 @@ __all__ = [
     "MailManager",
     "mail_manager",
     "FastApiMailProvider",
+    # Events
+    "Event",
+    "Listener",
+    "SyncListener",
+    "QueuedListener",
+    "EventDispatcher",
+    "EventManager",
+    "event_listener",
+    "subscribe",
+    "ListensTo",
+    "handles",
+    "event_manager",
+    "dispatch",
+    "listen",
+    "forget",
 ]
